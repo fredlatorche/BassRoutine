@@ -8,8 +8,6 @@
   --on-accent: #1a1a1a;     /* texte posé sur l'accent */
   --accent-deep: #b86a00;   /* accent foncé (contours sur la portée) */
   --strong-line: #5a6082;
-  --staff-paper: #c9ccd6;
-  --staff-ink: #2a2d38;
   color-scheme: dark;
 }
 
@@ -18,32 +16,26 @@
 :root[data-theme="noir"] {
   --bg: #000; --card: #111214; --line: #26282e; --text: #ececec; --muted: #8a8d96;
   --accent: #ffaa3c; --on-accent: #1a1a1a; --accent-deep: #b86a00; --strong-line: #4a4d57;
-  --staff-paper: #c4c6cc; --staff-ink: #1f2026;
 }
 :root[data-theme="bois"] {
   --bg: #1e1712; --card: #2a211a; --line: #3d3127; --text: #f1e6d8; --muted: #b3a08a;
   --accent: #e8a24a; --on-accent: #241604; --accent-deep: #9c5f14; --strong-line: #6b5440;
-  --staff-paper: #d6cab4; --staff-ink: #2b2118;
 }
 :root[data-theme="ocean"] {
   --bg: #0f1d24; --card: #16303a; --line: #24444f; --text: #e3f1f4; --muted: #8fb2bb;
   --accent: #3cc6c9; --on-accent: #062a2b; --accent-deep: #137b7d; --strong-line: #3b6874;
-  --staff-paper: #c6d6da; --staff-ink: #1d2d33;
 }
 :root[data-theme="foret"] {
   --bg: #131c16; --card: #1c2a20; --line: #2b3d30; --text: #e4efe6; --muted: #94ad99;
   --accent: #8fd16a; --on-accent: #13240b; --accent-deep: #4a8a2a; --strong-line: #4b6650;
-  --staff-paper: #cdd8cc; --staff-ink: #223026;
 }
 :root[data-theme="violet"] {
   --bg: #1b1526; --card: #271d38; --line: #3a2d52; --text: #ece6f6; --muted: #a497bd;
   --accent: #c58cff; --on-accent: #26103d; --accent-deep: #7b45b8; --strong-line: #5d4a80;
-  --staff-paper: #d0c9dd; --staff-ink: #2a2238;
 }
 :root[data-theme="clair"] {
   --bg: #eef0f4; --card: #fff; --line: #d3d7e0; --text: #1e2130; --muted: #646a80;
   --accent: #e07a00; --on-accent: #fff; --accent-deep: #a35800; --strong-line: #9aa1b5;
-  --staff-paper: #e4e6ec; --staff-ink: #23262f;
   color-scheme: light;
 }
 
@@ -339,22 +331,22 @@ button.gear { font-size: 1.2rem; line-height: 1; padding: 6px 8px; }
 .mix-row input { width: 100%; accent-color: var(--accent); }
 .mix-row output { text-align: right; font-variant-numeric: tabular-nums; }
 
-/* ---------- Portée en clé de fa (fond gris perle, notes gris anthracite) ---------- */
+/* ---------- Portée en clé de fa (même fond que la tablature, couleurs du thème) ---------- */
 
 .staff { position: absolute; top: 0; left: 0; }
-.staff-bg { fill: var(--staff-paper); }
-.staff-line { stroke: var(--staff-ink); stroke-width: 1; opacity: 0.8; }
-.staff-bar { stroke: var(--staff-ink); stroke-width: 1.2; }
-.staff-ink { fill: var(--staff-ink); }
-.staff-clef-curve { fill: none; stroke: var(--staff-ink); stroke-width: 2.6; stroke-linecap: round; }
-.staff-head { fill: var(--staff-ink); stroke: var(--staff-ink); stroke-width: 1.2; }
-.staff-head.hollow { fill: var(--staff-paper); stroke-width: 1.6; }
-.staff-stem { fill: none; stroke: var(--staff-ink); stroke-width: 1.3; }
-.staff-acc { font: 16px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; fill: var(--staff-ink); }
-.staff-note.playing .staff-head { fill: var(--accent); stroke: var(--accent-deep); }
-.staff-note.playing .staff-head.hollow { fill: var(--staff-paper); stroke: var(--accent-deep); stroke-width: 2.4; }
-.staff-note.playing .staff-stem { stroke: var(--accent-deep); }
-.staff-note.playing .staff-acc { fill: var(--accent-deep); }
+.staff-bg { fill: var(--card); }
+.staff-line { stroke: var(--text); stroke-width: 1; opacity: 0.45; }
+.staff-bar { stroke: var(--text); stroke-width: 1.2; opacity: 0.7; }
+.staff-ink { fill: var(--text); }
+.staff-clef-curve { fill: none; stroke: var(--text); stroke-width: 2.6; stroke-linecap: round; }
+.staff-head { fill: var(--text); stroke: var(--text); stroke-width: 1.2; }
+.staff-head.hollow { fill: var(--card); stroke-width: 1.6; }
+.staff-stem { fill: none; stroke: var(--text); stroke-width: 1.3; }
+.staff-acc { font: 16px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; fill: var(--text); }
+.staff-note.playing .staff-head { fill: var(--accent); stroke: var(--accent); }
+.staff-note.playing .staff-head.hollow { fill: var(--card); stroke: var(--accent); stroke-width: 2.4; }
+.staff-note.playing .staff-stem { stroke: var(--accent); }
+.staff-note.playing .staff-acc { fill: var(--accent); }
 
 .mixer-option { margin-bottom: 14px; }
 body.with-staff .hint { margin-bottom: 310px; }
