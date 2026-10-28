@@ -77,7 +77,8 @@ export function clefSvg(fifths = 0) {
 
 // Dessine la portée ; renvoie le SVG et, pour chaque événement, son groupe (pour l'allumer en lecture).
 // doubles : positions (en temps) des doubles barres (fin / début de boucle).
-export function renderStaff(events, totalBeats, bpb, beatW, doubles = []) {
+// everyNote : mode novice, l'altération est écrite sur chaque note altérée (même si l'armure l'indique déjà).
+export function renderStaff(events, totalBeats, bpb, beatW, doubles = [], everyNote = false) {
   const width = totalBeats * beatW + 8;
   const svg = el('svg', { width, height: STAFF_H, class: 'staff' });
   el('rect', { width, height: STAFF_H, class: 'staff-bg' }, svg);
@@ -102,7 +103,11 @@ export function renderStaff(events, totalBeats, bpb, beatW, doubles = []) {
     // Altération : seulement si elle diffère de l'armure (e.sig) ou de ce qui est déjà écrit dans la mesure.
     const bar = Math.floor(e.t / bpb);
     if (bar !== barIdx) { barIdx = bar; shown = new Map(); }
-    if ((shown.get(d) ?? sigAcc(d % 7, e.sig ?? 0)) !== acc) {
+    const keyAcc = sigAcc(d % 7, e.sig ?? 0);
+    const write = everyNote
+      ? acc !== 0 || keyAcc !== 0                  // ♯/♭ sur chaque note altérée, ♮ si l'armure altère la lettre
+      : (shown.get(d) ?? keyAcc) !== acc;
+    if (write) {
       const t = el('text', { x: x - 15, y: y + 5, class: 'staff-acc' }, g);
       t.textContent = ACC_TEXT[acc];
       shown.set(d, acc);

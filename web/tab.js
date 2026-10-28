@@ -30,7 +30,7 @@ function fingerings(events) {
 // onSeek(temps) est appelé quand on touche / clique la tab ; labels : colonne des noms de cordes.
 export function createTab(container, { onSeek, labels } = {}) {
   let track, playhead, cueMark, notes = [], events = [], current = -1, cueX = 0;
-  let showStaff = false, lastArgs = null, loop = 0, fifths = 0;
+  let showStaff = false, everyAccidental = false, lastArgs = null, loop = 0, fifths = 0;
 
   // Un clic (ou un tap, pas un glissé) choisit le point de départ.
   container.addEventListener('click', (e) => {
@@ -70,7 +70,7 @@ export function createTab(container, { onSeek, labels } = {}) {
     track.style.width = `${totalBeats * BEAT_W + 8}px`;
     track.style.height = `${140 + off}px`;
 
-    const staff = showStaff ? renderStaff(events, totalBeats, beatsPerBar, BEAT_W, doubles) : null;
+    const staff = showStaff ? renderStaff(events, totalBeats, beatsPerBar, BEAT_W, doubles, everyAccidental) : null;
     if (staff) track.append(staff.svg);
 
     for (let s = 0; s < STRINGS.length; s++) {
@@ -191,5 +191,15 @@ export function createTab(container, { onSeek, labels } = {}) {
     setCue(cueX / BEAT_W);
   }
 
-  return { render, follow, setCue, setStaff, setKey };
+  // Mode novice : altération écrite sur chaque note de la portée.
+  function setEveryAccidental(on) {
+    everyAccidental = on;
+    if (!showStaff || !lastArgs) return;
+    const scroll = container.scrollLeft;
+    render(...lastArgs);
+    container.scrollLeft = scroll;
+    setCue(cueX / BEAT_W);
+  }
+
+  return { render, follow, setCue, setStaff, setKey, setEveryAccidental };
 }

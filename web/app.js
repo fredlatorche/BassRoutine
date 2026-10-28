@@ -767,6 +767,16 @@ function setStaffVisible(on) {
 }
 $('showStaff').addEventListener('change', (e) => setStaffVisible(e.target.checked));
 
+// Mode novice : altérations répétées sur chaque note de la portée (choix retenu sur l'appareil).
+const EVERY_ACC_KEY = 'bassroutine-every-accidental';
+function setEveryAccidental(on) {
+  $('everyAcc').checked = on;
+  tab.setEveryAccidental(on);
+  try { localStorage.setItem(EVERY_ACC_KEY, on ? '1' : '0'); } catch { /* stockage indisponible */ }
+}
+$('everyAcc').addEventListener('change', (e) => setEveryAccidental(e.target.checked));
+try { if (localStorage.getItem(EVERY_ACC_KEY) === '1') setEveryAccidental(true); } catch { /* stockage indisponible */ }
+
 // Thème de couleurs (le script dans <head> l'applique déjà au chargement).
 const THEME_KEY = 'bassroutine-theme';
 function setTheme(name) {
