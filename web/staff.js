@@ -60,13 +60,23 @@ export function clefSvg(fifths = 0) {
   el('rect', { width, height: STAFF_H, class: 'staff-bg' }, svg);
   staffLines(svg, width);
   const fLine = BOTTOM - 6 * STEP;   // la clé de fa entoure la 4e ligne (Fa)
+  // Clé gravée : tête ronde sur la ligne de fa, crochet épais qui monte jusqu'à la ligne du haut
+  // puis redescend en s'affinant ; deux points de part et d'autre de la ligne de fa.
+  const y = (dy) => fLine + dy;
   el('path', {
-    d: `M 8 ${fLine} C 8 ${fLine - 10}, 22 ${fLine - 12}, 24 ${fLine - 2} C 26 ${fLine + 8}, 18 ${fLine + 18}, 6 ${fLine + 26}`,
-    class: 'staff-clef-curve',
+    d: `M 5.2 ${y(-1.5)}
+        C 6 ${y(-8.6)}, 14 ${y(-10.6)}, 19.6 ${y(-7.6)}
+        C 25.6 ${y(-4.4)}, 26 ${y(4.6)}, 20.6 ${y(10.4)}
+        C 15.6 ${y(15.8)}, 9.4 ${y(19.4)}, 3 ${y(22.6)}
+        L 2.6 ${y(21.6)}
+        C 8.2 ${y(18)}, 13.4 ${y(13.6)}, 16.2 ${y(8.6)}
+        C 19.2 ${y(3.4)}, 19 ${y(-4.4)}, 14.6 ${y(-6.2)}
+        C 11.4 ${y(-7.4)}, 8.4 ${y(-5.8)}, 7.8 ${y(-3.2)} Z`,
+    class: 'staff-ink',
   }, svg);
-  el('circle', { cx: 8, cy: fLine, r: 3.2, class: 'staff-ink' }, svg);
-  el('circle', { cx: 29, cy: fLine - 4, r: 1.8, class: 'staff-ink' }, svg);
-  el('circle', { cx: 29, cy: fLine + 4, r: 1.8, class: 'staff-ink' }, svg);
+  el('circle', { cx: 7.6, cy: y(0.2), r: 3.3, class: 'staff-ink' }, svg);
+  el('circle', { cx: 29.5, cy: y(-4), r: 1.7, class: 'staff-ink' }, svg);
+  el('circle', { cx: 29.5, cy: y(4), r: 1.7, class: 'staff-ink' }, svg);
   signatureLetters(fifths).forEach((letter, i) => {
     const d = fifths > 0 ? SIG_SHARP_D[letter] : SIG_FLAT_D[letter];
     const t = el('text', { x: 36 + i * 8, y: yOf(d) + (fifths > 0 ? 5 : 3), class: 'staff-acc' }, svg);
