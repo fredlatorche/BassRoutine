@@ -333,11 +333,12 @@ function seek(bar) {
   }
 }
 
+// En haut à droite : seulement « mesure / temps » ; le détail (section, chorus…) est dans l'infobulle.
 function showCue() {
   tab.setKey(prog.barSig[cue / prog.bpb] ?? 0);
-  $('position').textContent = cue === 0
-    ? 'Mesure – · Temps –'
-    : `Départ : ${prog.labels[cue / prog.bpb]}`;
+  const bar = cue / prog.bpb;
+  $('position').textContent = cue === 0 ? '– / –' : `${bar + 1} / 1`;
+  $('position').title = cue === 0 ? 'Mesure / temps' : `Départ : ${prog.labels[bar]}`;
 }
 
 // ---------- Interface ----------
@@ -515,7 +516,8 @@ function showBeat(s) {
     return;
   }
   const bar = Math.floor(s / prog.bpb);
-  $('position').textContent = `${prog.labels[bar]} · Temps ${(s % prog.bpb) + 1}`;
+  $('position').textContent = `${bar + 1} / ${(s % prog.bpb) + 1}`;
+  $('position').title = `${prog.labels[bar]} · Temps ${(s % prog.bpb) + 1}`;
   tab.setKey(prog.barSig[bar] ?? 0);   // l'armure suit la tonalité en cours (gammes)
   const els = mode === 'loop'
     ? [grid.querySelector(`[data-step="${s}"]`)]
@@ -811,7 +813,6 @@ $('mixerReset').addEventListener('click', () => {
     slider.dispatchEvent(new Event('input'));
   });
 });
-$('rewind').addEventListener('click', () => seek(0));
 
 // Cliquer une mesure de la grille d'accords = repartir de là (premier chorus).
 $('chart').addEventListener('click', (e) => {

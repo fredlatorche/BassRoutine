@@ -17,10 +17,14 @@
   </script>
 </head>
 <body>
+  <!-- En-tête toujours visible (collé en haut) : Play reste à portée de main sur mobile. -->
   <header>
-    <h1>Bass Routine</h1>
+    <div class="header-left">
+      <h1>Bass Routine</h1>
+      <button id="play" class="play">▶ Play</button>
+    </div>
     <div class="header-right">
-      <div id="position">Mesure – · Temps –</div>
+      <div id="position" title="Mesure / temps">– / –</div>
       <button id="mixerBtn" class="gear" aria-label="Réglages" aria-expanded="false" title="Réglages">⚙️</button>
     </div>
   </header>
@@ -53,10 +57,6 @@
   <section class="controls">
     <!-- Lecture : boutons, mode, tempo -->
     <div class="transport">
-      <div class="transport-buttons">
-        <button id="rewind" title="Revenir au début" aria-label="Revenir au début">⏮</button>
-        <button id="play" class="play">▶ Play</button>
-      </div>
       <div class="field">
         <label for="mode">Mode</label>
         <select id="mode">
@@ -253,7 +253,7 @@
     </div>
   </main>
 
-  <p class="hint">Touche la tablature (ou une mesure de la grille) pour choisir d'où repartir · ⏮ revient au début.<br>
+  <p class="hint">Touche la tablature (ou une mesure de la grille) pour choisir d'où repartir ; touche la mesure 1 pour revenir au début. En haut à droite : mesure / temps.<br>
     Gammes : le petit chiffre à côté de la case est le doigt (1 index, 2 majeur, 3 annulaire, 4 auriculaire, 0 corde à vide).<br>
     Sur iPhone : si tu n'entends rien, vérifie le bouton silencieux et le volume.</p>
 
