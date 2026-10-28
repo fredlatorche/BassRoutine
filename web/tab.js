@@ -30,16 +30,37 @@ function fingerings(events) {
 // onSeek(temps) est appelé quand on touche / clique la tab ; labels : colonne des noms de cordes.
 export function createTab(container, { onSeek, labels } = {}) {
   let track, playhead, cueMark, notes = [], events = [], current = -1, cueX = 0;
-  let showStaff = false, lastArgs = null;
+  let showStaff = false, lastArgs = null, loop = 0;
 
   // Un clic (ou un tap, pas un glissé) choisit le point de départ.
   container.addEventListener('click', (e) => {
     const x = e.clientX - container.getBoundingClientRect().left + container.scrollLeft;
-    onSeek?.(Math.max(0, x / BEAT_W));
+    const beat = Math.max(0, x / BEAT_W);
+    onSeek?.(loop ? beat % loop : beat);   // un clic dans une copie de la boucle vise la même mesure
   });
 
-  function render(evts, totalBeats, beatsPerBar) {
-    lastArgs = [evts, totalBeats, beatsPerBar];
+  // loopLen : longueur de la boucle en temps (0 = pas de boucle). En boucle, on affiche la séquence
+  // deux fois puis le début d'une troisième, séparées par des doubles traits, pour voir la suite.
+  function render(evts, totalBeats, beatsPerBar, { loopLen = 0 } = {}) {
+    lastArgs = [evts, totalBeats, beatsPerBar, { loopLen }];
+    loop = loopLen;
+    const basePos = fingerings(evts);   // même doigté pour toutes les copies
+    let pos = basePos, doubles = [];
+    if (loopLen) {
+      const head = Math.min(loopLen, Math.ceil(container.clientWidth / BEAT_W) + beatsPerBar);
+      const shown = [];
+      pos = [];
+      for (let k = 0; k < 3; k++) {
+        evts.forEach((e, i) => {
+          if (k === 2 && e.t >= head) return;
+          shown.push({ ...e, t: e.t + k * loopLen });
+          pos.push(basePos[i]);
+        });
+      }
+      evts = shown;
+      totalBeats = 2 * loopLen + head;
+      doubles = [loopLen, 2 * loopLen];
+    }
     events = evts;
     current = -1;
     lit = -1;
@@ -49,7 +70,7 @@ export function createTab(container, { onSeek, labels } = {}) {
     track.style.width = `${totalBeats * BEAT_W + 8}px`;
     track.style.height = `${140 + off}px`;
 
-    const staff = showStaff ? renderStaff(events, totalBeats, beatsPerBar, BEAT_W) : null;
+    const staff = showStaff ? renderStaff(events, totalBeats, beatsPerBar, BEAT_W, doubles) : null;
     if (staff) track.append(staff.svg);
 
     for (let s = 0; s < STRINGS.length; s++) {
@@ -64,11 +85,11 @@ export function createTab(container, { onSeek, labels } = {}) {
       bar.className = 'tab-bar';
       bar.style.left = `${b * beatsPerBar * BEAT_W}px`;
       bar.style.top = `${4 + off}px`;
-      bar.textContent = b + 1;
+      bar.textContent = loopLen ? (b % (loopLen / beatsPerBar)) + 1 : b + 1;   // numéros repartis à 1 à chaque passage
+      if (doubles.includes(b * beatsPerBar)) bar.classList.add('double');
       track.append(bar);
     }
 
-    const pos = fingerings(events);
     notes = events.map((e, i) => {
       const x = e.t * BEAT_W + 6;
       const el = document.createElement('b');

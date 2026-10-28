@@ -277,9 +277,12 @@ const tab = createTab($('tab'), {
   labels: document.querySelector('.tab-labels'),
 });
 
+const isLooping = () => (mode === 'loop' && $('loop').checked) || (mode === 'scale' && $('scaleLoop').checked);
+
 function refresh() {
   prog = mode === 'loop' ? buildLoopProgram() : mode === 'song' ? buildSongProgram() : buildScaleProgram();
-  tab.render(prog.bassEvents, prog.totalBeats, prog.bpb);
+  // En boucle, la tab montre la suite (le début de la séquence suivante) après un double trait.
+  tab.render(prog.bassEvents, prog.totalBeats, prog.bpb, { loopLen: isLooping() ? prog.totalBeats : 0 });
   if (cue >= prog.totalBeats) cue = 0;
   tab.setCue(cue);
 }
@@ -499,6 +502,7 @@ function showBeat(s) {
 let bass, pad, other, click, kit;
 let step = 0;
 let playing = false;
+let cycle = 0;          // nombre de passages de la boucle depuis Play
 let beatClock = null;   // dernier temps affiché et son heure audio, pour faire défiler la tab en continu
 
 // ---------- Table de mixage ----------
@@ -625,13 +629,13 @@ const makePad = (kind) => (PAD_SOUNDS[kind] ?? PAD_SOUNDS.epiano)(reverb);
 // Appelé à chaque temps : joue tous les événements qui tombent dans ce temps.
 function tick(time) {
   if (step >= prog.totalBeats) {
-    const looping = (mode === 'loop' && $('loop').checked) || (mode === 'scale' && $('scaleLoop').checked);
-    if (!looping) {
+    if (!isLooping()) {
       Tone.Transport.stop(time);
       Tone.Draw.schedule(stopUI, time);
       return;
     }
     step = 0;
+    cycle++;
   }
   const s = step++;
   const beat = s % prog.bpb;
@@ -664,8 +668,9 @@ function tick(time) {
   if ($('metro').checked) {
     click.triggerAttackRelease(beat === 0 ? 'C6' : 'G5', '32n', time, beat === 0 ? 0.8 : 0.45);
   }
+  const c = cycle;
   Tone.Draw.schedule(() => {
-    beatClock = { s, time };
+    beatClock = { s, time, cycle: c };
     showBeat(s);
   }, time);
 }
@@ -675,7 +680,10 @@ function frame() {
   if (beatClock) {
     const beatDur = 60 / Tone.Transport.bpm.value;
     const frac = Math.min(1, Math.max(0, (Tone.context.currentTime - beatClock.time) / beatDur));
-    tab.follow(beatClock.s + frac);
+    // En boucle, à partir du 2e passage on suit la 2e copie de la séquence dans la tab :
+    // le retour de la fin de la 2e copie au début de la 2e est invisible (contenu identique).
+    const copy = isLooping() && beatClock.cycle >= 1 ? prog.totalBeats : 0;
+    tab.follow(beatClock.s + frac + copy);
   }
   requestAnimationFrame(frame);
 }
@@ -687,6 +695,7 @@ async function start() {
   if (!bass) initAudio();
   Tone.Transport.bpm.value = Number($('tempo').value);
   step = cue;
+  cycle = 0;
   beatClock = null;
   Tone.Transport.start('+0.05');
   playing = true;
@@ -785,6 +794,8 @@ scaleControl('scaleBox', 'box');
 
 $('mode').addEventListener('change', (e) => setMode(e.target.value));
 $('bars').addEventListener('change', (e) => setBars(Number(e.target.value)));
+$('loop').addEventListener('change', refresh);
+$('scaleLoop').addEventListener('change', refresh);
 $('drumStyle').append(option('auto', 'Rythme auto', true));
 for (const [id, label] of Object.entries(DRUM_STYLES)) $('drumStyle').append(option(id, label, false));
 $('randKey').append(option('random', 'Tonalité au hasard', true));

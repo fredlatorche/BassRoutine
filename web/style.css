@@ -319,3 +319,6 @@ button.gear { font-size: 1.2rem; line-height: 1; padding: 6px 8px; }
 
 .mixer-option { margin-bottom: 14px; }
 body.with-staff .hint { margin-bottom: 310px; }
+
+/* Double trait : fin d'un passage de la boucle et début du suivant. */
+.tab-bar.double { border-left: 6px double var(--accent); }

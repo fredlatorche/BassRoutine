@@ -62,7 +62,8 @@ export function clefSvg(width = 36) {
 }
 
 // Dessine la portée ; renvoie le SVG et, pour chaque événement, son groupe (pour l'allumer en lecture).
-export function renderStaff(events, totalBeats, bpb, beatW) {
+// doubles : positions (en temps) des doubles barres (fin / début de boucle).
+export function renderStaff(events, totalBeats, bpb, beatW, doubles = []) {
   const width = totalBeats * beatW + 8;
   const svg = el('svg', { width, height: STAFF_H, class: 'staff' });
   el('rect', { width, height: STAFF_H, class: 'staff-bg' }, svg);
@@ -70,6 +71,7 @@ export function renderStaff(events, totalBeats, bpb, beatW) {
   for (let b = 0; b * bpb <= totalBeats; b++) {
     const x = b * bpb * beatW;
     el('line', { x1: x, x2: x, y1: BOTTOM - 8 * STEP, y2: BOTTOM, class: 'staff-bar' }, svg);
+    if (doubles.includes(b * bpb)) el('line', { x1: x - 4, x2: x - 4, y1: BOTTOM - 8 * STEP, y2: BOTTOM, class: 'staff-bar' }, svg);
   }
 
   let barIdx = -1, shown = new Map();   // altérations déjà écrites dans la mesure
