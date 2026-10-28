@@ -859,9 +859,93 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
+// ---------- Mémoire des réglages d'une session à l'autre ----------
+// Tout est gardé dans le stockage local du navigateur (sur l'appareil, rien n'est envoyé) :
+// mode, tempo, cases cochées, menus, ligne de la boucle (même inventée ou modifiée), gammes, morceau.
+// Le fichier MIDI importé n'est pas gardé (il faut le réimporter).
+
+const SETTINGS_KEY = 'bassroutine-settings';
+const TOGGLES = ['synth', 'drums', 'fills', 'metro', 'others', 'loop', 'scaleLoop'];
+const SELECTS = ['padSound', 'drumStyle', 'randKey', 'randMode', 'randRegister', 'preset', 'bars'];
+const SCALE_SELECTS = {
+  scaleType: 'type', scaleKey: 'key', scaleRange: 'range', scaleDir: 'direction',
+  scaleRhythm: 'rhythm', scaleFinger: 'fingering', scaleZone: 'zone', scaleBox: 'box',
+};
+
+function snapshot() {
+  return {
+    v: 1,
+    mode,
+    tempo: Number($('tempo').value),
+    toggles: Object.fromEntries(TOGGLES.map((id) => [id, $(id).checked])),
+    selects: Object.fromEntries(SELECTS.map((id) => [id, $(id).value])),
+    loop: { ...loopState },
+    loopInfo: $('loopInfo').hidden ? '' : $('loopInfo').textContent,
+    song: {
+      songId: songState.songId === 'midi' ? SONGS[0].id : songState.songId,
+      choruses: songState.choruses, seed: songState.seed, style: songState.style,
+    },
+    scale: { ...scaleState },
+  };
+}
+
+// Met une valeur dans un menu seulement si elle y existe encore.
+function setSelect(id, value) {
+  const sel = $(id);
+  if ([...sel.options].some((o) => o.value === String(value))) sel.value = String(value);
+}
+
+function restoreSettings() {
+  let saved;
+  try { saved = JSON.parse(localStorage.getItem(SETTINGS_KEY)); } catch { return false; }
+  if (!saved || saved.v !== 1) return false;
+
+  for (const [id, on] of Object.entries(saved.toggles ?? {})) if ($(id)) $(id).checked = on;
+  for (const [id, value] of Object.entries(saved.selects ?? {})) if ($(id)) setSelect(id, value);
+
+  if (saved.song && SONGS.some((x) => x.id === saved.song.songId)) Object.assign(songState, saved.song);
+  setSelect('choruses', songState.choruses);
+  setSelect('style', songState.style);
+  updateSongSelect();
+
+  if (saved.scale) Object.assign(scaleState, saved.scale);
+  updateKeySelect();
+  for (const [id, field] of Object.entries(SCALE_SELECTS)) setSelect(id, scaleState[field]);
+
+  const l = saved.loop;
+  if (l && Array.isArray(l.bass) && l.bass.length === l.bars * BEATS && l.chords?.length === l.bars) {
+    Object.assign(loopState, l);
+    setSelect('bars', l.bars);
+    renderLoopGrid();
+  } else {
+    applyPreset($('preset').value in PRESETS ? $('preset').value : 'mi');
+  }
+  if (saved.loopInfo) {
+    $('loopInfo').textContent = saved.loopInfo;
+    $('loopInfo').hidden = false;
+  }
+
+  if (['loop', 'song', 'scale'].includes(saved.mode)) {
+    $('mode').value = saved.mode;
+    setMode(saved.mode);
+  }
+  if (saved.tempo) setTempo(saved.tempo);   // après le mode, qui impose son tempo par défaut
+  return true;
+}
+
 updateSongSelect();
-applyPreset('mi');
+if (!restoreSettings()) applyPreset('mi');
 try { if (localStorage.getItem(STAFF_KEY) === '1') setStaffVisible(true); } catch { /* stockage indisponible */ }
+
+// Sauvegarde peu après chaque action (menus, cases, curseurs, boutons, grille).
+let saveTimer;
+function saveSoon() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(snapshot())); } catch { /* stockage indisponible */ }
+  }, 300);
+}
+for (const type of ['change', 'input', 'click']) document.addEventListener(type, saveSoon);
 
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
   navigator.serviceWorker.register('sw.js');
