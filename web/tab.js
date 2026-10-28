@@ -6,7 +6,20 @@ import { STAFF_H, renderStaff, clefSvg, clefWidth } from './staff.js';
 import { noteLabel } from './notation.js';
 
 const STRINGS = [43, 38, 33, 28];   // G, D, A, E (de haut en bas, comme sur une tab)
-const BEAT_W = 60;                  // largeur d'un temps en pixels
+const BEAT_W = 60;                  // largeur d'un temps en pixels (minimum)
+const NOTE_W = 36;                  // place nécessaire pour une case à 2 chiffres + le numéro de doigt
+const MAX_BEAT_W = 150;
+
+// Largeur d'un temps : élargie quand les notes sont serrées (triolets, doubles croches),
+// pour que les numéros de case ne se chevauchent pas.
+function beatWidth(events) {
+  let gap = 1;
+  for (let i = 1; i < events.length; i++) {
+    const d = events[i].t - events[i - 1].t;
+    if (d > 0.01 && d < gap) gap = d;
+  }
+  return Math.min(MAX_BEAT_W, Math.max(BEAT_W, Math.ceil(NOTE_W / gap)));
+}
 const MAX_FRET = 20;
 
 // Choix des cases : on reste près de la position de la main, les cordes à vide sont « gratuites ».
@@ -30,13 +43,14 @@ function fingerings(events) {
 
 // onSeek(temps) est appelé quand on touche / clique la tab ; labels : colonne des noms de cordes.
 export function createTab(container, { onSeek, labels } = {}) {
-  let track, playhead, cueMark, notes = [], events = [], current = -1, cueX = 0;
+  let track, playhead, cueMark, notes = [], events = [], current = -1, cueBeat = 0;
+  let bw = BEAT_W;   // largeur d'un temps pour l'affichage en cours
   let showStaff = false, everyAccidental = false, lastArgs = null, loop = 0, fifths = 0;
 
   // Un clic (ou un tap, pas un glissé) choisit le point de départ.
   container.addEventListener('click', (e) => {
     const x = e.clientX - container.getBoundingClientRect().left + container.scrollLeft;
-    const beat = Math.max(0, x / BEAT_W);
+    const beat = Math.max(0, x / bw);
     onSeek?.(loop ? beat % loop : beat);   // un clic dans une copie de la boucle vise la même mesure
   });
 
@@ -44,11 +58,12 @@ export function createTab(container, { onSeek, labels } = {}) {
   // deux fois puis le début d'une troisième, séparées par des doubles traits, pour voir la suite.
   function render(evts, totalBeats, beatsPerBar, { loopLen = 0 } = {}) {
     lastArgs = [evts, totalBeats, beatsPerBar, { loopLen }];
+    bw = beatWidth(evts);
     loop = loopLen;
     const basePos = fingerings(evts);   // même doigté pour toutes les copies
     let pos = basePos, doubles = [];
     if (loopLen) {
-      const head = Math.min(loopLen, Math.ceil(container.clientWidth / BEAT_W) + beatsPerBar);
+      const head = Math.min(loopLen, Math.ceil(container.clientWidth / bw) + beatsPerBar);
       const shown = [];
       pos = [];
       for (let k = 0; k < 3; k++) {
@@ -68,10 +83,10 @@ export function createTab(container, { onSeek, labels } = {}) {
     const off = showStaff ? STAFF_H : 0;   // la tab descend sous la portée
     track = document.createElement('div');
     track.className = 'tab-track';
-    track.style.width = `${totalBeats * BEAT_W + 8}px`;
+    track.style.width = `${totalBeats * bw + 8}px`;
     track.style.height = `${140 + off}px`;
 
-    const staff = showStaff ? renderStaff(events, totalBeats, beatsPerBar, BEAT_W, doubles, everyAccidental) : null;
+    const staff = showStaff ? renderStaff(events, totalBeats, beatsPerBar, bw, doubles, everyAccidental) : null;
     if (staff) track.append(staff.svg);
 
     for (let s = 0; s < STRINGS.length; s++) {
@@ -84,7 +99,7 @@ export function createTab(container, { onSeek, labels } = {}) {
     for (let b = 0; b * beatsPerBar < totalBeats; b++) {
       const bar = document.createElement('div');
       bar.className = 'tab-bar';
-      bar.style.left = `${b * beatsPerBar * BEAT_W}px`;
+      bar.style.left = `${b * beatsPerBar * bw}px`;
       bar.style.top = `${4 + off}px`;
       bar.textContent = loopLen ? (b % (loopLen / beatsPerBar)) + 1 : b + 1;   // numéros repartis à 1 à chaque passage
       if (doubles.includes(b * beatsPerBar)) bar.classList.add('double');
@@ -92,7 +107,7 @@ export function createTab(container, { onSeek, labels } = {}) {
     }
 
     notes = events.map((e, i) => {
-      const x = e.t * BEAT_W + 14;   // aligné sous la note de la portée (marge après la barre de mesure)
+      const x = e.t * bw + 14;   // aligné sous la note de la portée (marge après la barre de mesure)
       const el = document.createElement('b');
       el.className = 'tab-note';
       el.style.left = `${x}px`;
@@ -131,10 +146,10 @@ export function createTab(container, { onSeek, labels } = {}) {
       playhead.hidden = true;
       current = -1;
       setCurrent(-1);
-      container.scrollTo({ left: Math.max(0, cueX - container.clientWidth / 3), behavior: 'smooth' });
+      container.scrollTo({ left: Math.max(0, cueBeat * bw - container.clientWidth / 3), behavior: 'smooth' });
       return;
     }
-    const x = beat * BEAT_W;
+    const x = beat * bw;
     playhead.hidden = false;
     playhead.style.left = `${x}px`;
     container.scrollLeft = Math.max(0, x - container.clientWidth / 3);
@@ -157,9 +172,9 @@ export function createTab(container, { onSeek, labels } = {}) {
 
   // Repère du point de départ (en temps).
   function setCue(beat) {
-    cueX = beat * BEAT_W;
+    cueBeat = beat;
     if (!cueMark) return;
-    cueMark.style.left = `${cueX}px`;
+    cueMark.style.left = `${beat * bw}px`;
     cueMark.hidden = beat === 0;
   }
 
@@ -189,7 +204,7 @@ export function createTab(container, { onSeek, labels } = {}) {
     const scroll = container.scrollLeft;
     if (lastArgs) render(...lastArgs);
     container.scrollLeft = scroll;
-    setCue(cueX / BEAT_W);
+    setCue(cueBeat);
   }
 
   // Redessine avec les mêmes données (changement de notation des noms de notes…).
@@ -198,7 +213,7 @@ export function createTab(container, { onSeek, labels } = {}) {
     const scroll = container.scrollLeft;
     render(...lastArgs);
     container.scrollLeft = scroll;
-    setCue(cueX / BEAT_W);
+    setCue(cueBeat);
   }
 
   // Mode novice : altération écrite sur chaque note de la portée.
@@ -208,7 +223,7 @@ export function createTab(container, { onSeek, labels } = {}) {
     const scroll = container.scrollLeft;
     render(...lastArgs);
     container.scrollLeft = scroll;
-    setCue(cueX / BEAT_W);
+    setCue(cueBeat);
   }
 
   return { render, follow, setCue, setStaff, setKey, setEveryAccidental, redraw };
