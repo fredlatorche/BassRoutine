@@ -73,8 +73,9 @@ export function gmDrumEvents(notes) {
     .map((n) => ({ t: n.t, d: GM[n.midi], v: n.vel ?? 0.8, note: TOM_NOTES[n.midi] }));
 }
 
-export function createKit() {
-  const out = new Tone.Volume(-4).toDestination();
+// dest : nœud de sortie (la tranche « Batterie » de la table de mixage).
+export function createKit(dest) {
+  const out = new Tone.Volume(-4).connect(dest);
 
   const kick = new Tone.MembraneSynth({
     pitchDecay: 0.04, octaves: 6,

@@ -15,8 +15,19 @@
 <body>
   <header>
     <h1>Bass Routine</h1>
-    <div id="position">Mesure – · Temps –</div>
+    <div class="header-right">
+      <div id="position">Mesure – · Temps –</div>
+      <button id="mixerBtn" class="gear" aria-label="Volumes" aria-expanded="false" title="Volumes">⚙️</button>
+    </div>
   </header>
+
+  <section id="mixer" class="mixer" hidden>
+    <div class="mixer-head">
+      <strong>Volumes</strong>
+      <button id="mixerReset">Réinitialiser</button>
+    </div>
+    <div id="mixerChannels"></div>
+  </section>
 
   <section class="controls">
     <div class="control">

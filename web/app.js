@@ -495,30 +495,84 @@ let step = 0;
 let playing = false;
 let beatClock = null;   // dernier temps affiché et son heure audio, pour faire défiler la tab en continu
 
+// ---------- Table de mixage ----------
+// Une tranche de volume par instrument, réglée en % (100 % = équilibre d'origine, 0 = coupé).
+
+const MIX_CHANNELS = {
+  master: 'Général',
+  bass: 'Basse',
+  pad: 'Accords',
+  drums: 'Batterie',
+  click: 'Métronome',
+  other: 'Autres pistes (MIDI)',
+};
+const MIX_KEY = 'bassroutine-mix';
+const mixLevels = Object.fromEntries(Object.keys(MIX_CHANNELS).map((k) => [k, 100]));
+try { Object.assign(mixLevels, JSON.parse(localStorage.getItem(MIX_KEY) || '{}')); } catch { /* stockage indisponible */ }
+const mix = {};   // nœuds Tone.Volume, créés au premier Play
+
+const toDb = (pct) => (pct <= 0 ? -Infinity : 20 * Math.log10(pct / 100));
+
+function applyLevel(name) {
+  if (name === 'master') Tone.Destination.volume.value = toDb(mixLevels.master);
+  else if (mix[name]) mix[name].volume.value = toDb(mixLevels[name]);
+}
+
+function renderMixer() {
+  const panel = $('mixerChannels');
+  for (const [name, label] of Object.entries(MIX_CHANNELS)) {
+    const row = document.createElement('label');
+    row.className = 'mix-row';
+    const text = document.createElement('span');
+    text.textContent = label;
+    const slider = document.createElement('input');
+    slider.type = 'range';
+    slider.min = 0;
+    slider.max = 150;
+    slider.step = 5;
+    slider.value = mixLevels[name];
+    const value = document.createElement('output');
+    value.textContent = `${mixLevels[name]} %`;
+    slider.addEventListener('input', () => {
+      mixLevels[name] = Number(slider.value);
+      value.textContent = `${slider.value} %`;
+      applyLevel(name);
+      try { localStorage.setItem(MIX_KEY, JSON.stringify(mixLevels)); } catch { /* stockage indisponible */ }
+    });
+    row.append(text, slider, value);
+    panel.append(row);
+  }
+}
+
 function initAudio() {
+  for (const name of Object.keys(MIX_CHANNELS)) {
+    if (name !== 'master') mix[name] = new Tone.Volume().toDestination();
+    applyLevel(name);
+  }
+
   bass = new Tone.MonoSynth({
     oscillator: { type: 'sawtooth' },
     filter: { type: 'lowpass', Q: 2 },
     envelope: { attack: 0.005, decay: 0.2, sustain: 0.6, release: 0.15 },
     filterEnvelope: { attack: 0.005, decay: 0.15, sustain: 0.3, release: 0.2, baseFrequency: 120, octaves: 2.5 },
     volume: -6,
-  }).toDestination();
+  }).connect(mix.bass);
 
-  reverb = new Tone.Reverb({ decay: 2.5, wet: 0.3 }).toDestination();
+  reverb = new Tone.Reverb({ decay: 2.5, wet: 0.3 }).connect(mix.pad);
   pad = makePad($('padSound').value);
-  kit = createKit();
+  kit = createKit(mix.drums);
 
   other = new Tone.PolySynth(Tone.Synth, {
     oscillator: { type: 'triangle' },
     envelope: { attack: 0.01, decay: 0.2, sustain: 0.4, release: 0.3 },
     volume: -16,
-  }).toDestination();
+  }).connect(mix.other);
 
   click = new Tone.Synth({
     oscillator: { type: 'square' },
     envelope: { attack: 0.001, decay: 0.05, sustain: 0, release: 0.01 },
     volume: -16,
-  }).toDestination();
+  }).connect(mix.click);
 
   Tone.Transport.scheduleRepeat(tick, '4n');
 }
@@ -648,6 +702,19 @@ function stopUI() {
 // ---------- Contrôles ----------
 
 $('play').addEventListener('click', () => (playing ? stop() : start()));
+
+renderMixer();
+$('mixerBtn').addEventListener('click', () => {
+  const open = $('mixer').hidden;
+  $('mixer').hidden = !open;
+  $('mixerBtn').setAttribute('aria-expanded', open);
+});
+$('mixerReset').addEventListener('click', () => {
+  $('mixerChannels').querySelectorAll('input').forEach((slider) => {
+    slider.value = 100;
+    slider.dispatchEvent(new Event('input'));
+  });
+});
 $('rewind').addEventListener('click', () => seek(0));
 
 // Cliquer une mesure de la grille d'accords = repartir de là (premier chorus).

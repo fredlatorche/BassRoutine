@@ -276,3 +276,26 @@ button.play {
 .invent { flex-wrap: wrap; }
 #invent { font-weight: 600; }
 #loopInfo { color: var(--accent); margin: 0 0 10px; font-weight: 600; }
+
+/* ---------- Table de mixage (roue crantée) ---------- */
+
+.header-right { display: flex; align-items: center; gap: 12px; }
+button.gear { font-size: 1.2rem; line-height: 1; padding: 6px 8px; }
+
+.mixer {
+  padding: 14px;
+  margin-bottom: 16px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.mixer-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+#mixerChannels {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 8px 24px;
+}
+.mix-row { display: grid; grid-template-columns: 9em 1fr 3.5em; align-items: center; gap: 10px; }
+.mix-row span { color: var(--muted); }
+.mix-row input { width: 100%; accent-color: var(--accent); }
+.mix-row output { text-align: right; font-variant-numeric: tabular-nums; }
