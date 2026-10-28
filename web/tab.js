@@ -92,7 +92,7 @@ export function createTab(container, { onSeek, labels } = {}) {
     }
 
     notes = events.map((e, i) => {
-      const x = e.t * BEAT_W + 6;
+      const x = e.t * BEAT_W + 14;   // aligné sous la note de la portée (marge après la barre de mesure)
       const el = document.createElement('b');
       el.className = 'tab-note';
       el.style.left = `${x}px`;

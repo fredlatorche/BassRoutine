@@ -110,7 +110,7 @@ export function renderStaff(events, totalBeats, bpb, beatW, doubles = [], everyN
   // 1. Têtes de notes, lignes supplémentaires et altérations ; valeur de chaque note.
   let barIdx = -1, shown = new Map();   // altérations déjà écrites dans la mesure
   const notes = events.map((e, i) => {
-    const x = e.t * beatW + 12;
+    const x = e.t * beatW + 20;   // marge après la barre de mesure, pour une éventuelle altération
     const { d, acc } = spelling(e.midi, e.name);
     const y = yOf(d);
     const g = el('g', { class: 'staff-note' }, svg);
