@@ -70,6 +70,24 @@ header {
 
 h1 { margin: 0; font-size: 1.3rem; white-space: nowrap; }
 
+/* Logo : la basse détourée, à l'horizontale ; un liseré clair la détache des fonds sombres. */
+.brand { display: flex; align-items: center; gap: 10px; }
+.logo {
+  height: 38px;
+  width: auto;
+  filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.35)) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.4));
+}
+@media (max-width: 520px) {
+  .logo { height: 30px; }
+  .brand-name {   /* sur mobile en portrait, la basse tient lieu de titre */
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+}
+
 #position {
   min-width: 3.5em;
   text-align: right;
