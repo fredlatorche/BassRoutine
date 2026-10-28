@@ -1,7 +1,7 @@
 // Bass Routine : mode Boucle (grille éditable) et mode Morceau (walking générée ou MIDI importé),
 // avec accords de synthé, métronome et tablature qui défile.
 
-import { NAMES, LOW_E, HIGH, parseChord, bassRoot, padVoicing } from './theory.js';
+import { NAMES, LOW_E, parseChord, bassRoot, padVoicing } from './theory.js';
 import { SONGS, expandSong } from './songs.js';
 import { bassLine, STYLES } from './walking.js';
 import { readMidiFile, guessBassTrack } from './midi-import.js';
@@ -12,13 +12,15 @@ import { SCALE_TYPES, FINGERINGS, ZONES, keyOptions, boxOptions, buildScaleExerc
 const BEATS = 4;
 const $ = (id) => document.getElementById(id);
 
-// Notes proposées dans la grille ; l'octave du dessus est marquée « aigu ».
+// Notes proposées dans la grille, du Mi grave au Do de la case 17 sur G ;
+// l'octave du dessus est marquée « aigu », la suivante « suraigu ».
+const GRID_HIGH = 60;
 const BASS_NOTES = [];
-for (let m = LOW_E; m <= HIGH; m++) {
-  BASS_NOTES.push({ midi: m, label: NAMES[m % 12] + (m >= LOW_E + 12 ? ' aigu' : '') });
+for (let m = LOW_E; m <= GRID_HIGH; m++) {
+  BASS_NOTES.push({ midi: m, label: NAMES[m % 12] + (m >= LOW_E + 24 ? ' suraigu' : m >= LOW_E + 12 ? ' aigu' : '') });
 }
 
-const LOOP_CHORDS = ['Em', 'E', 'E7', 'Am', 'A', 'A7', 'D', 'G', 'C', 'Bm', 'B7'];
+const LOOP_CHORDS = ['Em', 'E', 'E7', 'Am', 'Am7', 'A', 'A7', 'D', 'D7', 'Dm7', 'G', 'Gmaj7', 'Gm7', 'C', 'Bm', 'B7'];
 
 const PRESETS = {
   mi: {
@@ -39,6 +41,35 @@ const PRESETS = {
       return [r, r + third, r + 7, approach];
     },
   },
+  // Lignes écrites note par note (une mesure = 4 noires), répétées pour remplir la boucle.
+  // Blues en Mi : 1-3-5-6 et descentes chromatiques vers chaque accord.
+  walkingBlues: {
+    chords: ['E7', 'E7', 'A7', 'A7', 'E7', 'E7', 'B7', 'A7'],
+    lines: [
+      [28, 32, 35, 37], [38, 37, 35, 32], [33, 37, 40, 37], [33, 31, 30, 29],
+      [28, 32, 35, 37], [38, 37, 35, 34], [35, 39, 42, 34], [33, 31, 30, 29],
+    ],
+    drums: 'walking',
+  },
+  // ii-V-I en Sol avec retour par Mi7 : chaque mesure finit un demi-ton au-dessus de l'accord suivant.
+  walking251: {
+    chords: ['Am7', 'D7', 'Gmaj7', 'E7'],
+    lines: [[33, 36, 40, 39], [38, 42, 45, 44], [43, 47, 45, 41], [40, 38, 35, 34]],
+    drums: 'walking',
+  },
+  // Haut du manche en Ré mineur, lié et chantant, pensé pour la fretless :
+  // cordes de D et G entre les cases 10 et 15 (positions imposées dans la tab).
+  walkingHigh: {
+    chords: ['Dm7', 'Gm7', 'A7', 'Dm7'],
+    lines: [[50, 52, 53, 57], [58, 57, 55, 53], [52, 49, 52, 55], [53, 52, 50, 49]],
+    // [corde, case] avec 0 = G, 1 = D
+    frets: [
+      [[1, 12], [1, 14], [0, 10], [0, 14]], [[0, 15], [0, 14], [0, 12], [0, 10]],
+      [[1, 14], [1, 11], [1, 14], [0, 12]], [[0, 10], [1, 14], [1, 12], [1, 11]],
+    ],
+    legato: true,
+    drums: 'walking',
+  },
 };
 
 let mode = 'loop';
@@ -47,6 +78,9 @@ const loopState = {
   bars: 8,
   chords: [],
   bass: [],   // une note MIDI (ou null = silence) par temps
+  frets: [],  // position imposée dans la tab ([corde, case]) ou null, par temps
+  legato: false,
+  drums: 'eighths',
 };
 
 const songState = {
@@ -62,11 +96,15 @@ function applyPreset(name) {
   const p = PRESETS[name];
   loopState.chords = [];
   loopState.bass = [];
+  loopState.frets = [];
+  loopState.legato = !!p.legato;
+  loopState.drums = p.drums ?? 'eighths';
   for (let b = 0; b < loopState.bars; b++) {
     const chord = p.chords[b % p.chords.length];
     const next = p.chords[(b + 1) % p.chords.length];
     loopState.chords.push(chord);
-    loopState.bass.push(...p.bar(chord, next));
+    loopState.bass.push(...(p.lines ? p.lines[b % p.lines.length] : p.bar(chord, next)));
+    loopState.frets.push(...(p.frets ? p.frets[b % p.frets.length] : [null, null, null, null]));
   }
   renderLoopGrid();
 }
@@ -74,13 +112,14 @@ function applyPreset(name) {
 // Change le nombre de mesures en répétant le contenu existant.
 function setBars(n) {
   const oldBars = loopState.bars;
-  const chords = [], bass = [];
+  const chords = [], bass = [], frets = [];
   for (let b = 0; b < n; b++) {
     const src = b % oldBars;
     chords.push(loopState.chords[src]);
     bass.push(...loopState.bass.slice(src * BEATS, src * BEATS + BEATS));
+    frets.push(...loopState.frets.slice(src * BEATS, src * BEATS + BEATS));
   }
-  Object.assign(loopState, { bars: n, chords, bass });
+  Object.assign(loopState, { bars: n, chords, bass, frets });
   renderLoopGrid();
 }
 
@@ -130,10 +169,16 @@ function makeProgram({ events, others = [], drums = null, drumStyle = 'eighths',
 function buildLoopProgram() {
   const events = [];
   loopState.bass.forEach((midi, i) => {
-    if (midi != null) events.push({ t: i, dur: 0.85, midi, vel: i % BEATS === 0 ? 0.9 : 0.75 });
+    if (midi == null) return;
+    const pos = loopState.frets[i];
+    events.push({
+      t: i, dur: loopState.legato ? 0.97 : 0.85, midi, vel: i % BEATS === 0 ? 0.9 : 0.75,
+      ...(pos && { string: pos[0], fret: pos[1] }),
+    });
   });
   return makeProgram({
     events,
+    drumStyle: loopState.drums,
     chordBars: loopState.chords.map((c) => [c]),
     bars: loopState.bars,
     bpb: BEATS,
@@ -270,6 +315,7 @@ function renderLoopGrid() {
       sel.classList.toggle('rest', loopState.bass[i] == null);
       sel.addEventListener('change', () => {
         loopState.bass[i] = sel.value === '' ? null : Number(sel.value);
+        loopState.frets[i] = null;   // note modifiée : la tab choisit la position
         sel.classList.toggle('rest', loopState.bass[i] == null);
         refresh();
       });
