@@ -59,6 +59,20 @@
           <option value="walkingBlues">Walking blues (Mi)</option>
           <option value="walking251">Walking ii-V-I (Sol)</option>
           <option value="walkingHigh">Walking aigu – fretless (Ré m)</option>
+          <option value="invented" hidden>🎲 Ligne inventée</option>
+        </select>
+      </div>
+      <div class="control invent">
+        <button id="invent">🎲 Inventer</button>
+        <select id="randKey" aria-label="Tonalité de la ligne inventée"></select>
+        <select id="randMode" aria-label="Majeur ou mineur">
+          <option value="random">Majeur ou mineur</option>
+          <option value="major">Majeur</option>
+          <option value="minor">Mineur</option>
+        </select>
+        <select id="randRegister" aria-label="Registre">
+          <option value="low">Grave</option>
+          <option value="high">Aigu (fretless)</option>
         </select>
       </div>
       <label class="toggle"><input id="loop" type="checkbox"> Boucle</label>
@@ -154,6 +168,7 @@
   </section>
 
   <main>
+    <p id="loopInfo" hidden></p>
     <div id="grid"></div>
     <div id="scaleView" hidden>
       <div id="scaleList"></div>

@@ -205,6 +205,12 @@ function eighths(segs, rand) {
   return out;
 }
 
+// Walking en noires seules, sans fin de morceau : la dernière mesure approche la première,
+// pour tourner en boucle (mode Boucle, une note par temps).
+export function walkingQuarters(bars, seed = 1, bpb = 4) {
+  return walkQuarters(segments(bars, bpb), rng(seed), bpb);
+}
+
 // bars : [{ chords: ['Dm7'] }, { chords: ['Gm7', 'C7'] }, ...]
 // Renvoie des événements { t, dur, midi, vel } (t et dur en temps), triés.
 export function bassLine(bars, seed = 1, style = 'walking', bpb = 4) {

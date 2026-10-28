@@ -270,3 +270,9 @@ button.play {
   vertical-align: 5px;
 }
 .tab-note.playing sup { color: #1a1a1a; }
+
+/* ---------- Mode aléatoire (Boucle) ---------- */
+
+.invent { flex-wrap: wrap; }
+#invent { font-weight: 600; }
+#loopInfo { color: var(--accent); margin: 0 0 10px; font-weight: 600; }

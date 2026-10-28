@@ -8,6 +8,7 @@ import { readMidiFile, guessBassTrack } from './midi-import.js';
 import { createTab } from './tab.js';
 import { createKit, patternHits, gmDrumEvents } from './drums.js';
 import { SCALE_TYPES, FINGERINGS, ZONES, keyOptions, boxOptions, buildScaleExercise } from './scales.js';
+import { inventLoop, KEY_CHOICES } from './random-loop.js';
 
 const BEATS = 4;
 const $ = (id) => document.getElementById(id);
@@ -94,6 +95,8 @@ const songState = {
 
 function applyPreset(name) {
   const p = PRESETS[name];
+  if (!p) return;
+  $('loopInfo').hidden = true;
   loopState.chords = [];
   loopState.bass = [];
   loopState.frets = [];
@@ -106,6 +109,26 @@ function applyPreset(name) {
     loopState.bass.push(...(p.lines ? p.lines[b % p.lines.length] : p.bar(chord, next)));
     loopState.frets.push(...(p.frets ? p.frets[b % p.frets.length] : [null, null, null, null]));
   }
+  renderLoopGrid();
+}
+
+// Mode aléatoire : grille et walking inventées dans la tonalité choisie (ou au hasard).
+function invent() {
+  const register = $('randRegister').value;
+  const r = inventLoop({ key: $('randKey').value, mode: $('randMode').value, register, bars: loopState.bars });
+  Object.assign(loopState, {
+    chords: r.chords,
+    bass: r.line,
+    frets: r.line.map(() => null),
+    legato: register === 'high',
+    drums: 'walking',
+  });
+  $('preset').value = 'invented';
+  $('loopInfo').textContent = `🎲 ${r.label}`;
+  $('loopInfo').hidden = false;
+  // C'est avec la nappe et la batterie que ça sonne : on les active.
+  $('synth').checked = true;
+  $('drums').checked = true;
   renderLoopGrid();
 }
 
@@ -300,7 +323,8 @@ function renderLoopGrid() {
     head.className = 'bar-head';
     head.textContent = `Mesure ${b + 1}`;
     const chordSel = document.createElement('select');
-    for (const c of LOOP_CHORDS) chordSel.append(option(c, c, c === loopState.chords[b]));
+    const choices = LOOP_CHORDS.includes(loopState.chords[b]) ? LOOP_CHORDS : [loopState.chords[b], ...LOOP_CHORDS];
+    for (const c of choices) chordSel.append(option(c, parseChord(c).label, c === loopState.chords[b]));
     chordSel.addEventListener('change', () => { loopState.chords[b] = chordSel.value; refresh(); });
     head.append(chordSel);
 
@@ -672,6 +696,9 @@ scaleControl('scaleBox', 'box');
 
 $('mode').addEventListener('change', (e) => setMode(e.target.value));
 $('bars').addEventListener('change', (e) => setBars(Number(e.target.value)));
+$('randKey').append(option('random', 'Tonalité au hasard', true));
+KEY_CHOICES.forEach((k, pc) => $('randKey').append(option(pc, k, false)));
+$('invent').addEventListener('click', invent);
 $('preset').addEventListener('change', (e) => applyPreset(e.target.value));
 
 $('song').addEventListener('change', (e) => {
