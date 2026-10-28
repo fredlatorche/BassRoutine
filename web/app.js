@@ -8,7 +8,7 @@ import { readMidiFile, guessBassTrack } from './midi-import.js';
 import { createTab } from './tab.js';
 import { createKit, patternHits, gmDrumEvents, DRUM_STYLES, WALKING_DRUMS } from './drums.js';
 import { SCALE_TYPES, FINGERINGS, ZONES, keyOptions, boxOptions, buildScaleExercise } from './scales.js';
-import { inventLoop, KEY_CHOICES } from './random-loop.js';
+import { inventLoop, KEY_CHOICES, fifthsFromLabel } from './random-loop.js';
 import { spellEvents, pitchName } from './spelling.js';
 import { setNotation, noteLabel } from './notation.js';
 
@@ -1038,6 +1038,8 @@ function restoreSettings() {
 
   const l = saved.loop;
   if (l && Array.isArray(l.bass) && l.bass.length === l.bars * BEATS && l.chords?.length === l.bars) {
+    // Sauvegarde d'avant l'armure : on la retrouve d'après la ligne inventée, ou d'après la ligne choisie.
+    if (l.fifths == null) l.fifths = fifthsFromLabel(saved.loopInfo) ?? PRESETS[saved.selects?.preset]?.fifths ?? 0;
     Object.assign(loopState, l);
     setSelect('bars', l.bars);
     renderLoopGrid();

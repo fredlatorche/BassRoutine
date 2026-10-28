@@ -1,6 +1,6 @@
 // Garde l'app en cache pour qu'elle marche hors ligne.
 // Réseau d'abord (pour voir tout de suite les modifications), cache en secours.
-const CACHE = 'basse-tools-v24';
+const CACHE = 'basse-tools-v25';
 const ASSETS = [
   './', 'index.html', 'style.css', 'app.js', 'theory.js', 'songs.js', 'walking.js', 'midi-import.js', 'tab.js', 'drums.js', 'scales.js', 'random-loop.js', 'staff.js', 'spelling.js', 'notation.js',
   'manifest.json', 'vendor/Tone.js', 'vendor/Midi.js',

@@ -42,6 +42,14 @@ const KEY_LABEL = Object.fromEntries(KEY_CHOICES);
 const MAJOR_FIFTHS = { C: 0, 'C#': 7, Db: -5, D: 2, Eb: -3, E: 4, F: -1, 'F#': 6, Gb: -6, G: 1, Ab: -4, A: 3, Bb: -2, B: 5 };
 const MINOR_FIFTHS = { C: -3, 'C#': 4, D: -1, 'D#': 6, Eb: -6, E: 1, F: -4, 'F#': 3, G: -2, 'G#': 5, Ab: -7, A: 0, 'A#': 7, Bb: -5, B: 2 };
 const ENHARMONIC = { 'C#': 'Db', Db: 'C#', 'D#': 'Eb', Eb: 'D#', 'F#': 'Gb', Gb: 'F#', 'G#': 'Ab', Ab: 'G#', 'A#': 'Bb', Bb: 'A#' };
+// Armure d'après le texte affiché (« Ré♭ majeur ») : sert aux anciennes sauvegardes sans armure.
+export function fifthsFromLabel(label) {
+  const m = /(\S+) (majeur|mineur)/.exec(label ?? '');
+  if (!m) return null;
+  const name = Object.keys(KEY_LABEL).find((k) => KEY_LABEL[k] === m[1]);
+  return (m[2] === 'mineur' ? MINOR_FIFTHS : MAJOR_FIFTHS)[name] ?? null;
+}
+
 const pcOf = (name) => (NATURAL[LETTERS.indexOf(name[0])] + (name[1] === '#' ? 1 : name[1] === 'b' ? -1 : 0) + 12) % 12;
 
 // Nom anglais de la fondamentale (pour le symbole d'accord), avec la bonne lettre.
