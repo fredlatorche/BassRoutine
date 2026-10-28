@@ -865,7 +865,7 @@ $('scaleLoop').addEventListener('change', refresh);
 $('drumStyle').append(option('auto', 'Rythme auto', true));
 for (const [id, label] of Object.entries(DRUM_STYLES)) $('drumStyle').append(option(id, label, false));
 $('randKey').append(option('random', 'Tonalité au hasard', true));
-KEY_CHOICES.forEach((k, pc) => $('randKey').append(option(pc, k, false)));
+for (const [value, label] of KEY_CHOICES) $('randKey').append(option(value, label, false));
 $('invent').addEventListener('click', invent);
 $('preset').addEventListener('change', (e) => applyPreset(e.target.value));
 

@@ -2,8 +2,6 @@
 // (majeure ou mineure) et une walking bass qui tourne en boucle dessus.
 
 import { walkingQuarters } from './walking.js';
-import { keyName } from './scales.js';
-import { keyFifths } from './spelling.js';
 
 const LETTERS = 'CDEFGAB';
 const NATURAL = [0, 2, 4, 5, 7, 9, 11];
@@ -31,7 +29,20 @@ const MINOR_TEMPLATES = [
   ['i', 'i', 'iv', 'V'], ['i', 'VI', 'iv', 'V'],
 ];
 
-export const KEY_CHOICES = ['Do', 'Do♯ / Ré♭', 'Ré', 'Mi♭', 'Mi', 'Fa', 'Fa♯', 'Sol', 'La♭ / Sol♯', 'La', 'Si♭', 'Si'];
+// Tonalités proposées, enharmoniques séparées (Do♯ et Ré♭ ne s'écrivent pas pareil).
+export const KEY_CHOICES = [
+  ['C', 'Do'], ['C#', 'Do♯'], ['Db', 'Ré♭'], ['D', 'Ré'], ['D#', 'Ré♯'], ['Eb', 'Mi♭'], ['E', 'Mi'],
+  ['F', 'Fa'], ['F#', 'Fa♯'], ['Gb', 'Sol♭'], ['G', 'Sol'], ['G#', 'Sol♯'], ['Ab', 'La♭'], ['A', 'La'],
+  ['A#', 'La♯'], ['Bb', 'Si♭'], ['B', 'Si'],
+];
+const KEY_LABEL = Object.fromEntries(KEY_CHOICES);
+
+// Armure de chaque tonalité usuelle. Celles qui n'existent pas en pratique (Ré♯ majeur, Ré♭ mineur…)
+// sont remplacées par leur équivalent enharmonique (Mi♭ majeur, Do♯ mineur…).
+const MAJOR_FIFTHS = { C: 0, 'C#': 7, Db: -5, D: 2, Eb: -3, E: 4, F: -1, 'F#': 6, Gb: -6, G: 1, Ab: -4, A: 3, Bb: -2, B: 5 };
+const MINOR_FIFTHS = { C: -3, 'C#': 4, D: -1, 'D#': 6, Eb: -6, E: 1, F: -4, 'F#': 3, G: -2, 'G#': 5, Ab: -7, A: 0, 'A#': 7, Bb: -5, B: 2 };
+const ENHARMONIC = { 'C#': 'Db', Db: 'C#', 'D#': 'Eb', Eb: 'D#', 'F#': 'Gb', Gb: 'F#', 'G#': 'Ab', Ab: 'G#', 'A#': 'Bb', Bb: 'A#' };
+const pcOf = (name) => (NATURAL[LETTERS.indexOf(name[0])] + (name[1] === '#' ? 1 : name[1] === 'b' ? -1 : 0) + 12) % 12;
 
 // Nom anglais de la fondamentale (pour le symbole d'accord), avec la bonne lettre.
 function spellEn(letterIdx, pc) {
@@ -39,27 +50,29 @@ function spellEn(letterIdx, pc) {
   return LETTERS[letterIdx] + (acc > 0 ? '#'.repeat(acc) : 'b'.repeat(-acc));
 }
 
-function chordSymbol(pc, minor, [degree, quality]) {
-  const key = (minor ? MINOR_KEYS : MAJOR_KEYS)[pc];
+function chordSymbol(key, minor, [degree, quality]) {
+  const pc = pcOf(key);
   const letter = (LETTERS.indexOf(key[0]) + degree - 1) % 7;
   const rootPc = (pc + (minor ? MINOR_SCALE : MAJOR_SCALE)[degree - 1]) % 12;
   return spellEn(letter, rootPc) + quality;
 }
 
-// key : 0 à 11 ou 'random' ; mode : 'major', 'minor' ou 'random' ; register : 'low' ou 'high'.
+// key : nom anglais ('Db', 'C#'…) ou 'random' ; mode : 'major', 'minor' ou 'random' ; register : 'low' ou 'high'.
 // Renvoie { chords (un par mesure), line (une note MIDI par temps), label, fifths (armure) }.
 export function inventLoop({ key, mode, register, bars }, rand = Math.random) {
-  const pc = key === 'random' ? Math.floor(rand() * 12) : Number(key);
   const minor = mode === 'random' ? rand() < 0.4 : mode === 'minor';
+  const fifthsTable = minor ? MINOR_FIFTHS : MAJOR_FIFTHS;
+  let name = key in KEY_LABEL ? key : (minor ? MINOR_KEYS : MAJOR_KEYS)[Math.floor(rand() * 12)];   // 'random' ou valeur inconnue
+  if (!(name in fifthsTable)) name = ENHARMONIC[name];
   const templates = minor ? MINOR_TEMPLATES : MAJOR_TEMPLATES;
   const table = minor ? MINOR_CHORDS : MAJOR_CHORDS;
 
   const picked = Array.from({ length: Math.max(1, bars / 4) }, () => templates[Math.floor(rand() * templates.length)]);
-  const chords = picked.flat().map((r) => chordSymbol(pc, minor, table[r]));
+  const chords = picked.flat().map((r) => chordSymbol(name, minor, table[r]));
 
   let line = walkingQuarters(chords.map((c) => ({ chords: [c] })), Math.floor(rand() * 1e9)).map((e) => e.midi);
   if (register === 'high') line = line.map((m) => m + 12);   // une octave plus haut : cordes de D et G
 
-  const label = `${keyName(pc, minor)} ${minor ? 'mineur' : 'majeur'} · ${picked.map((t) => t.join('–')).join('  |  ')}`;
-  return { chords, line, label, fifths: keyFifths(pc, minor) };
+  const label = `${KEY_LABEL[name]} ${minor ? 'mineur' : 'majeur'} · ${picked.map((t) => t.join('–')).join('  |  ')}`;
+  return { chords, line, label, fifths: fifthsTable[name] };
 }

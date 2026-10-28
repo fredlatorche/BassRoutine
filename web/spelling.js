@@ -84,10 +84,13 @@ export function spellEvents(events, chordAt, fifths) {
       const raised = diatonic.get((pc + 11) % 12);
       const lowered = diatonic.get((pc + 1) % 12);
       const options = (up ? [raised, lowered] : [lowered, raised]).filter((l) => l != null);
-      letter = options.find((l) => {
+      const valid = options.filter((l) => {
         const n = nameOf(l, pc);
         return Math.abs(n.acc) <= 1 && !AWKWARD.has(n.name);   // pas de Do♭, Mi♯… ni de double altération
-      }) ?? options[0];
+      });
+      // Dans une tonalité à dièses on évite les bémols (et inversement), si l'autre écriture est possible.
+      const foreign = (l) => (fifths > 0 && nameOf(l, pc).acc < 0) || (fifths < 0 && nameOf(l, pc).acc > 0);
+      letter = valid.find((l) => !foreign(l)) ?? valid[0] ?? options[0];
     }
 
     return { ...e, name: nameOf(letter, pc).name, sig: fifths };
