@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Basse Tools</title>
+  <meta name="theme-color" content="#181a26">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Basse Tools">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Basse Tools</h1>
+    <div id="position">Mesure – · Temps –</div>
+  </header>
+
+  <section class="controls">
+    <div class="control">
+      <button id="rewind" title="Revenir au début">⏮</button>
+      <button id="play" class="play">▶ Play</button>
+    </div>
+
+    <div class="control">
+      <label for="mode">Mode</label>
+      <select id="mode">
+        <option value="loop">Boucle</option>
+        <option value="song">Morceau</option>
+      </select>
+    </div>
+
+    <div class="control tempo">
+      <label for="tempo">Tempo</label>
+      <button class="small" data-bpm="-5">−</button>
+      <input id="tempo" type="range" min="40" max="240" value="100">
+      <button class="small" data-bpm="5">+</button>
+      <output id="tempoVal">100 BPM</output>
+    </div>
+
+    <div id="loopControls" class="group">
+      <div class="control">
+        <label for="bars">Mesures</label>
+        <select id="bars">
+          <option>4</option>
+          <option selected>8</option>
+          <option>16</option>
+        </select>
+      </div>
+      <div class="control">
+        <label for="preset">Ligne</label>
+        <select id="preset">
+          <option value="mi">Mi par temps</option>
+          <option value="quinte">Fondamentale-quinte</option>
+          <option value="walking">Walking simple</option>
+        </select>
+      </div>
+      <label class="toggle"><input id="loop" type="checkbox"> Boucle</label>
+    </div>
+
+    <div id="songControls" class="group" hidden>
+      <div class="control">
+        <label for="song">Morceau</label>
+        <select id="song"></select>
+      </div>
+      <div id="chorusCtl" class="control">
+        <label for="choruses">Chorus</label>
+        <select id="choruses">
+          <option>1</option>
+          <option selected>2</option>
+          <option>3</option>
+          <option>4</option>
+        </select>
+      </div>
+      <div id="styleCtl" class="control">
+        <label for="style">Style</label>
+        <select id="style"></select>
+      </div>
+      <button id="regen">↻ Nouvelle ligne</button>
+      <label class="file-btn">Importer un MIDI…<input id="midiFile" type="file" accept=".mid,.midi,audio/midi"></label>
+      <div id="midiCtl" class="group" hidden>
+        <div class="control">
+          <label for="track">Piste basse</label>
+          <select id="track"></select>
+        </div>
+        <label class="toggle"><input id="others" type="checkbox"> Autres pistes</label>
+      </div>
+    </div>
+
+    <div class="toggles">
+      <label class="toggle"><input id="synth" type="checkbox"> Accords</label>
+      <select id="padSound" aria-label="Son des accords">
+        <option value="epiano">Piano électrique</option>
+        <option value="pad">Nappe</option>
+        <option value="vibes">Vibraphone</option>
+      </select>
+      <label class="toggle"><input id="drums" type="checkbox"> Batterie</label>
+      <label class="toggle"><input id="metro" type="checkbox"> Métronome</label>
+    </div>
+  </section>
+
+  <main>
+    <div id="grid"></div>
+    <div id="songView" hidden>
+      <p id="songInfo"></p>
+      <div id="chart"></div>
+    </div>
+  </main>
+
+  <p class="hint">Touche la tablature (ou une mesure de la grille) pour choisir d'où repartir · ⏮ revient au début.<br>
+    Sur iPhone : si tu n'entends rien, vérifie le bouton silencieux et le volume.</p>
+
+  <footer id="tabPanel">
+    <div class="tab-labels">
+      <span>G</span><span>D</span><span>A</span><span>E</span>
+    </div>
+    <div id="tab" class="tab-scroll"></div>
+  </footer>
+
+  <script src="vendor/Tone.js"></script>
+  <script src="vendor/Midi.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
