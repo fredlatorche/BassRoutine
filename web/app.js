@@ -6,7 +6,7 @@ import { SONGS, expandSong } from './songs.js';
 import { bassLine, STYLES } from './walking.js';
 import { readMidiFile, guessBassTrack } from './midi-import.js';
 import { createTab } from './tab.js';
-import { createKit, patternHits, gmDrumEvents } from './drums.js';
+import { createKit, patternHits, gmDrumEvents, DRUM_STYLES, WALKING_DRUMS } from './drums.js';
 import { SCALE_TYPES, FINGERINGS, ZONES, keyOptions, boxOptions, buildScaleExercise } from './scales.js';
 import { inventLoop, KEY_CHOICES } from './random-loop.js';
 
@@ -116,15 +116,18 @@ function applyPreset(name) {
 function invent() {
   const register = $('randRegister').value;
   const r = inventLoop({ key: $('randKey').value, mode: $('randMode').value, register, bars: loopState.bars });
+  // Batterie en « Auto » : un rythme au hasard parmi ceux qui vont avec une walking.
+  const drums = WALKING_DRUMS[Math.floor(Math.random() * WALKING_DRUMS.length)];
   Object.assign(loopState, {
     chords: r.chords,
     bass: r.line,
     frets: r.line.map(() => null),
     legato: register === 'high',
-    drums: 'walking',
+    drums,
   });
   $('preset').value = 'invented';
-  $('loopInfo').textContent = `🎲 ${r.label}`;
+  const drumLabel = DRUM_STYLES[$('drumStyle').value === 'auto' ? drums : $('drumStyle').value];
+  $('loopInfo').textContent = `🎲 ${r.label}  ·  batterie : ${drumLabel}`;
   $('loopInfo').hidden = false;
   // C'est avec la nappe et la batterie que ça sonne : on les active.
   $('synth').checked = true;
@@ -646,9 +649,14 @@ function tick(time) {
     pad.triggerAttackRelease(notes, chord.beats * beatDur * 0.95, time, 0.5);
   }
   if ($('drums').checked) {
-    const hits = prog.drumByBeat ? prog.drumByBeat[s] ?? [] : patternHits(prog.drumStyle, s, prog.bpb);
+    // « Auto » : rythme du style (ou batterie du fichier MIDI) ; sinon le rythme choisi dans le menu.
+    const choice = $('drumStyle').value;
+    const fileDrums = choice === 'auto' && prog.drumByBeat;
+    const hits = fileDrums
+      ? prog.drumByBeat[s] ?? []
+      : patternHits(choice === 'auto' ? prog.drumStyle : choice, s, prog.bpb, $('fills').checked);
     for (const h of hits) kit.play(h, at(h));
-    if (s === 0 && !prog.drumByBeat) kit.play({ d: 'crash', v: 0.6 }, time);
+    if (s === 0 && !fileDrums) kit.play({ d: 'crash', v: 0.6 }, time);
   }
   if ($('metro').checked) {
     click.triggerAttackRelease(beat === 0 ? 'C6' : 'G5', '32n', time, beat === 0 ? 0.8 : 0.45);
@@ -763,6 +771,8 @@ scaleControl('scaleBox', 'box');
 
 $('mode').addEventListener('change', (e) => setMode(e.target.value));
 $('bars').addEventListener('change', (e) => setBars(Number(e.target.value)));
+$('drumStyle').append(option('auto', 'Rythme auto', true));
+for (const [id, label] of Object.entries(DRUM_STYLES)) $('drumStyle').append(option(id, label, false));
 $('randKey').append(option('random', 'Tonalité au hasard', true));
 KEY_CHOICES.forEach((k, pc) => $('randKey').append(option(pc, k, false)));
 $('invent').addEventListener('click', invent);
