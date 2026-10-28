@@ -1,4 +1,4 @@
-// Basse Tools : mode Boucle (grille éditable) et mode Morceau (walking générée ou MIDI importé),
+// Bass Routine : mode Boucle (grille éditable) et mode Morceau (walking générée ou MIDI importé),
 // avec accords de synthé, métronome et tablature qui défile.
 
 import { NAMES, LOW_E, HIGH, parseChord, bassRoot, padVoicing } from './theory.js';

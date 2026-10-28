@@ -1,6 +1,6 @@
 {
-  "name": "Basse Tools",
-  "short_name": "Basse",
+  "name": "Bass Routine",
+  "short_name": "Bass Routine",
   "description": "Lignes de basse simples avec tempo, accords de synthé et métronome.",
   "start_url": "./",
   "scope": "./",
