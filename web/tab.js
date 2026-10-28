@@ -68,7 +68,7 @@ export function createTab(container, { onSeek } = {}) {
       const name = document.createElement('span');
       name.className = 'tab-name';
       name.style.left = `${x}px`;
-      name.textContent = NAMES[e.midi % 12];
+      name.textContent = e.name ?? NAMES[e.midi % 12];
       track.append(el, name);
       return [el, name];
     });

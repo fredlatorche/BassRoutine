@@ -238,3 +238,25 @@ button.play {
 }
 
 .chart-bar { cursor: pointer; }
+
+/* ---------- Gammes ---------- */
+
+#scaleList { display: flex; flex-direction: column; gap: 8px; }
+
+.scale-row {
+  padding: 10px 12px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  cursor: pointer;
+}
+.scale-row.playing { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+.scale-title { font-weight: 600; margin-bottom: 6px; }
+.scale-notes { display: flex; flex-wrap: wrap; gap: 4px; }
+.scale-notes span {
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--muted);
+  font-size: 0.85rem;
+}

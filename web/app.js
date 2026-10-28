@@ -7,6 +7,7 @@ import { bassLine, STYLES } from './walking.js';
 import { readMidiFile, guessBassTrack } from './midi-import.js';
 import { createTab } from './tab.js';
 import { createKit, patternHits, gmDrumEvents } from './drums.js';
+import { SCALE_TYPES, keyOptions, buildScaleExercise } from './scales.js';
 
 const BEATS = 4;
 const $ = (id) => document.getElementById(id);
@@ -176,10 +177,31 @@ function buildSongProgram() {
 // Point de départ de la lecture (en temps, toujours au début d'une mesure).
 let cue = 0;
 
+const scaleState = {
+  type: 'major',
+  key: '0',          // hauteur de la tonique (0 = Do), ou 'all'
+  range: '2',        // '1', '2' octaves ou 'neck' (tout le manche)
+  direction: 'both', // 'up', 'down', 'both'
+  rhythm: 2,         // notes par temps
+};
+let scaleKeys = [];   // résumé par tonalité, pour l'affichage
+
+function buildScaleProgram() {
+  const ex = buildScaleExercise(scaleState);
+  scaleKeys = ex.keys;
+  return makeProgram({
+    events: ex.events,
+    chordBars: ex.chordBars,
+    bars: ex.bars,
+    bpb: BEATS,
+    labels: ex.labels,
+  });
+}
+
 const tab = createTab($('tab'), { onSeek: (beat) => seek(Math.floor(beat / prog.bpb)) });
 
 function refresh() {
-  prog = mode === 'loop' ? buildLoopProgram() : buildSongProgram();
+  prog = mode === 'loop' ? buildLoopProgram() : mode === 'song' ? buildSongProgram() : buildScaleProgram();
   tab.render(prog.bassEvents, prog.totalBeats, prog.bpb);
   if (cue >= prog.totalBeats) cue = 0;
   tab.setCue(cue);
@@ -311,17 +333,53 @@ function setMode(m) {
   if (playing) stop();
   mode = m;
   cue = 0;
-  const loop = mode === 'loop';
-  $('loopControls').hidden = !loop;
-  $('songControls').hidden = loop;
-  grid.hidden = !loop;
-  $('songView').hidden = loop;
-  if (loop) {
+  $('loopControls').hidden = mode !== 'loop';
+  $('songControls').hidden = mode !== 'song';
+  $('scaleControls').hidden = mode !== 'scale';
+  grid.hidden = mode !== 'loop';
+  $('songView').hidden = mode !== 'song';
+  $('scaleView').hidden = mode !== 'scale';
+  if (mode === 'loop') {
     refresh();
-  } else {
+  } else if (mode === 'song') {
     if (!usingMidi()) setTempo(currentSong().bpm);
     renderSong();
+  } else {
+    setTempo(80);
+    renderScales();
   }
+}
+
+// Gammes : une ligne par tonalité avec ses notes ; un clic sur la ligne repart de là.
+function renderScales() {
+  refresh();
+  const view = $('scaleList');
+  view.innerHTML = '';
+  for (const k of scaleKeys) {
+    const row = document.createElement('div');
+    row.className = 'scale-row';
+    row.dataset.start = k.startBar;
+    row.dataset.end = k.startBar + k.bars;
+    const title = document.createElement('div');
+    title.className = 'scale-title';
+    title.textContent = k.label;
+    const notes = document.createElement('div');
+    notes.className = 'scale-notes';
+    for (const n of k.names) {
+      const chip = document.createElement('span');
+      chip.textContent = n;
+      notes.append(chip);
+    }
+    row.append(title, notes);
+    row.addEventListener('click', () => seek(k.startBar));
+    view.append(row);
+  }
+}
+
+function updateKeySelect() {
+  const sel = $('scaleKey');
+  sel.innerHTML = '';
+  for (const k of keyOptions(scaleState.type)) sel.append(option(k.value, k.label, k.value === scaleState.key));
 }
 
 // Mise à jour de l'affichage à chaque temps.
@@ -337,7 +395,9 @@ function showBeat(s) {
   $('position').textContent = `${prog.labels[bar]} · Temps ${(s % prog.bpb) + 1}`;
   const els = mode === 'loop'
     ? [grid.querySelector(`[data-step="${s}"]`)]
-    : [chart.querySelector(`[data-bar="${usingMidi() ? bar : bar % chart.children.length}"]`)];
+    : mode === 'song'
+      ? [chart.querySelector(`[data-bar="${usingMidi() ? bar : bar % chart.children.length}"]`)]
+      : [...document.querySelectorAll('.scale-row')].filter((r) => bar >= r.dataset.start && bar < r.dataset.end);
   for (const el of els) {
     if (!el) continue;
     el.classList.add('playing');
@@ -422,7 +482,8 @@ const makePad = (kind) => (PAD_SOUNDS[kind] ?? PAD_SOUNDS.epiano)(reverb);
 // Appelé à chaque temps : joue tous les événements qui tombent dans ce temps.
 function tick(time) {
   if (step >= prog.totalBeats) {
-    if (!(mode === 'loop' && $('loop').checked)) {
+    const looping = (mode === 'loop' && $('loop').checked) || (mode === 'scale' && $('scaleLoop').checked);
+    if (!looping) {
       Tone.Transport.stop(time);
       Tone.Draw.schedule(stopUI, time);
       return;
@@ -529,6 +590,21 @@ $('padSound').addEventListener('change', (e) => {
   pad.onDispose?.();
   pad = makePad(e.target.value);
 });
+
+for (const [id, s] of Object.entries(SCALE_TYPES)) $('scaleType').append(option(id, s.label, id === scaleState.type));
+updateKeySelect();
+const scaleControl = (id, field, parse = (v) => v) => $(id).addEventListener('change', (e) => {
+  if (playing) stop();
+  scaleState[field] = parse(e.target.value);
+  if (field === 'type') updateKeySelect();   // les noms de tonalités changent entre majeur et mineur
+  cue = 0;
+  renderScales();
+});
+scaleControl('scaleType', 'type');
+scaleControl('scaleKey', 'key');
+scaleControl('scaleRange', 'range');
+scaleControl('scaleDir', 'direction');
+scaleControl('scaleRhythm', 'rhythm', Number);
 
 $('mode').addEventListener('change', (e) => setMode(e.target.value));
 $('bars').addEventListener('change', (e) => setBars(Number(e.target.value)));

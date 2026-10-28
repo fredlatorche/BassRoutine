@@ -29,6 +29,7 @@
       <select id="mode">
         <option value="loop">Boucle</option>
         <option value="song">Morceau</option>
+        <option value="scale">Gammes</option>
       </select>
     </div>
 
@@ -89,6 +90,42 @@
       </div>
     </div>
 
+    <div id="scaleControls" class="group" hidden>
+      <div class="control">
+        <label for="scaleType">Gamme</label>
+        <select id="scaleType"></select>
+      </div>
+      <div class="control">
+        <label for="scaleKey">Tonalité</label>
+        <select id="scaleKey"></select>
+      </div>
+      <div class="control">
+        <label for="scaleRange">Étendue</label>
+        <select id="scaleRange">
+          <option value="1">1 octave</option>
+          <option value="2" selected>2 octaves</option>
+          <option value="neck">Tout le manche (case 12)</option>
+        </select>
+      </div>
+      <div class="control">
+        <label for="scaleDir">Sens</label>
+        <select id="scaleDir">
+          <option value="up">Montante</option>
+          <option value="down">Descendante</option>
+          <option value="both" selected>Montée + descente</option>
+        </select>
+      </div>
+      <div class="control">
+        <label for="scaleRhythm">Rythme</label>
+        <select id="scaleRhythm">
+          <option value="1">Noires</option>
+          <option value="2" selected>Croches</option>
+          <option value="3">Triolets</option>
+        </select>
+      </div>
+      <label class="toggle"><input id="scaleLoop" type="checkbox"> Boucle</label>
+    </div>
+
     <div class="toggles">
       <label class="toggle"><input id="synth" type="checkbox"> Accords</label>
       <select id="padSound" aria-label="Son des accords">
@@ -103,6 +140,9 @@
 
   <main>
     <div id="grid"></div>
+    <div id="scaleView" hidden>
+      <div id="scaleList"></div>
+    </div>
     <div id="songView" hidden>
       <p id="songInfo"></p>
       <div id="chart"></div>
