@@ -656,7 +656,46 @@ const PAD_SOUNDS = {
     modulationEnvelope: { attack: 0.001, decay: 0.25, sustain: 0, release: 0.2 },
     volume: -14,
   }).connect(dest),
+  // Cordes (section de violons) : dents de scie désaccordées, vibrato, archet qui s'installe doucement.
+  strings: (dest) => chain(dest, new Tone.PolySynth(Tone.Synth, {
+    oscillator: { type: 'fatsawtooth', count: 4, spread: 18 },
+    envelope: { attack: 0.35, decay: 0.3, sustain: 0.85, release: 1.2 },
+    volume: -26,
+  }), [new Tone.Vibrato(5.5, 0.08), new Tone.Filter(2600, 'lowpass')], { transpose: 12 }),
+  // Cuivres : le filtre s'ouvre à l'attaque (le « souffle » du cuivre), puis se referme un peu.
+  brass: (dest) => chain(dest, new Tone.PolySynth(Tone.MonoSynth, {
+    oscillator: { type: 'sawtooth' },
+    filter: { type: 'lowpass', Q: 1, rolloff: -24 },
+    envelope: { attack: 0.04, decay: 0.3, sustain: 0.75, release: 0.35 },
+    filterEnvelope: { attack: 0.06, decay: 0.4, sustain: 0.5, release: 0.4, baseFrequency: 350, octaves: 3 },
+    volume: -22,
+  }), []),
+  // Flûtes : son presque pur, petit vibrato, jouées une octave plus haut.
+  flute: (dest) => chain(dest, new Tone.PolySynth(Tone.Synth, {
+    oscillator: { type: 'triangle' },
+    envelope: { attack: 0.09, decay: 0.2, sustain: 0.8, release: 0.5 },
+    volume: -16,
+  }), [new Tone.Vibrato(5, 0.05)], { transpose: 12 }),
+  // Orgue : tirettes (fondamentale + harmoniques), son tenu, léger chorus.
+  organ: (dest) => chain(dest, new Tone.PolySynth(Tone.Synth, {
+    oscillator: { type: 'custom', partials: [1, 0.6, 0.3, 0, 0.2, 0, 0.1, 0.05] },
+    envelope: { attack: 0.01, decay: 0.1, sustain: 0.9, release: 0.15 },
+    volume: -22,
+  }), [new Tone.Chorus(2, 2.5, 0.4).start()]),
+  // Guitare jazz : attaque pincée qui s'éteint, accords grattés note après note.
+  guitar: (dest) => chain(dest, new Tone.PolySynth(Tone.Synth, {
+    oscillator: { type: 'fattriangle', count: 2, spread: 8 },
+    envelope: { attack: 0.003, decay: 1.4, sustain: 0.05, release: 0.6 },
+    volume: -14,
+  }), [new Tone.Filter(2200, 'lowpass')], { strum: 0.03 }),
 };
+
+// Branche synth -> effets -> dest ; options : transpose (demi-tons), strum (décalage entre les notes, s).
+function chain(dest, synth, effects, options = {}) {
+  synth.chain(...effects, dest);
+  synth.onDispose = () => effects.forEach((fx) => fx.dispose());
+  return Object.assign(synth, options);
+}
 
 const makePad = (kind) => (PAD_SOUNDS[kind] ?? PAD_SOUNDS.epiano)(reverb);
 
@@ -686,8 +725,12 @@ function tick(time) {
   }
   const chord = prog.chordStarts[s];
   if ($('synth').checked && chord) {
-    const notes = padVoicing(parseChord(chord.symbol)).map((m) => Tone.Frequency(m, 'midi'));
-    pad.triggerAttackRelease(notes, chord.beats * beatDur * 0.95, time, 0.5);
+    const notes = padVoicing(parseChord(chord.symbol)).map((m) => Tone.Frequency(m + (pad.transpose ?? 0), 'midi'));
+    if (pad.strum) {
+      notes.forEach((n, i) => pad.triggerAttackRelease(n, chord.beats * beatDur * 0.95 - i * pad.strum, time + i * pad.strum, 0.5));
+    } else {
+      pad.triggerAttackRelease(notes, chord.beats * beatDur * 0.95, time, 0.5);
+    }
   }
   if ($('drums').checked) {
     // « Auto » : rythme du style (ou batterie du fichier MIDI) ; sinon le rythme choisi dans le menu.
