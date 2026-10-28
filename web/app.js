@@ -1,7 +1,7 @@
 // Bass Routine : mode Boucle (grille éditable) et mode Morceau (walking générée ou MIDI importé),
 // avec accords de synthé, métronome et tablature qui défile.
 
-import { NAMES, LOW_E, parseChord, bassRoot, padVoicing } from './theory.js';
+import { LOW_E, parseChord, bassRoot, padVoicing } from './theory.js';
 import { SONGS, expandSong } from './songs.js';
 import { bassLine, STYLES } from './walking.js';
 import { readMidiFile, guessBassTrack } from './midi-import.js';
@@ -9,6 +9,7 @@ import { createTab } from './tab.js';
 import { createKit, patternHits, gmDrumEvents, DRUM_STYLES, WALKING_DRUMS } from './drums.js';
 import { SCALE_TYPES, FINGERINGS, ZONES, keyOptions, boxOptions, buildScaleExercise } from './scales.js';
 import { inventLoop, KEY_CHOICES } from './random-loop.js';
+import { spellEvents, pitchName } from './spelling.js';
 
 const BEATS = 4;
 const $ = (id) => document.getElementById(id);
@@ -17,22 +18,26 @@ const $ = (id) => document.getElementById(id);
 // l'octave du dessus est marquée « aigu », la suivante « suraigu ».
 const GRID_HIGH = 60;
 const BASS_NOTES = [];
-for (let m = LOW_E; m <= GRID_HIGH; m++) {
-  BASS_NOTES.push({ midi: m, label: NAMES[m % 12] + (m >= LOW_E + 24 ? ' suraigu' : m >= LOW_E + 12 ? ' aigu' : '') });
-}
+for (let m = LOW_E; m <= GRID_HIGH; m++) BASS_NOTES.push(m);
+// Nom dans la tonalité de la boucle (Mi♭ plutôt que Ré♯ en Si♭…).
+const gridLabel = (m) => pitchName(m, loopState.fifths) + (m >= LOW_E + 24 ? ' suraigu' : m >= LOW_E + 12 ? ' aigu' : '');
 
 const LOOP_CHORDS = ['Em', 'E', 'E7', 'Am', 'Am7', 'A', 'A7', 'D', 'D7', 'Dm7', 'G', 'Gmaj7', 'Gm7', 'C', 'Bm', 'B7'];
 
 const PRESETS = {
+  // fifths : armure de la ligne (dièses > 0, bémols < 0), pour l'écriture sur la portée.
   mi: {
+    fifths: 1,
     chords: ['Em'],
     bar: () => [LOW_E, LOW_E, LOW_E, LOW_E],
   },
   quinte: {
+    fifths: 1,
     chords: ['Em', 'Am', 'B7', 'Em'],
     bar: (c) => { const r = bassRoot(parseChord(c)); return [r, r + 7, r, r + 7]; },
   },
   walking: {
+    fifths: 1,
     chords: ['Em', 'Am', 'D', 'G'],
     bar: (c, next) => {
       const r = bassRoot(parseChord(c));
@@ -45,6 +50,7 @@ const PRESETS = {
   // Lignes écrites note par note (une mesure = 4 noires), répétées pour remplir la boucle.
   // Blues en Mi : 1-3-5-6 et descentes chromatiques vers chaque accord.
   walkingBlues: {
+    fifths: 4,
     chords: ['E7', 'E7', 'A7', 'A7', 'E7', 'E7', 'B7', 'A7'],
     lines: [
       [28, 32, 35, 37], [38, 37, 35, 32], [33, 37, 40, 37], [33, 31, 30, 29],
@@ -54,6 +60,7 @@ const PRESETS = {
   },
   // ii-V-I en Sol avec retour par Mi7 : chaque mesure finit un demi-ton au-dessus de l'accord suivant.
   walking251: {
+    fifths: 1,
     chords: ['Am7', 'D7', 'Gmaj7', 'E7'],
     lines: [[33, 36, 40, 39], [38, 42, 45, 44], [43, 47, 45, 41], [40, 38, 35, 34]],
     drums: 'walking',
@@ -61,6 +68,7 @@ const PRESETS = {
   // Haut du manche en Ré mineur, lié et chantant, pensé pour la fretless :
   // cordes de D et G entre les cases 10 et 15 (positions imposées dans la tab).
   walkingHigh: {
+    fifths: -1,
     chords: ['Dm7', 'Gm7', 'A7', 'Dm7'],
     lines: [[50, 52, 53, 57], [58, 57, 55, 53], [52, 49, 52, 55], [53, 52, 50, 49]],
     // [corde, case] avec 0 = G, 1 = D
@@ -82,6 +90,7 @@ const loopState = {
   frets: [],  // position imposée dans la tab ([corde, case]) ou null, par temps
   legato: false,
   drums: 'eighths',
+  fifths: 1,   // armure de la boucle
 };
 
 const songState = {
@@ -101,6 +110,7 @@ function applyPreset(name) {
   loopState.bass = [];
   loopState.frets = [];
   loopState.legato = !!p.legato;
+  loopState.fifths = p.fifths ?? 0;
   loopState.drums = p.drums ?? 'eighths';
   for (let b = 0; b < loopState.bars; b++) {
     const chord = p.chords[b % p.chords.length];
@@ -124,6 +134,7 @@ function invent() {
     frets: r.line.map(() => null),
     legato: register === 'high',
     drums,
+    fifths: r.fifths,
   });
   $('preset').value = 'invented';
   const drumLabel = DRUM_STYLES[$('drumStyle').value === 'auto' ? drums : $('drumStyle').value];
@@ -171,9 +182,18 @@ function trimLegato(events) {
 
 // chordBars : un tableau de symboles par mesure (ou null) ; labels : texte affiché par mesure.
 // drumStyle : rythme de batterie généré ; drums : coups lus dans un MIDI (remplacent le rythme).
-function makeProgram({ events, others = [], drums = null, drumStyle = 'eighths', chordBars = null, bars, bpb, labels }) {
+// fifths : armure (pour la portée) ; les notes peuvent porter leur propre armure (sig, gammes).
+function makeProgram({ events, others = [], drums = null, drumStyle = 'eighths', chordBars = null, bars, bpb, labels, fifths = 0 }) {
   const totalBeats = bars * bpb;
   const bassEvents = trimLegato(events);
+  // Armure de chaque mesure (change d'une tonalité à l'autre dans les gammes).
+  const barSig = [];
+  let sig = bassEvents[0]?.sig ?? fifths;
+  for (let b = 0; b < bars; b++) {
+    const first = bassEvents.find((e) => e.t >= b * bpb && e.t < (b + 1) * bpb);
+    if (first?.sig != null) sig = first.sig;
+    barSig.push(sig);
+  }
   const chordStarts = [];
   chordBars?.forEach((chords, b) => {
     const len = bpb / chords.length;
@@ -189,6 +209,7 @@ function makeProgram({ events, others = [], drums = null, drumStyle = 'eighths',
     drumByBeat: drums?.length ? byBeat(drums, totalBeats) : null,
     drumStyle,
     chordStarts,
+    barSig,
   };
 }
 
@@ -203,7 +224,8 @@ function buildLoopProgram() {
     });
   });
   return makeProgram({
-    events,
+    events: spellEvents(events, (t) => loopState.chords[Math.floor(t / BEATS)], loopState.fifths),
+    fifths: loopState.fifths,
     drumStyle: loopState.drums,
     chordBars: loopState.chords.map((c) => [c]),
     bars: loopState.bars,
@@ -224,7 +246,8 @@ function buildSongProgram() {
     const bars = Math.max(1, Math.ceil(end / m.beatsPerBar));
     const drums = gmDrumEvents(m.tracks.filter((t) => t.percussion).flatMap((t) => t.notes));
     return makeProgram({
-      events: bassTrack.notes,
+      events: spellEvents(bassTrack.notes, null, m.fifths ?? 0),
+      fifths: m.fifths ?? 0,
       others,
       drums,
       bars,
@@ -234,8 +257,14 @@ function buildSongProgram() {
   }
   const bars = expandSong(currentSong(), songState.choruses);
   const perChorus = bars.length / songState.choruses;
+  const chordAt = (t) => {
+    const chords = bars[Math.floor(t / BEATS)]?.chords;
+    return chords?.[Math.floor((t % BEATS) / (BEATS / chords.length))] ?? null;
+  };
+  const fifths = currentSong().fifths ?? 0;
   return makeProgram({
-    events: bassLine(bars, songState.seed, songState.style),
+    events: spellEvents(bassLine(bars, songState.seed, songState.style), chordAt, fifths),
+    fifths,
     drumStyle: songState.style,
     chordBars: bars.map((b) => b.chords),
     bars: bars.length,
@@ -285,6 +314,7 @@ function refresh() {
   tab.render(prog.bassEvents, prog.totalBeats, prog.bpb, { loopLen: isLooping() ? prog.totalBeats : 0 });
   if (cue >= prog.totalBeats) cue = 0;
   tab.setCue(cue);
+  tab.setKey(prog.barSig[cue / prog.bpb] ?? 0);
 }
 
 // Se placer au début d'une mesure ; pendant la lecture, on y saute tout de suite.
@@ -304,6 +334,7 @@ function seek(bar) {
 }
 
 function showCue() {
+  tab.setKey(prog.barSig[cue / prog.bpb] ?? 0);
   $('position').textContent = cue === 0
     ? 'Mesure – · Temps –'
     : `Départ : ${prog.labels[cue / prog.bpb]}`;
@@ -344,7 +375,7 @@ function renderLoopGrid() {
       const sel = document.createElement('select');
       sel.dataset.step = i;
       sel.append(option('', '—', loopState.bass[i] == null));
-      for (const n of BASS_NOTES) sel.append(option(n.midi, n.label, n.midi === loopState.bass[i]));
+      for (const m of BASS_NOTES) sel.append(option(m, gridLabel(m), m === loopState.bass[i]));
       sel.classList.toggle('rest', loopState.bass[i] == null);
       sel.addEventListener('change', () => {
         loopState.bass[i] = sel.value === '' ? null : Number(sel.value);
@@ -485,6 +516,7 @@ function showBeat(s) {
   }
   const bar = Math.floor(s / prog.bpb);
   $('position').textContent = `${prog.labels[bar]} · Temps ${(s % prog.bpb) + 1}`;
+  tab.setKey(prog.barSig[bar] ?? 0);   // l'armure suit la tonalité en cours (gammes)
   const els = mode === 'loop'
     ? [grid.querySelector(`[data-step="${s}"]`)]
     : mode === 'song'

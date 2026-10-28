@@ -4,6 +4,7 @@
 // Les notes sont orthographiées correctement (Si♭ en Fa majeur, Fa♯ en Sol majeur…).
 
 import { LOW_E } from './theory.js';
+import { keyFifths } from './spelling.js';
 
 const LETTERS = 'CDEFGAB';
 const FR = ['Do', 'Ré', 'Mi', 'Fa', 'Sol', 'La', 'Si'];
@@ -360,7 +361,7 @@ export function buildScaleExercise({ type, key, range, direction, rhythm, finger
         // La dernière note est tenue jusqu'à la fin de la mesure (au moins un temps).
         const end = last ? Math.ceil((t + 1) / bpb) * bpb - 0.1 : t + dt * 0.9;
         events.push({
-          t, dur: end - t, midi: n.midi, name: n.name, vel: n.root ? 0.9 : 0.75,
+          t, dur: end - t, midi: n.midi, name: n.name, sig: keyFifths(pc, s.minor), vel: n.root ? 0.9 : 0.75,
           string: 3 - n.f.string, fret: n.f.fret, finger: n.f.finger,   // corde au format de la tab (0 = G)
         });
       });

@@ -7,6 +7,7 @@ export const SONGS = [
     title: 'So What',
     composer: 'Miles Davis',
     bpm: 136,
+    fifths: 0,   // armure : Ré dorien, sans altération à la clé
     form: ['A', 'A', 'B', 'A'],
     sections: {
       A: ['Dm7', 'Dm7', 'Dm7', 'Dm7', 'Dm7', 'Dm7', 'Dm7', 'Dm7'],
@@ -17,6 +18,7 @@ export const SONGS = [
     id: 'blues-f',
     title: 'Blues en F (jazz)',
     bpm: 120,
+    fifths: -1,
     form: ['A'],
     sections: {
       A: ['F7', 'Bb7', 'F7', 'Cm7 F7', 'Bb7', 'Bdim7', 'F7', 'Am7b5 D7', 'Gm7', 'C7', 'F7 D7', 'Gm7 C7'],
@@ -26,6 +28,7 @@ export const SONGS = [
     id: 'autumn',
     title: 'Autumn Leaves',
     bpm: 130,
+    fifths: -2,   // Sol mineur
     form: ['A', 'A', 'B', 'C'],
     sections: {
       A: ['Cm7', 'F7', 'Bbmaj7', 'Ebmaj7', 'Am7b5', 'D7', 'Gm6', 'Gm6'],

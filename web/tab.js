@@ -2,7 +2,7 @@
 // défilement continu derrière une tête de lecture. En option, la portée en clé de fa au-dessus.
 
 import { NAMES } from './theory.js';
-import { STAFF_H, renderStaff, clefSvg } from './staff.js';
+import { STAFF_H, renderStaff, clefSvg, clefWidth } from './staff.js';
 
 const STRINGS = [43, 38, 33, 28];   // G, D, A, E (de haut en bas, comme sur une tab)
 const BEAT_W = 60;                  // largeur d'un temps en pixels
@@ -30,7 +30,7 @@ function fingerings(events) {
 // onSeek(temps) est appelé quand on touche / clique la tab ; labels : colonne des noms de cordes.
 export function createTab(container, { onSeek, labels } = {}) {
   let track, playhead, cueMark, notes = [], events = [], current = -1, cueX = 0;
-  let showStaff = false, lastArgs = null, loop = 0;
+  let showStaff = false, lastArgs = null, loop = 0, fifths = 0;
 
   // Un clic (ou un tap, pas un glissé) choisit le point de départ.
   container.addEventListener('click', (e) => {
@@ -162,14 +162,28 @@ export function createTab(container, { onSeek, labels } = {}) {
     cueMark.hidden = beat === 0;
   }
 
+  // Clé et armure dans la colonne de gauche.
+  function drawClef() {
+    if (!labels) return;
+    labels.querySelector('.staff-clef')?.remove();
+    labels.style.width = showStaff ? `${clefWidth(fifths)}px` : '';
+    if (showStaff) labels.prepend(clefSvg(fifths));
+  }
+
+  // Armure affichée (nombre de dièses > 0 ou de bémols < 0).
+  function setKey(f) {
+    if (f === fifths) return;
+    fifths = f;
+    drawClef();
+  }
+
   // Affiche ou masque la portée (clé de fa) au-dessus de la tab.
   function setStaff(on) {
     showStaff = on;
     if (labels) {
       labels.style.setProperty('--off', `${on ? STAFF_H : 0}px`);
       labels.classList.toggle('with-staff', on);
-      labels.querySelector('.staff-clef')?.remove();
-      if (on) labels.prepend(clefSvg());
+      drawClef();
     }
     const scroll = container.scrollLeft;
     if (lastArgs) render(...lastArgs);
@@ -177,5 +191,5 @@ export function createTab(container, { onSeek, labels } = {}) {
     setCue(cueX / BEAT_W);
   }
 
-  return { render, follow, setCue, setStaff };
+  return { render, follow, setCue, setStaff, setKey };
 }

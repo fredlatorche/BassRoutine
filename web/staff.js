@@ -1,6 +1,8 @@
 // Portée en clé de fa au-dessus de la tab (SVG), alignée sur la même échelle horizontale.
 // Comme d'habitude pour la basse, les notes sont écrites une octave au-dessus du son réel.
 
+import { sigAcc, signatureLetters } from './spelling.js';
+
 export const STAFF_H = 110;   // hauteur de la zone de portée, en pixels
 
 const SVG = 'http://www.w3.org/2000/svg';
@@ -45,8 +47,15 @@ function staffLines(svg, width) {
   }
 }
 
-// Clé de fa seule, pour la colonne de gauche (reste visible pendant le défilement).
-export function clefSvg(width = 36) {
+// Position (degré écrit) des altérations de l'armure en clé de fa, par lettre.
+const SIG_SHARP_D = { 3: 24, 0: 21, 4: 25, 1: 22, 5: 19, 2: 23, 6: 20 };   // Fa Do Sol Ré La Mi Si
+const SIG_FLAT_D = { 6: 20, 2: 23, 5: 19, 1: 22, 4: 18, 0: 21, 3: 17 };    // Si Mi La Ré Sol Do Fa
+
+export const clefWidth = (fifths = 0) => 36 + Math.abs(fifths) * 8 + (fifths ? 6 : 0);
+
+// Clé de fa et armure, pour la colonne de gauche (restent visibles pendant le défilement).
+export function clefSvg(fifths = 0) {
+  const width = clefWidth(fifths);
   const svg = el('svg', { width, height: STAFF_H, class: 'staff-clef' });
   el('rect', { width, height: STAFF_H, class: 'staff-bg' }, svg);
   staffLines(svg, width);
@@ -58,6 +67,11 @@ export function clefSvg(width = 36) {
   el('circle', { cx: 8, cy: fLine, r: 3.2, class: 'staff-ink' }, svg);
   el('circle', { cx: 29, cy: fLine - 4, r: 1.8, class: 'staff-ink' }, svg);
   el('circle', { cx: 29, cy: fLine + 4, r: 1.8, class: 'staff-ink' }, svg);
+  signatureLetters(fifths).forEach((letter, i) => {
+    const d = fifths > 0 ? SIG_SHARP_D[letter] : SIG_FLAT_D[letter];
+    const t = el('text', { x: 36 + i * 8, y: yOf(d) + (fifths > 0 ? 5 : 3), class: 'staff-acc' }, svg);
+    t.textContent = fifths > 0 ? '♯' : '♭';
+  });
   return svg;
 }
 
@@ -85,10 +99,10 @@ export function renderStaff(events, totalBeats, bpb, beatW, doubles = []) {
     for (let ld = D_BOTTOM - 2; ld >= d; ld -= 2) el('line', { x1: x - 9, x2: x + 9, y1: yOf(ld), y2: yOf(ld), class: 'staff-line' }, g);
     for (let ld = D_TOP + 2; ld <= d; ld += 2) el('line', { x1: x - 9, x2: x + 9, y1: yOf(ld), y2: yOf(ld), class: 'staff-line' }, g);
 
-    // Altération : seulement si elle change par rapport à ce qui est déjà écrit dans la mesure.
+    // Altération : seulement si elle diffère de l'armure (e.sig) ou de ce qui est déjà écrit dans la mesure.
     const bar = Math.floor(e.t / bpb);
     if (bar !== barIdx) { barIdx = bar; shown = new Map(); }
-    if ((shown.get(d) ?? 0) !== acc) {
+    if ((shown.get(d) ?? sigAcc(d % 7, e.sig ?? 0)) !== acc) {
       const t = el('text', { x: x - 15, y: y + 5, class: 'staff-acc' }, g);
       t.textContent = ACC_TEXT[acc];
       shown.set(d, acc);

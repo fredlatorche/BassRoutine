@@ -3,6 +3,7 @@
 
 import { walkingQuarters } from './walking.js';
 import { keyName } from './scales.js';
+import { keyFifths } from './spelling.js';
 
 const LETTERS = 'CDEFGAB';
 const NATURAL = [0, 2, 4, 5, 7, 9, 11];
@@ -46,7 +47,7 @@ function chordSymbol(pc, minor, [degree, quality]) {
 }
 
 // key : 0 à 11 ou 'random' ; mode : 'major', 'minor' ou 'random' ; register : 'low' ou 'high'.
-// Renvoie { chords (un par mesure), line (une note MIDI par temps), label }.
+// Renvoie { chords (un par mesure), line (une note MIDI par temps), label, fifths (armure) }.
 export function inventLoop({ key, mode, register, bars }, rand = Math.random) {
   const pc = key === 'random' ? Math.floor(rand() * 12) : Number(key);
   const minor = mode === 'random' ? rand() < 0.4 : mode === 'minor';
@@ -60,5 +61,5 @@ export function inventLoop({ key, mode, register, bars }, rand = Math.random) {
   if (register === 'high') line = line.map((m) => m + 12);   // une octave plus haut : cordes de D et G
 
   const label = `${keyName(pc, minor)} ${minor ? 'mineur' : 'majeur'} · ${picked.map((t) => t.join('–')).join('  |  ')}`;
-  return { chords, line, label };
+  return { chords, line, label, fifths: keyFifths(pc, minor) };
 }
