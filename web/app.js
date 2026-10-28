@@ -7,7 +7,7 @@ import { bassLine, STYLES } from './walking.js';
 import { readMidiFile, guessBassTrack } from './midi-import.js';
 import { createTab } from './tab.js';
 import { createKit, patternHits, gmDrumEvents } from './drums.js';
-import { SCALE_TYPES, keyOptions, buildScaleExercise } from './scales.js';
+import { SCALE_TYPES, FINGERINGS, ZONES, keyOptions, boxOptions, buildScaleExercise } from './scales.js';
 
 const BEATS = 4;
 const $ = (id) => document.getElementById(id);
@@ -183,6 +183,9 @@ const scaleState = {
   range: '2',        // '1', '2' octaves ou 'neck' (tout le manche)
   direction: 'both', // 'up', 'down', 'both'
   rhythm: 2,         // notes par temps
+  fingering: '3nps', // '3nps', 'position' ou 'boxes'
+  zone: 'auto',      // zone du manche (3 notes par corde, en position)
+  box: 'all',        // numéro de box, ou 'all'
 };
 let scaleKeys = [];   // résumé par tonalité, pour l'affichage
 
@@ -380,6 +383,16 @@ function updateKeySelect() {
   const sel = $('scaleKey');
   sel.innerHTML = '';
   for (const k of keyOptions(scaleState.type)) sel.append(option(k.value, k.label, k.value === scaleState.key));
+  // 5 boxes en pentatonique, 7 sinon.
+  const boxes = boxOptions(scaleState.type);
+  if (!boxes.some((b) => b.value === scaleState.box)) scaleState.box = 'all';
+  $('scaleBox').innerHTML = '';
+  for (const b of boxes) $('scaleBox').append(option(b.value, b.label, b.value === scaleState.box));
+  // Les boxes ont leur propre étendue ; la zone ne sert qu'aux deux autres doigtés.
+  const boxMode = scaleState.fingering === 'boxes';
+  $('scaleBoxCtl').hidden = !boxMode;
+  $('scaleZoneCtl').hidden = boxMode;
+  $('scaleRangeCtl').hidden = boxMode;
 }
 
 // Mise à jour de l'affichage à chaque temps.
@@ -592,11 +605,13 @@ $('padSound').addEventListener('change', (e) => {
 });
 
 for (const [id, s] of Object.entries(SCALE_TYPES)) $('scaleType').append(option(id, s.label, id === scaleState.type));
+for (const [id, label] of Object.entries(FINGERINGS)) $('scaleFinger').append(option(id, label, id === scaleState.fingering));
+for (const [id, label] of Object.entries(ZONES)) $('scaleZone').append(option(id, label, id === scaleState.zone));
 updateKeySelect();
 const scaleControl = (id, field, parse = (v) => v) => $(id).addEventListener('change', (e) => {
   if (playing) stop();
   scaleState[field] = parse(e.target.value);
-  if (field === 'type') updateKeySelect();   // les noms de tonalités changent entre majeur et mineur
+  if (field === 'type' || field === 'fingering') updateKeySelect();   // noms de tonalités, boxes, menus visibles
   cue = 0;
   renderScales();
 });
@@ -605,6 +620,9 @@ scaleControl('scaleKey', 'key');
 scaleControl('scaleRange', 'range');
 scaleControl('scaleDir', 'direction');
 scaleControl('scaleRhythm', 'rhythm', Number);
+scaleControl('scaleFinger', 'fingering');
+scaleControl('scaleZone', 'zone');
+scaleControl('scaleBox', 'box');
 
 $('mode').addEventListener('change', (e) => setMode(e.target.value));
 $('bars').addEventListener('change', (e) => setBars(Number(e.target.value)));
