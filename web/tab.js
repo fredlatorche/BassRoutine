@@ -1,7 +1,8 @@
 // Tablature de basse 4 cordes : notes placées selon leur position réelle dans la mesure,
-// défilement continu derrière une tête de lecture.
+// défilement continu derrière une tête de lecture. En option, la portée en clé de fa au-dessus.
 
 import { NAMES } from './theory.js';
+import { STAFF_H, renderStaff, clefSvg } from './staff.js';
 
 const STRINGS = [43, 38, 33, 28];   // G, D, A, E (de haut en bas, comme sur une tab)
 const BEAT_W = 60;                  // largeur d'un temps en pixels
@@ -26,9 +27,10 @@ function fingerings(events) {
   });
 }
 
-// onSeek(temps) est appelé quand on touche / clique la tab.
-export function createTab(container, { onSeek } = {}) {
+// onSeek(temps) est appelé quand on touche / clique la tab ; labels : colonne des noms de cordes.
+export function createTab(container, { onSeek, labels } = {}) {
   let track, playhead, cueMark, notes = [], events = [], current = -1, cueX = 0;
+  let showStaff = false, lastArgs = null;
 
   // Un clic (ou un tap, pas un glissé) choisit le point de départ.
   container.addEventListener('click', (e) => {
@@ -37,17 +39,23 @@ export function createTab(container, { onSeek } = {}) {
   });
 
   function render(evts, totalBeats, beatsPerBar) {
+    lastArgs = [evts, totalBeats, beatsPerBar];
     events = evts;
     current = -1;
     lit = -1;
+    const off = showStaff ? STAFF_H : 0;   // la tab descend sous la portée
     track = document.createElement('div');
     track.className = 'tab-track';
     track.style.width = `${totalBeats * BEAT_W + 8}px`;
+    track.style.height = `${140 + off}px`;
+
+    const staff = showStaff ? renderStaff(events, totalBeats, beatsPerBar, BEAT_W) : null;
+    if (staff) track.append(staff.svg);
 
     for (let s = 0; s < STRINGS.length; s++) {
       const line = document.createElement('div');
       line.className = 'tab-line';
-      line.style.top = `${30 + s * 24}px`;
+      line.style.top = `${30 + off + s * 24}px`;
       track.append(line);
     }
 
@@ -55,6 +63,7 @@ export function createTab(container, { onSeek } = {}) {
       const bar = document.createElement('div');
       bar.className = 'tab-bar';
       bar.style.left = `${b * beatsPerBar * BEAT_W}px`;
+      bar.style.top = `${4 + off}px`;
       bar.textContent = b + 1;
       track.append(bar);
     }
@@ -65,7 +74,7 @@ export function createTab(container, { onSeek } = {}) {
       const el = document.createElement('b');
       el.className = 'tab-note';
       el.style.left = `${x}px`;
-      el.style.top = `${30 + (pos[i]?.string ?? 3) * 24}px`;
+      el.style.top = `${30 + off + (pos[i]?.string ?? 3) * 24}px`;
       el.textContent = pos[i]?.fret ?? '?';
       if (pos[i]?.finger != null) {
         const finger = document.createElement('sup');
@@ -76,9 +85,10 @@ export function createTab(container, { onSeek } = {}) {
       const name = document.createElement('span');
       name.className = 'tab-name';
       name.style.left = `${x}px`;
+      name.style.top = `${118 + off}px`;
       name.textContent = e.name ?? NAMES[e.midi % 12];
       track.append(el, name);
-      return [el, name];
+      return staff ? [el, name, staff.groups[i]] : [el, name];
     });
 
     playhead = document.createElement('div');
@@ -119,7 +129,7 @@ export function createTab(container, { onSeek } = {}) {
   function setCurrent(i) {
     if (i === lit) return;
     if (lit >= 0) notes[lit]?.forEach((el) => el.classList.remove('playing'));
-    if (i >= 0) notes[i].forEach((el) => el.classList.add('playing'));
+    if (i >= 0) notes[i]?.forEach((el) => el.classList.add('playing'));
     lit = i;
   }
 
@@ -131,5 +141,20 @@ export function createTab(container, { onSeek } = {}) {
     cueMark.hidden = beat === 0;
   }
 
-  return { render, follow, setCue };
+  // Affiche ou masque la portée (clé de fa) au-dessus de la tab.
+  function setStaff(on) {
+    showStaff = on;
+    if (labels) {
+      labels.style.setProperty('--off', `${on ? STAFF_H : 0}px`);
+      labels.classList.toggle('with-staff', on);
+      labels.querySelector('.staff-clef')?.remove();
+      if (on) labels.prepend(clefSvg());
+    }
+    const scroll = container.scrollLeft;
+    if (lastArgs) render(...lastArgs);
+    container.scrollLeft = scroll;
+    setCue(cueX / BEAT_W);
+  }
+
+  return { render, follow, setCue, setStaff };
 }

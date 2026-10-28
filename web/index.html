@@ -17,11 +17,15 @@
     <h1>Bass Routine</h1>
     <div class="header-right">
       <div id="position">Mesure – · Temps –</div>
-      <button id="mixerBtn" class="gear" aria-label="Volumes" aria-expanded="false" title="Volumes">⚙️</button>
+      <button id="mixerBtn" class="gear" aria-label="Réglages" aria-expanded="false" title="Réglages">⚙️</button>
     </div>
   </header>
 
   <section id="mixer" class="mixer" hidden>
+    <div class="mixer-head">
+      <strong>Affichage</strong>
+    </div>
+    <label class="toggle mixer-option"><input id="showStaff" type="checkbox"> Notes sur la portée (clé de fa) au-dessus de la tablature</label>
     <div class="mixer-head">
       <strong>Volumes</strong>
       <button id="mixerReset">Réinitialiser</button>

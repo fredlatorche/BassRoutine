@@ -171,22 +171,23 @@ button.play {
   -webkit-user-select: none;
 }
 
-/* Cordes à 30, 54, 78 et 102 px du haut ; noms des notes en dessous. */
-.tab-labels { position: relative; width: 20px; height: 140px; color: var(--muted); }
+/* Cordes à 30, 54, 78 et 102 px du haut (décalées sous la portée si elle est affichée). */
+.tab-labels { position: relative; width: 20px; height: calc(140px + var(--off, 0px)); color: var(--muted); flex-shrink: 0; }
+.tab-labels.with-staff { width: 36px; }
 .tab-labels span { position: absolute; left: 0; transform: translateY(-50%); }
-.tab-labels span:nth-child(1) { top: 30px; }
-.tab-labels span:nth-child(2) { top: 54px; }
-.tab-labels span:nth-child(3) { top: 78px; }
-.tab-labels span:nth-child(4) { top: 102px; }
+.tab-labels span:nth-of-type(1) { top: calc(30px + var(--off, 0px)); }
+.tab-labels span:nth-of-type(2) { top: calc(54px + var(--off, 0px)); }
+.tab-labels span:nth-of-type(3) { top: calc(78px + var(--off, 0px)); }
+.tab-labels span:nth-of-type(4) { top: calc(102px + var(--off, 0px)); }
+.tab-labels .staff-clef { position: absolute; top: 0; left: 0; }
 
 .tab-scroll { position: relative; flex: 1; overflow-x: auto; scrollbar-width: thin; cursor: pointer; }
-.tab-track { position: relative; height: 140px; padding-right: 70vw; box-sizing: content-box; }
+.tab-track { position: relative; padding-right: 70vw; box-sizing: content-box; }
 
 .tab-line { position: absolute; left: 0; right: 0; height: 1px; background: var(--line); }
 
 .tab-bar {
   position: absolute;
-  top: 4px;
   bottom: 26px;
   border-left: 2px solid var(--muted);
   padding-left: 3px;
@@ -206,7 +207,6 @@ button.play {
 
 .tab-name {
   position: absolute;
-  top: 118px;
   color: var(--muted);
   font: 500 11px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
@@ -299,3 +299,23 @@ button.gear { font-size: 1.2rem; line-height: 1; padding: 6px 8px; }
 .mix-row span { color: var(--muted); }
 .mix-row input { width: 100%; accent-color: var(--accent); }
 .mix-row output { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* ---------- Portée en clé de fa (fond blanc) ---------- */
+
+.staff { position: absolute; top: 0; left: 0; }
+.staff-bg { fill: #fff; }
+.staff-line { stroke: #222; stroke-width: 1; }
+.staff-bar { stroke: #222; stroke-width: 1.2; }
+.staff-ink { fill: #111; }
+.staff-clef-curve { fill: none; stroke: #111; stroke-width: 2.6; stroke-linecap: round; }
+.staff-head { fill: #111; stroke: #111; stroke-width: 1.2; }
+.staff-head.hollow { fill: #fff; stroke-width: 1.6; }
+.staff-stem { fill: none; stroke: #111; stroke-width: 1.3; }
+.staff-acc { font: 16px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; fill: #111; }
+.staff-note.playing .staff-head { fill: var(--accent); stroke: var(--accent); }
+.staff-note.playing .staff-head.hollow { fill: #fff; stroke: var(--accent); stroke-width: 2.4; }
+.staff-note.playing .staff-stem { stroke: var(--accent); }
+.staff-note.playing .staff-acc { fill: var(--accent); }
+
+.mixer-option { margin-bottom: 14px; }
+body.with-staff .hint { margin-bottom: 310px; }

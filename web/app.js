@@ -272,7 +272,10 @@ function buildScaleProgram() {
   });
 }
 
-const tab = createTab($('tab'), { onSeek: (beat) => seek(Math.floor(beat / prog.bpb)) });
+const tab = createTab($('tab'), {
+  onSeek: (beat) => seek(Math.floor(beat / prog.bpb)),
+  labels: document.querySelector('.tab-labels'),
+});
 
 function refresh() {
   prog = mode === 'loop' ? buildLoopProgram() : mode === 'song' ? buildSongProgram() : buildScaleProgram();
@@ -712,6 +715,17 @@ function stopUI() {
 $('play').addEventListener('click', () => (playing ? stop() : start()));
 
 renderMixer();
+
+// Portée en clé de fa au-dessus de la tab : désactivée par défaut, choix retenu sur l'appareil.
+const STAFF_KEY = 'bassroutine-staff';
+function setStaffVisible(on) {
+  $('showStaff').checked = on;
+  document.body.classList.toggle('with-staff', on);
+  tab.setStaff(on);
+  try { localStorage.setItem(STAFF_KEY, on ? '1' : '0'); } catch { /* stockage indisponible */ }
+}
+$('showStaff').addEventListener('change', (e) => setStaffVisible(e.target.checked));
+
 $('mixerBtn').addEventListener('click', () => {
   const open = $('mixer').hidden;
   $('mixer').hidden = !open;
@@ -836,6 +850,7 @@ document.addEventListener('keydown', (e) => {
 
 updateSongSelect();
 applyPreset('mi');
+try { if (localStorage.getItem(STAFF_KEY) === '1') setStaffVisible(true); } catch { /* stockage indisponible */ }
 
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
   navigator.serviceWorker.register('sw.js');
