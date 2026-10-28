@@ -8,9 +8,11 @@ const BEAT_W = 60;                  // largeur d'un temps en pixels
 const MAX_FRET = 20;
 
 // Choix des cases : on reste près de la position de la main, les cordes à vide sont « gratuites ».
+// Les exercices de gammes fournissent leur propre doigté (string, fret, finger).
 function fingerings(events) {
   let hand = 2;
   return events.map((e) => {
+    if (e.fret != null) return { string: e.string, fret: e.fret, finger: e.finger };
     const midi = e.midi < STRINGS[3] ? e.midi + 12 : e.midi;   // trop grave pour une 4 cordes : octave au-dessus
     let best = null;
     STRINGS.forEach((open, s) => {
@@ -65,6 +67,12 @@ export function createTab(container, { onSeek } = {}) {
       el.style.left = `${x}px`;
       el.style.top = `${30 + (pos[i]?.string ?? 3) * 24}px`;
       el.textContent = pos[i]?.fret ?? '?';
+      if (pos[i]?.finger != null) {
+        const finger = document.createElement('sup');
+        finger.textContent = pos[i].finger;
+        finger.title = pos[i].finger === 0 ? 'corde à vide' : `doigt ${pos[i].finger}`;
+        el.append(finger);
+      }
       const name = document.createElement('span');
       name.className = 'tab-name';
       name.style.left = `${x}px`;

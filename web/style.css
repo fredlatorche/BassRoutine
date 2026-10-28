@@ -260,3 +260,13 @@ button.play {
   color: var(--muted);
   font-size: 0.85rem;
 }
+
+/* Numéro de doigt (gammes) : 1 index … 4 auriculaire, 0 corde à vide. */
+.tab-note sup {
+  margin-left: 1px;
+  font-size: 9px;
+  font-weight: 500;
+  color: var(--accent);
+  vertical-align: 5px;
+}
+.tab-note.playing sup { color: #1a1a1a; }
