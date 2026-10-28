@@ -735,6 +735,18 @@ function setStaffVisible(on) {
 }
 $('showStaff').addEventListener('change', (e) => setStaffVisible(e.target.checked));
 
+// Thème de couleurs (le script dans <head> l'applique déjà au chargement).
+const THEME_KEY = 'bassroutine-theme';
+function setTheme(name) {
+  if (name) document.documentElement.dataset.theme = name;
+  else delete document.documentElement.dataset.theme;
+  // Barre du navigateur sur mobile : même couleur que le fond.
+  document.querySelector('meta[name="theme-color"]').content = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
+  try { localStorage.setItem(THEME_KEY, name); } catch { /* stockage indisponible */ }
+}
+$('theme').value = document.documentElement.dataset.theme ?? '';
+$('theme').addEventListener('change', (e) => setTheme(e.target.value));
+
 $('mixerBtn').addEventListener('click', () => {
   const open = $('mixer').hidden;
   $('mixer').hidden = !open;
