@@ -767,6 +767,17 @@ function setStaffVisible(on) {
 }
 $('showStaff').addEventListener('change', (e) => setStaffVisible(e.target.checked));
 
+// Détail des mesures (grille de la boucle, grille d'accords, liste des gammes) : masqué par défaut.
+const DETAIL_KEY = 'bassroutine-detail';
+function setDetailVisible(on) {
+  $('detail').hidden = !on;
+  $('detailToggle').setAttribute('aria-expanded', on);
+  $('detailToggle').textContent = on ? '▾ Masquer le détail des mesures' : '▸ Afficher le détail des mesures';
+  try { localStorage.setItem(DETAIL_KEY, on ? '1' : '0'); } catch { /* stockage indisponible */ }
+}
+$('detailToggle').addEventListener('click', () => setDetailVisible($('detail').hidden));
+try { if (localStorage.getItem(DETAIL_KEY) === '1') setDetailVisible(true); } catch { /* stockage indisponible */ }
+
 // Mode novice : altérations répétées sur chaque note de la portée (choix retenu sur l'appareil).
 const EVERY_ACC_KEY = 'bassroutine-every-accidental';
 function setEveryAccidental(on) {

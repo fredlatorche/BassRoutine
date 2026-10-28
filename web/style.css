@@ -353,3 +353,13 @@ body.with-staff .hint { margin-bottom: 310px; }
 
 /* Double trait : fin d'un passage de la boucle et début du suivant. */
 .tab-bar.double { border-left: 6px double var(--accent); }
+
+/* Bouton pour afficher / masquer le détail des mesures. */
+.detail-toggle {
+  display: block;
+  margin-bottom: 12px;
+  background: transparent;
+  border: 1px dashed var(--line);
+  color: var(--muted);
+}
+.detail-toggle:hover { color: var(--text); border-color: var(--muted); }
