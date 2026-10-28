@@ -10,6 +10,7 @@ import { createKit, patternHits, gmDrumEvents, DRUM_STYLES, WALKING_DRUMS } from
 import { SCALE_TYPES, FINGERINGS, ZONES, keyOptions, boxOptions, buildScaleExercise } from './scales.js';
 import { inventLoop, KEY_CHOICES } from './random-loop.js';
 import { spellEvents, pitchName } from './spelling.js';
+import { setNotation, noteLabel } from './notation.js';
 
 const BEATS = 4;
 const $ = (id) => document.getElementById(id);
@@ -20,7 +21,7 @@ const GRID_HIGH = 60;
 const BASS_NOTES = [];
 for (let m = LOW_E; m <= GRID_HIGH; m++) BASS_NOTES.push(m);
 // Nom dans la tonalité de la boucle (Mi♭ plutôt que Ré♯ en Si♭…).
-const gridLabel = (m) => pitchName(m, loopState.fifths) + (m >= LOW_E + 24 ? ' suraigu' : m >= LOW_E + 12 ? ' aigu' : '');
+const gridLabel = (m) => noteLabel(pitchName(m, loopState.fifths)) + (m >= LOW_E + 24 ? ' suraigu' : m >= LOW_E + 12 ? ' aigu' : '');
 
 const LOOP_CHORDS = ['Em', 'E', 'E7', 'Am', 'Am7', 'A', 'A7', 'D', 'D7', 'Dm7', 'G', 'Gmaj7', 'Gm7', 'C', 'Bm', 'B7'];
 
@@ -481,7 +482,7 @@ function renderScales() {
     notes.className = 'scale-notes';
     for (const n of k.names) {
       const chip = document.createElement('span');
-      chip.textContent = n;
+      chip.textContent = noteLabel(n);
       notes.append(chip);
     }
     row.append(title, notes);
@@ -832,6 +833,20 @@ function setEveryAccidental(on) {
 }
 $('everyAcc').addEventListener('change', (e) => setEveryAccidental(e.target.checked));
 try { if (localStorage.getItem(EVERY_ACC_KEY) === '1') setEveryAccidental(true); } catch { /* stockage indisponible */ }
+
+// Noms des notes : français ou américain (choix retenu sur l'appareil).
+const NOTATION_KEY = 'bassroutine-notation';
+function applyNotation(n) {
+  setNotation(n);
+  $('notation').value = n;
+  try { localStorage.setItem(NOTATION_KEY, n); } catch { /* stockage indisponible */ }
+  tab.redraw();
+  if (mode === 'loop') renderLoopGrid();
+  if (mode === 'scale') renderScales();
+}
+$('notation').addEventListener('change', (e) => applyNotation(e.target.value));
+// Au chargement on règle seulement la notation : les premiers affichages viennent après.
+try { const n = localStorage.getItem(NOTATION_KEY); if (n) { setNotation(n); $('notation').value = n; } } catch { /* stockage indisponible */ }
 
 // Thème de couleurs (le script dans <head> l'applique déjà au chargement).
 const THEME_KEY = 'bassroutine-theme';

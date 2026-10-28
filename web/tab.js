@@ -3,6 +3,7 @@
 
 import { NAMES } from './theory.js';
 import { STAFF_H, renderStaff, clefSvg, clefWidth } from './staff.js';
+import { noteLabel } from './notation.js';
 
 const STRINGS = [43, 38, 33, 28];   // G, D, A, E (de haut en bas, comme sur une tab)
 const BEAT_W = 60;                  // largeur d'un temps en pixels
@@ -107,7 +108,7 @@ export function createTab(container, { onSeek, labels } = {}) {
       name.className = 'tab-name';
       name.style.left = `${x}px`;
       name.style.top = `${118 + off}px`;
-      name.textContent = e.name ?? NAMES[e.midi % 12];
+      name.textContent = noteLabel(e.name ?? NAMES[e.midi % 12]);
       track.append(el, name);
       return staff ? [el, name, staff.groups[i]] : [el, name];
     });
@@ -191,6 +192,15 @@ export function createTab(container, { onSeek, labels } = {}) {
     setCue(cueX / BEAT_W);
   }
 
+  // Redessine avec les mêmes données (changement de notation des noms de notes…).
+  function redraw() {
+    if (!lastArgs) return;
+    const scroll = container.scrollLeft;
+    render(...lastArgs);
+    container.scrollLeft = scroll;
+    setCue(cueX / BEAT_W);
+  }
+
   // Mode novice : altération écrite sur chaque note de la portée.
   function setEveryAccidental(on) {
     everyAccidental = on;
@@ -201,5 +211,5 @@ export function createTab(container, { onSeek, labels } = {}) {
     setCue(cueX / BEAT_W);
   }
 
-  return { render, follow, setCue, setStaff, setKey, setEveryAccidental };
+  return { render, follow, setCue, setStaff, setKey, setEveryAccidental, redraw };
 }
