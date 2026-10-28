@@ -414,6 +414,7 @@ button.gear { font-size: 1.2rem; line-height: 1; padding: 6px 8px; }
 .staff-head { fill: var(--text); stroke: var(--text); stroke-width: 1.2; }
 .staff-head.hollow { fill: var(--card); stroke-width: 1.6; }
 .staff-stem { fill: none; stroke: var(--text); stroke-width: 1.3; }
+.staff-tuplet { font: italic 600 11px/1 Georgia, 'Times New Roman', serif; fill: var(--text); text-anchor: middle; }
 .staff-acc { font: 16px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; fill: var(--text); }
 .staff-note.playing .staff-head { fill: var(--accent); stroke: var(--accent); }
 .staff-note.playing .staff-head.hollow { fill: var(--card); stroke: var(--accent); stroke-width: 2.4; }

@@ -85,6 +85,14 @@ export function clefSvg(fifths = 0) {
   return svg;
 }
 
+// Crochet de croche gravé : forme pleine qui part du bout de la hampe et s'affine en s'incurvant.
+// Toujours à droite de la hampe ; vers le bas pour une hampe montante, vers le haut sinon.
+function flagPath(sx, sy, up) {
+  const v = up ? 1 : -1;
+  return `M ${sx} ${sy} C ${sx + 0.6} ${sy + 5 * v}, ${sx + 9.5} ${sy + 8 * v}, ${sx + 7.6} ${sy + 17.5 * v}`
+    + ` C ${sx + 7.2} ${sy + 11.5 * v}, ${sx + 3.6} ${sy + 8.6 * v}, ${sx} ${sy + 7.2 * v} Z`;
+}
+
 // Dessine la portée ; renvoie le SVG et, pour chaque événement, son groupe (pour l'allumer en lecture).
 // doubles : positions (en temps) des doubles barres (fin / début de boucle).
 // everyNote : mode novice, l'altération est écrite sur chaque note altérée (même si l'armure l'indique déjà).
@@ -99,14 +107,14 @@ export function renderStaff(events, totalBeats, bpb, beatW, doubles = [], everyN
     if (doubles.includes(b * bpb)) el('line', { x1: x - 4, x2: x - 4, y1: BOTTOM - 8 * STEP, y2: BOTTOM, class: 'staff-bar' }, svg);
   }
 
+  // 1. Têtes de notes, lignes supplémentaires et altérations ; valeur de chaque note.
   let barIdx = -1, shown = new Map();   // altérations déjà écrites dans la mesure
-  const groups = events.map((e, i) => {
+  const notes = events.map((e, i) => {
     const x = e.t * beatW + 12;
     const { d, acc } = spelling(e.midi, e.name);
     const y = yOf(d);
     const g = el('g', { class: 'staff-note' }, svg);
 
-    // Lignes supplémentaires.
     for (let ld = D_BOTTOM - 2; ld >= d; ld -= 2) el('line', { x1: x - 9, x2: x + 9, y1: yOf(ld), y2: yOf(ld), class: 'staff-line' }, g);
     for (let ld = D_TOP + 2; ld <= d; ld += 2) el('line', { x1: x - 9, x2: x + 9, y1: yOf(ld), y2: yOf(ld), class: 'staff-line' }, g);
 
@@ -127,23 +135,72 @@ export function renderStaff(events, totalBeats, bpb, beatW, doubles = [], everyN
     const next = events[i + 1];
     const span = next ? next.t - e.t : e.dur;
     const value = span >= 3.5 ? 1 : span >= 1.75 ? 2 : span >= 0.9 ? 4 : span >= 0.3 ? 8 : 16;
-
     el('ellipse', {
       cx: x, cy: y, rx: 5.2, ry: 3.8, transform: `rotate(-20 ${x} ${y})`,
       class: value <= 2 ? 'staff-head hollow' : 'staff-head',
     }, g);
-    if (value > 1) {
-      const up = d < D_MIDDLE;
-      const sx = up ? x + 4.8 : x - 4.8;
-      const sy = up ? y - 28 : y + 28;
-      el('line', { x1: sx, x2: sx, y1: y, y2: sy, class: 'staff-stem' }, g);
-      const flags = value === 8 ? 1 : value === 16 ? 2 : 0;
-      for (let k = 0; k < flags; k++) {
-        const fy = up ? sy + k * 6 : sy - k * 6;
-        el('path', { d: `M ${sx} ${fy} q 7 ${up ? 6 : -6} 5 ${up ? 14 : -14}`, class: 'staff-stem' }, g);
-      }
-    }
-    return g;
+    return { x, d, y, g, value, span, bar, beat: Math.floor(e.t + 1e-6), triplet: Math.abs(span - 1 / 3) < 0.04 };
   });
+
+  // 2. Groupes ligaturés : croches et doubles croches consécutives d'un même temps.
+  const beams = el('g', {}, svg);
+  const beamGroups = [];
+  for (let i = 0; i < notes.length; i++) {
+    const n = notes[i];
+    if (n.value < 8) continue;
+    const group = [n];
+    while (i + 1 < notes.length) {
+      const m = notes[i + 1];
+      if (m.value < 8 || m.beat !== n.beat || m.bar !== n.bar) break;
+      group.push(m);
+      i++;
+    }
+    beamGroups.push(group);
+  }
+  const inBeam = new Set(beamGroups.filter((gr) => gr.length > 1).flat());
+
+  // 3. Hampes et crochets des notes seules (noires, blanches, croches isolées).
+  for (const n of notes) {
+    if (n.value === 1 || inBeam.has(n)) continue;
+    const up = n.d < D_MIDDLE;
+    const sx = up ? n.x + 4.8 : n.x - 4.8;
+    const sy = up ? n.y - 28 : n.y + 28;
+    el('line', { x1: sx, x2: sx, y1: n.y, y2: sy, class: 'staff-stem' }, n.g);
+    const flags = n.value === 8 ? 1 : n.value === 16 ? 2 : 0;
+    for (let k = 0; k < flags; k++) el('path', { d: flagPath(sx, up ? sy + k * 6 : sy - k * 6, up), class: 'staff-ink' }, n.g);
+  }
+
+  // 4. Ligatures : barre légèrement inclinée suivant la mélodie, hampes d'au moins 26 px.
+  for (const gr of beamGroups) {
+    if (gr.length < 2) continue;
+    const up = gr.reduce((sum, n) => sum + n.d, 0) / gr.length < D_MIDDLE;
+    const dir = up ? -1 : 1;
+    const sxs = gr.map((n) => (up ? n.x + 4.8 : n.x - 4.8));
+    const first = gr[0], last = gr[gr.length - 1];
+    const slope = Math.max(-0.2, Math.min(0.2, (last.y - first.y) / (sxs[sxs.length - 1] - sxs[0]))) * 0.6;
+    const ends = gr.map((n, k) => n.y + dir * 26 - slope * (sxs[k] - sxs[0]));
+    const b0 = up ? Math.min(...ends) : Math.max(...ends);
+    const beamY = (x) => b0 + slope * (x - sxs[0]);
+    gr.forEach((n, k) => el('line', { x1: sxs[k], x2: sxs[k], y1: n.y, y2: beamY(sxs[k]), class: 'staff-stem' }, n.g));
+    const bar = (xa, xb, offset) => {
+      const t = 4.2 * -dir;   // épaisseur vers les têtes de notes
+      const ya = beamY(xa) - dir * offset, yb = beamY(xb) - dir * offset;
+      el('path', { d: `M ${xa} ${ya} L ${xb} ${yb} L ${xb} ${yb + t} L ${xa} ${ya + t} Z`, class: 'staff-ink' }, beams);
+    };
+    bar(sxs[0] - 0.6, sxs[sxs.length - 1] + 0.6, 0);
+    // 2e barre entre doubles croches voisines (ou petit crochet de barre pour une double isolée dans le groupe).
+    gr.forEach((n, k) => {
+      if (n.value !== 16) return;
+      if (gr[k + 1]?.value === 16) bar(sxs[k] - 0.6, sxs[k + 1] + 0.6, 6.5);
+      else if (gr[k - 1]?.value !== 16) bar(k ? sxs[k] - 7 : sxs[k], k ? sxs[k] : sxs[k] + 7, 6.5);
+    });
+    if (gr.length === 3 && gr.every((n) => n.triplet || n === last)) {
+      const mid = (sxs[0] + sxs[2]) / 2;
+      const t = el('text', { x: mid, y: beamY(mid) + (up ? -6 : 14), class: 'staff-tuplet' }, beams);
+      t.textContent = '3';
+    }
+  }
+
+  const groups = notes.map((n) => n.g);
   return { svg, groups };
 }
