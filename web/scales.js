@@ -111,7 +111,9 @@ function candidates(midi, zone) {
     for (let p = 1; p <= MAX_POS; p++) {
       let finger, cost;
       if (fret === 0) {
-        [finger, cost] = [0, zone === 'auto' || zone === 'low' ? 0.3 : 3];   // corde à vide : utile en bas du manche
+        // Corde à vide : privilégiée en bas du manche (main en position 1 à 5), évitée plus haut.
+        const lowZone = zone === 'auto' || zone === 'low';
+        [finger, cost] = [0, lowZone ? (p <= 5 ? -0.4 : 1) : 3];
       } else {
         const k = fret - p;                              // -1 (extension de l'index) à 3 (auriculaire)
         if (k < -1 || k > 3) continue;
@@ -133,7 +135,7 @@ function transition(a, b, interval) {
   }
   const jump = Math.abs(b.string - a.string);
   if (jump > 1) cost += 0.5 * (jump - 1);                 // sauter une corde
-  if ((interval > 0 && b.string < a.string) || (interval < 0 && b.string > a.string)) cost += 2;   // contre le sens de la gamme
+  if ((interval > 0 && b.string < a.string) || (interval < 0 && b.string > a.string)) cost += 6;   // contre le sens de la gamme
   return cost;
 }
 
@@ -154,13 +156,19 @@ function bestPath(midis, layers) {
   return best.reduce((a, b) => (b.cost < a.cost ? b : a));
 }
 
-// La tonique grave est jouée avec le doigt de référence (rootFinger).
+// La tonique grave est jouée à vide si c'est possible (Mi, La, Ré), sinon avec le doigt de référence (rootFinger).
 function positionFingering(notes, rootFinger, zone) {
   const lowRoot = Math.min(...notes.filter((n) => n.root).map((n) => n.midi));
+  const openRoot = (zone === 'auto' || zone === 'low') && OPEN.includes(lowRoot);
   const midis = notes.map((n) => n.midi);
   const layers = notes.map((n) => {
     const list = candidates(n.midi, zone);
-    if (n.midi === lowRoot) list.forEach((c) => { if (c.finger !== rootFinger && c.finger !== 0) c.cost += 1.5; });
+    if (n.midi === lowRoot) {
+      list.forEach((c) => {
+        if (openRoot) { if (c.finger !== 0) c.cost += 5; }
+        else if (c.finger !== rootFinger && c.finger !== 0) c.cost += 1.5;
+      });
+    }
     return list;
   });
   return bestPath(midis, layers);
@@ -206,7 +214,8 @@ function assign3nps(notes, s0, per) {
     const group = out.slice(i, i + per);
     const fretted = group.filter((x) => x.fret > 0);
     if (!fretted.length) { group.forEach((x) => { x.finger = 0; }); continue; }
-    const base = Math.min(...fretted.map((x) => x.fret));
+    // Avec une corde à vide dans le groupe, la main est en 1re position (doigt = case).
+    const base = group.some((x) => x.fret === 0) ? 1 : Math.min(...fretted.map((x) => x.fret));
     const span = Math.max(...fretted.map((x) => x.fret)) - base;
     group.forEach((x) => { x.finger = x.fret === 0 ? 0 : fingerInGroup(x.fret - base, span); });
   }
@@ -217,10 +226,12 @@ const ZONE_TARGET = { low: 2, mid: 7, high: 13 };
 
 function threeNpsBlock(type, pc, range, zone) {
   const per = SCALE_TYPES[type].steps.length === 5 ? 2 : 3;
-  // Départ possible : tonique sur la corde de E ou de A, à n'importe quelle octave jouable.
+  // Départ possible : tonique sur la corde de E ou de A, à n'importe quelle octave jouable,
+  // ou sur la corde de D à vide pour une octave (Ré).
   const options = [];
-  for (const s0 of [0, 1]) {
+  for (const s0 of [0, 1, 2]) {
     for (let f = 0; f <= 15; f++) {
+      if (s0 === 2 && (f > 0 || range !== '1')) continue;
       const root = OPEN[s0] + f;
       if ((root - pc) % 12 !== 0) continue;
       const top = range === 'neck' ? Math.max(root + 24, 60) : root + 12 * Number(range);
@@ -229,9 +240,11 @@ function threeNpsBlock(type, pc, range, zone) {
       if (fingering.every((x) => x.fret >= 0 && x.fret <= MAX_FRET)) options.push({ s0, f, notes, fingering });
     }
   }
+  // Tonique sur une corde à vide dès que possible (La sur A à vide plutôt qu'en case 5 sur E),
+  // sinon corde de E d'abord, le plus bas possible ; en zone, au plus près de la case visée.
   const score = (o) => zone === 'auto' || range === 'neck'
-    ? o.s0 * 100 + o.f                                         // corde de E d'abord, le plus bas possible
-    : Math.abs(o.f - ZONE_TARGET[zone]) + o.s0 * 0.5;
+    ? (o.f === 0 ? -1 : o.s0 * 100 + o.f)
+    : Math.abs(o.f - ZONE_TARGET[zone]) + o.s0 * 0.5 - (zone === 'low' && o.f === 0 ? 1 : 0);
   if (!options.length) return positionBlock(type, pc, range, zone);   // trop haut pour 3 notes par corde
   const best = options.reduce((a, b) => (score(b) < score(a) ? b : a));
   return [{ suffix: '', notes: best.notes, fingering: best.fingering }];
