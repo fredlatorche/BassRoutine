@@ -431,7 +431,7 @@ function renderSong() {
   const midi = usingMidi();
   $('chorusCtl').hidden = midi;
   $('styleCtl').hidden = midi;
-  $('regen').hidden = midi;
+  $('regenCtl').hidden = midi;
   $('midiCtl').hidden = !midi;
 }
 

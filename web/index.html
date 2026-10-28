@@ -51,39 +51,33 @@
   </section>
 
   <section class="controls">
-    <div class="control">
-      <button id="rewind" title="Revenir au début">⏮</button>
-      <button id="play" class="play">▶ Play</button>
-    </div>
-
-    <div class="control">
-      <label for="mode">Mode</label>
-      <select id="mode">
-        <option value="loop">Boucle</option>
-        <option value="song">Morceau</option>
-        <option value="scale">Gammes</option>
-      </select>
-    </div>
-
-    <div class="control tempo">
-      <label for="tempo">Tempo</label>
-      <button class="small" data-bpm="-5">−</button>
-      <input id="tempo" type="range" min="40" max="240" value="100">
-      <button class="small" data-bpm="5">+</button>
-      <output id="tempoVal">100 BPM</output>
-    </div>
-
-    <div id="loopControls" class="group">
-      <div class="control">
-        <label for="bars">Mesures</label>
-        <select id="bars">
-          <option>4</option>
-          <option selected>8</option>
-          <option>16</option>
-          <option>32</option>
+    <!-- Lecture : boutons, mode, tempo -->
+    <div class="transport">
+      <div class="transport-buttons">
+        <button id="rewind" title="Revenir au début" aria-label="Revenir au début">⏮</button>
+        <button id="play" class="play">▶ Play</button>
+      </div>
+      <div class="field">
+        <label for="mode">Mode</label>
+        <select id="mode">
+          <option value="loop">Boucle</option>
+          <option value="song">Morceau</option>
+          <option value="scale">Gammes</option>
         </select>
       </div>
-      <div class="control">
+      <div class="field tempo">
+        <label for="tempo">Tempo <output id="tempoVal">100 BPM</output></label>
+        <div class="tempo-row">
+          <button class="small" data-bpm="-5" aria-label="Moins vite">−</button>
+          <input id="tempo" type="range" min="40" max="240" value="100">
+          <button class="small" data-bpm="5" aria-label="Plus vite">+</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Réglages du mode Boucle -->
+    <div id="loopControls" class="fields">
+      <div class="field wide">
         <label for="preset">Ligne</label>
         <select id="preset">
           <option value="mi">Mi par temps</option>
@@ -95,28 +89,51 @@
           <option value="invented" hidden>🎲 Ligne inventée</option>
         </select>
       </div>
-      <div class="control invent">
-        <button id="invent">🎲 Inventer</button>
-        <select id="randKey" aria-label="Tonalité de la ligne inventée"></select>
-        <select id="randMode" aria-label="Majeur ou mineur">
-          <option value="random">Majeur ou mineur</option>
+      <div class="field">
+        <label for="bars">Mesures</label>
+        <select id="bars">
+          <option>4</option>
+          <option selected>8</option>
+          <option>16</option>
+          <option>32</option>
+        </select>
+      </div>
+      <div class="field check">
+        <label class="toggle"><input id="loop" type="checkbox" checked> Boucle</label>
+      </div>
+      <div class="fields-title">🎲 Ligne inventée</div>
+      <div class="field">
+        <label for="randKey">Tonalité</label>
+        <select id="randKey"></select>
+      </div>
+      <div class="field">
+        <label for="randMode">Majeur / mineur</label>
+        <select id="randMode">
+          <option value="random">Au hasard</option>
           <option value="major">Majeur</option>
           <option value="minor">Mineur</option>
         </select>
-        <select id="randRegister" aria-label="Registre">
+      </div>
+      <div class="field">
+        <label for="randRegister">Registre</label>
+        <select id="randRegister">
           <option value="low">Grave</option>
           <option value="high">Aigu (fretless)</option>
         </select>
       </div>
-      <label class="toggle"><input id="loop" type="checkbox" checked> Boucle</label>
+      <div class="field">
+        <span class="label" aria-hidden="true">&nbsp;</span>
+        <button id="invent">🎲 Inventer</button>
+      </div>
     </div>
 
-    <div id="songControls" class="group" hidden>
-      <div class="control">
+    <!-- Réglages du mode Morceau -->
+    <div id="songControls" class="fields" hidden>
+      <div class="field wide">
         <label for="song">Morceau</label>
         <select id="song"></select>
       </div>
-      <div id="chorusCtl" class="control">
+      <div id="chorusCtl" class="field">
         <label for="choruses">Chorus</label>
         <select id="choruses">
           <option>1</option>
@@ -125,43 +142,52 @@
           <option>4</option>
         </select>
       </div>
-      <div id="styleCtl" class="control">
+      <div id="styleCtl" class="field">
         <label for="style">Style</label>
         <select id="style"></select>
       </div>
-      <button id="regen">↻ Nouvelle ligne</button>
-      <label class="file-btn">Importer un MIDI…<input id="midiFile" type="file" accept=".mid,.midi,audio/midi"></label>
-      <div id="midiCtl" class="group" hidden>
-        <div class="control">
+      <div id="regenCtl" class="field">
+        <span class="label" aria-hidden="true">&nbsp;</span>
+        <button id="regen">↻ Nouvelle ligne</button>
+      </div>
+      <div class="field">
+        <span class="label" aria-hidden="true">&nbsp;</span>
+        <label class="file-btn">Importer un MIDI…<input id="midiFile" type="file" accept=".mid,.midi,audio/midi"></label>
+      </div>
+      <div id="midiCtl" class="field-set" hidden>
+        <div class="field">
           <label for="track">Piste basse</label>
           <select id="track"></select>
         </div>
-        <label class="toggle"><input id="others" type="checkbox"> Autres pistes</label>
+        <div class="field check">
+          <label class="toggle"><input id="others" type="checkbox"> Autres pistes</label>
+        </div>
       </div>
     </div>
 
-    <div id="scaleControls" class="group" hidden>
-      <div class="control">
+    <!-- Réglages du mode Gammes -->
+    <div id="scaleControls" class="fields" hidden>
+      <div class="field wide">
         <label for="scaleType">Gamme</label>
         <select id="scaleType"></select>
       </div>
-      <div class="control">
+      <div class="field">
         <label for="scaleKey">Tonalité</label>
         <select id="scaleKey"></select>
       </div>
-      <div class="control">
+      <div class="field">
         <label for="scaleFinger">Doigté</label>
         <select id="scaleFinger"></select>
       </div>
-      <div id="scaleZoneCtl" class="control">
+      <div id="scaleZoneCtl" class="field">
         <label for="scaleZone">Zone</label>
         <select id="scaleZone"></select>
       </div>
-      <div id="scaleBoxCtl" class="control" hidden>
+      <div id="scaleBoxCtl" class="field" hidden>
         <label for="scaleBox">Box</label>
         <select id="scaleBox"></select>
       </div>
-      <div id="scaleRangeCtl" class="control">
+      <div id="scaleRangeCtl" class="field">
         <label for="scaleRange">Étendue</label>
         <select id="scaleRange">
           <option value="1">1 octave</option>
@@ -169,7 +195,7 @@
           <option value="neck">Tout le manche (case 12)</option>
         </select>
       </div>
-      <div class="control">
+      <div class="field">
         <label for="scaleDir">Sens</label>
         <select id="scaleDir">
           <option value="up">Montante</option>
@@ -177,7 +203,7 @@
           <option value="both" selected>Montée + descente</option>
         </select>
       </div>
-      <div class="control">
+      <div class="field">
         <label for="scaleRhythm">Rythme</label>
         <select id="scaleRhythm">
           <option value="1">Noires</option>
@@ -185,20 +211,31 @@
           <option value="3">Triolets</option>
         </select>
       </div>
-      <label class="toggle"><input id="scaleLoop" type="checkbox" checked> Boucle</label>
+      <div class="field check">
+        <label class="toggle"><input id="scaleLoop" type="checkbox" checked> Boucle</label>
+      </div>
     </div>
 
-    <div class="toggles">
-      <label class="toggle"><input id="synth" type="checkbox" checked> Accords</label>
-      <select id="padSound" aria-label="Son des accords">
-        <option value="epiano">Piano électrique</option>
-        <option value="pad" selected>Nappe</option>
-        <option value="vibes">Vibraphone</option>
-      </select>
-      <label class="toggle"><input id="drums" type="checkbox" checked> Batterie</label>
-      <select id="drumStyle" aria-label="Rythme de batterie"></select>
-      <label class="toggle"><input id="fills" type="checkbox" checked> Breaks</label>
-      <label class="toggle"><input id="metro" type="checkbox"> Métronome</label>
+    <!-- Accompagnement (tous les modes) -->
+    <div class="fields">
+      <div class="field">
+        <label class="toggle"><input id="synth" type="checkbox" checked> Accords</label>
+        <select id="padSound" aria-label="Son des accords">
+          <option value="epiano">Piano électrique</option>
+          <option value="pad" selected>Nappe</option>
+          <option value="vibes">Vibraphone</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="toggle"><input id="drums" type="checkbox" checked> Batterie</label>
+        <select id="drumStyle" aria-label="Rythme de batterie"></select>
+      </div>
+      <div class="field check">
+        <label class="toggle"><input id="fills" type="checkbox" checked> Breaks</label>
+      </div>
+      <div class="field check">
+        <label class="toggle"><input id="metro" type="checkbox"> Métronome</label>
+      </div>
     </div>
   </section>
 
