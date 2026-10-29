@@ -110,5 +110,5 @@ sur chaque appareil.
 
 ## Le mot de la fin
 
-La basse ne va pas se travailler toute seule, et l'app est prête avant vous.
+La basse ne va pas se travailler toute seule.
 **Plus d'excuses : au boulot !**
