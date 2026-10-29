@@ -66,7 +66,29 @@ function chordSymbol(key, minor, [degree, quality]) {
   return spellEn(letter, rootPc) + quality;
 }
 
-// key : nom anglais ('Db', 'C#'…) ou 'random' ; mode : 'major', 'minor' ou 'random' ; register : 'low' ou 'high'.
+// Tout le manche : la ligne monte d'une octave vers le milieu de la boucle puis redescend.
+// Chaque note est jouée telle quelle ou une octave plus haut ; on choisit les temps où changer
+// d'octave pour suivre ce dessin avec le moins de grands sauts (là où la ligne s'y prête).
+function spanNeck(line) {
+  const n = line.length;
+  const target = (i) => 6 * (1 - Math.cos((2 * Math.PI * i) / n));   // 0 au début, 12 au milieu
+  const leap = (a, b) => Math.max(0, Math.abs(b - a) - 5);
+  const OFFSETS = [0, 12];
+  const local = (i, o) => 0.4 * Math.abs(o - target(i));
+  // Programmation dynamique note par note, la première restant en bas ; puis le retour au début.
+  let best = [{ cost: 0, path: [0] }, { cost: Infinity, path: [12] }];
+  for (let i = 1; i < n; i++) {
+    best = OFFSETS.map((o) => best
+      .map((b, k) => ({ cost: b.cost + leap(line[i - 1] + OFFSETS[k], line[i] + o) + local(i, o), path: [...b.path, o] }))
+      .reduce((a, b) => (b.cost < a.cost ? b : a)));
+  }
+  const loopBack = (b) => b.cost + leap(line[n - 1] + b.path[n - 1], line[0]);
+  const { path } = best.reduce((a, b) => (loopBack(b) < loopBack(a) ? b : a));
+  return line.map((m, i) => m + path[i]);
+}
+
+// key : nom anglais ('Db', 'C#'…) ou 'random' ; mode : 'major', 'minor' ou 'random' ;
+// register : 'low', 'high' ou 'neck' (tout le manche).
 // Renvoie { chords (un par mesure), line (une note MIDI par temps), label, fifths (armure) }.
 export function inventLoop({ key, mode, register, bars }, rand = Math.random) {
   const minor = mode === 'random' ? rand() < 0.4 : mode === 'minor';
@@ -81,6 +103,7 @@ export function inventLoop({ key, mode, register, bars }, rand = Math.random) {
 
   let line = walkingQuarters(chords.map((c) => ({ chords: [c] })), Math.floor(rand() * 1e9)).map((e) => e.midi);
   if (register === 'high') line = line.map((m) => m + 12);   // une octave plus haut : cordes de D et G
+  if (register === 'neck') line = spanNeck(line);
 
   const label = `${KEY_LABEL[name]} ${minor ? 'mineur' : 'majeur'} · ${picked.map((t) => t.join('–')).join('  |  ')}`;
   return { chords, line, label, fifths: fifthsTable[name] };

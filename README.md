@@ -31,7 +31,8 @@ Une fois installée, l'app fonctionne aussi hors connexion. Même au fond d'une 
   walking blues en Mi, walking ii-V-I en Sol, et une walking dans l'aigu pensée pour la fretless.
 - 🎲 **Inventer** : une grille d'accords typique (I–vi–ii–V, ii–V–I, i–iv–ii°–V…) et une
   walking bass qui tourne en boucle dessus, dans une tonalité au choix ou au hasard,
-  en majeur ou en mineur, en grave ou en aigu. Chaque clic propose une nouvelle ligne,
+  en majeur ou en mineur, en grave, en aigu ou sur tout le manche (la ligne monte
+  vers le milieu de la boucle puis redescend). Chaque clic propose une nouvelle ligne,
   même pendant la lecture.
 - Boucles de 4, 8, 16 ou 32 mesures, notes et accords modifiables dans la grille.
   (32 mesures de Mi par temps : idéal pour vérifier sa patience.)
