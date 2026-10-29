@@ -1,3 +1,4 @@
+// Bass Routine — © 2026 FredLatorche (https://github.com/fredlatorche/BassRoutine). Tous droits réservés.
 // Orthographe des notes selon les règles d'écriture : armure de la tonalité,
 // notes de l'accord nommées depuis sa fondamentale (Sol♯ dans Mi7, Si♭ dans Do7…),
 // notes de passage chromatiques en dièse en montant et en bémol en descendant.

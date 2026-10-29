@@ -1,3 +1,4 @@
+// Bass Routine — © 2026 FredLatorche (https://github.com/fredlatorche/BassRoutine). Tous droits réservés.
 // Noms des notes affichés : français (Do, Ré, Mi…) ou américain (C, D, E…).
 // Les noms sont calculés en français partout ; on les convertit seulement à l'affichage.
 

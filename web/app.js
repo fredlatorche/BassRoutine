@@ -1,3 +1,4 @@
+// Bass Routine — © 2026 FredLatorche (https://github.com/fredlatorche/BassRoutine). Tous droits réservés.
 // Bass Routine : mode Boucle (grille éditable) et mode Morceau (walking générée ou MIDI importé),
 // avec accords de synthé, métronome et tablature qui défile.
 

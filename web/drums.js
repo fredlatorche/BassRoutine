@@ -1,3 +1,4 @@
+// Bass Routine — © 2026 FredLatorche (https://github.com/fredlatorche/BassRoutine). Tous droits réservés.
 // Batterie synthétisée (Tone.js), rythmes par style et breaks.
 
 const SWING = 2 / 3;

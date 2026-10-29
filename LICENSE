@@ -1,0 +1,14 @@
+Bass Routine
+Copyright © 2026 FredLatorche (https://github.com/fredlatorche/BassRoutine)
+Tous droits réservés.
+
+Ce logiciel (code source, interface, textes, organisation des exercices et générateurs
+de lignes de basse) est l'œuvre de son auteur. Il est publié pour être consulté et utilisé
+en ligne à l'adresse https://fredlatorche.github.io/BassRoutine/.
+
+Sans autorisation écrite de l'auteur, il est interdit de le copier, le modifier,
+le redistribuer, le republier ou l'utiliser dans un autre produit, en tout ou en partie.
+
+Bibliothèques tierces incluses, soumises à leur propre licence (MIT) :
+- Tone.js — Copyright (c) 2014-2020 Yotam Mann — voir web/vendor/Tone.LICENSE.md
+- @tonejs/midi — Copyright © 2016 Yotam Mann — voir web/vendor/Midi.LICENSE.md

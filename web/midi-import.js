@@ -1,3 +1,4 @@
+// Bass Routine — © 2026 FredLatorche (https://github.com/fredlatorche/BassRoutine). Tous droits réservés.
 // Lecture d'un fichier MIDI (bibliothèque @tonejs/midi, globale `Midi` chargée par vendor/Midi.js).
 
 // Armure d'après la tonalité indiquée dans le fichier (dièses > 0, bémols < 0).

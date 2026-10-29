@@ -1,3 +1,4 @@
+// Bass Routine — © 2026 FredLatorche (https://github.com/fredlatorche/BassRoutine). Tous droits réservés.
 // Portée en clé de fa au-dessus de la tab (SVG), alignée sur la même échelle horizontale.
 // Comme d'habitude pour la basse, les notes sont écrites une octave au-dessus du son réel.
 

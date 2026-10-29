@@ -1,3 +1,4 @@
+# Bass Routine — © 2026 FredLatorche (https://github.com/fredlatorche/BassRoutine). Tous droits réservés.
 # Serveur local pour l'app (dossier web/), accessible depuis l'iPhone sur le même Wi-Fi.
 # Indique au navigateur de toujours revérifier les fichiers : après une modification,
 # un simple rechargement suffit (sinon Safari garde d'anciens modules en cache).

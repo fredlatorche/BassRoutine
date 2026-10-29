@@ -1,3 +1,4 @@
+// Bass Routine — © 2026 FredLatorche (https://github.com/fredlatorche/BassRoutine). Tous droits réservés.
 // Grilles d'accords des morceaux (une case = une mesure, deux accords séparés par une espace = demi-mesures).
 // Seules les grilles sont ici : la ligne de basse est générée (walking.js) ou importée depuis un MIDI.
 

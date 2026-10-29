@@ -1,3 +1,4 @@
+// Bass Routine — © 2026 FredLatorche (https://github.com/fredlatorche/BassRoutine). Tous droits réservés.
 // Exercices de gammes : toutes les tonalités, 1 ou 2 octaves ou tout le manche,
 // en montant, en descendant ou aller-retour, avec trois doigtés au choix :
 // 3 notes par corde, en position (moins de déplacements), ou par boxes.

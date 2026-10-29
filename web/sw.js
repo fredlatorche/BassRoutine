@@ -1,6 +1,7 @@
+// Bass Routine — © 2026 FredLatorche (https://github.com/fredlatorche/BassRoutine). Tous droits réservés.
 // Garde l'app en cache pour qu'elle marche hors ligne.
 // Réseau d'abord (pour voir tout de suite les modifications), cache en secours.
-const CACHE = 'basse-tools-v32';
+const CACHE = 'basse-tools-v33';
 const ASSETS = [
   './', 'index.html', 'style.css', 'app.js', 'theory.js', 'songs.js', 'walking.js', 'midi-import.js', 'tab.js', 'drums.js', 'scales.js', 'random-loop.js', 'staff.js', 'spelling.js', 'notation.js',
   'manifest.json', 'vendor/Tone.js', 'vendor/Midi.js',

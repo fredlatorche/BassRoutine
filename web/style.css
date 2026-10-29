@@ -1,3 +1,5 @@
+/* Bass Routine — © 2026 FredLatorche (https://github.com/fredlatorche/BassRoutine). Tous droits réservés. */
+
 :root {
   --bg: #181a26;
   --card: #232637;
@@ -261,7 +263,9 @@ button.play {
 .chart-bar .num { position: absolute; top: 4px; right: 7px; font-size: 0.7rem; color: var(--muted); font-weight: 400; }
 .chart-bar.playing { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
 
-.hint { color: var(--muted); font-size: 0.85rem; margin-top: 20px; margin-bottom: 200px; }
+.hint { color: var(--muted); font-size: 0.85rem; margin-top: 20px; margin-bottom: 0; }
+.copyright { color: var(--muted); font-size: 0.8rem; margin: 10px 0 200px; }
+.copyright a { color: var(--accent); }
 
 /* ---------- Tablature (fixée en bas) ---------- */
 
@@ -426,7 +430,7 @@ button.gear { font-size: 1.2rem; line-height: 1; padding: 6px 8px; }
 .staff-note.playing .staff-acc { fill: var(--accent); }
 
 .mixer-option { margin-bottom: 14px; }
-body.with-staff .hint { margin-bottom: 310px; }
+body.with-staff .copyright { margin-bottom: 310px; }
 
 /* Double trait : fin d'un passage de la boucle et début du suivant. */
 .tab-bar.double { border-left: 6px double var(--accent); }

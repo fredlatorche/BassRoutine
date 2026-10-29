@@ -1,3 +1,4 @@
+// Bass Routine — © 2026 FredLatorche (https://github.com/fredlatorche/BassRoutine). Tous droits réservés.
 // Générateur de lignes de basse sur une grille d'accords, en plusieurs styles rythmiques.
 // La walking part d'un squelette en noires : chaque changement d'accord est un « point d'appui »
 // (fondamentale ou note de l'accord), les temps intermédiaires marchent dans la gamme ou l'arpège,

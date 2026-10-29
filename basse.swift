@@ -1,3 +1,4 @@
+// Bass Routine — © 2026 FredLatorche (https://github.com/fredlatorche/BassRoutine). Tous droits réservés.
 // Joue une ligne de basse simple sur le synthé intégré de macOS (banque General MIDI d'Apple).
 // Usage : swift basse.swift [tempo] [mesures]
 //   ex. : swift basse.swift 100 8

@@ -108,6 +108,12 @@ sur chaque appareil.
 - [Tone.js](https://tonejs.github.io/) 14.8.49 (licence MIT), dans `web/vendor/Tone.js`
 - [@tonejs/midi](https://github.com/Tonejs/Midi) 2.0.28 (licence MIT), dans `web/vendor/Midi.js`
 
+## Droits
+
+© 2026 FredLatorche — tous droits réservés. L'app est libre d'utilisation en ligne, mais le code
+n'est pas libre de réutilisation : voir [LICENSE](LICENSE). Les empreintes des fichiers de chaque
+version publiée sont dans [EMPREINTES.md](EMPREINTES.md).
+
 ## Le mot de la fin
 
 La basse ne va pas se travailler toute seule.

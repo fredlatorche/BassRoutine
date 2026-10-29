@@ -1,3 +1,4 @@
+// Bass Routine — © 2026 FredLatorche (https://github.com/fredlatorche/BassRoutine). Tous droits réservés.
 // Mode aléatoire du mode Boucle : invente une grille d'accords typique dans une tonalité
 // (majeure ou mineure) et une walking bass qui tourne en boucle dessus.
 

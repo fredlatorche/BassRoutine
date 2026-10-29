@@ -1,7 +1,7 @@
 {
   "name": "Bass Routine",
   "short_name": "Bass Routine",
-  "description": "Lignes de basse simples avec tempo, accords de synthé et métronome.",
+  "description": "Bass Routine, par FredLatorche : lignes de basse, accords, batterie, tablature et partition pour travailler la basse.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

@@ -1,3 +1,4 @@
+// Bass Routine — © 2026 FredLatorche (https://github.com/fredlatorche/BassRoutine). Tous droits réservés.
 // Tablature de basse 4 cordes : notes placées selon leur position réelle dans la mesure,
 // défilement continu derrière une tête de lecture. En option, la portée en clé de fa au-dessus.
 
