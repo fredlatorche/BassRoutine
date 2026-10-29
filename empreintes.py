@@ -2,6 +2,7 @@
 # Recalcule EMPREINTES.md (SHA-256 de chaque fichier) : python3 empreintes.py
 # Génère EMPREINTES.md : SHA-256 de chaque fichier suivi par git (sauf EMPREINTES.md lui-même).
 import hashlib, subprocess, sys, datetime, os
+VERSION = '2.0'   # à changer à chaque version publiée
 root = sys.argv[1] if len(sys.argv) > 1 else os.path.dirname(os.path.abspath(__file__))
 files = [f for f in subprocess.check_output(['git', '-C', root, 'ls-files'], text=True).split('\n') if f and f != 'EMPREINTES.md']
 files += [f for f in subprocess.check_output(['git', '-C', root, 'ls-files', '--others', '--exclude-standard'], text=True).split('\n') if f and f != 'EMPREINTES.md']
@@ -14,7 +15,7 @@ today = datetime.date.today().isoformat()
 out = f"""# Empreintes de Bass Routine
 
 Auteur : **FredLatorche** — https://github.com/fredlatorche/BassRoutine
-Version : 1.0 — {today}
+Version : {VERSION} — {today}
 
 Chaque fichier du projet est identifié par son empreinte SHA-256 : si un seul caractère
 change, l'empreinte change complètement. Associée à une date certaine (historique GitHub,

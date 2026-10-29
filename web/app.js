@@ -12,6 +12,7 @@ import { SCALE_TYPES, FINGERINGS, ZONES, keyOptions, boxOptions, buildScaleExerc
 import { inventLoop, KEY_CHOICES, fifthsFromLabel } from './random-loop.js';
 import { spellEvents, pitchName } from './spelling.js';
 import { setNotation, noteLabel } from './notation.js';
+import * as midiOut from './midi-out.js';
 
 const BEATS = 4;
 const $ = (id) => document.getElementById(id);
@@ -772,17 +773,24 @@ function tick(time) {
   const beat = s % prog.bpb;
   const beatDur = 60 / Tone.Transport.bpm.value;
   const at = (e) => time + (e.t - s) * beatDur;
+  // Pistes envoyées à un instrument MIDI (réglages) : le son interne se tait.
+  const ctx = Tone.getContext().rawContext;
+  const toMidi = (track) => midiOut.routedToMidi(track);
 
   for (const e of prog.bassByBeat[s] ?? []) {
-    bass.triggerAttackRelease(Tone.Frequency(e.midi, 'midi'), e.dur * beatDur, at(e), e.vel ?? 0.8);
+    if (toMidi('bass')) midiOut.playNotes('bass', e.midi, e.dur * beatDur, at(e), e.vel ?? 0.8, ctx);
+    else bass.triggerAttackRelease(Tone.Frequency(e.midi, 'midi'), e.dur * beatDur, at(e), e.vel ?? 0.8);
   }
   if ($('others').checked) {
     for (const e of prog.otherByBeat[s] ?? []) {
-      other.triggerAttackRelease(Tone.Frequency(e.midi, 'midi'), e.dur * beatDur, at(e), e.vel ?? 0.6);
+      if (toMidi('other')) midiOut.playNotes('other', e.midi, e.dur * beatDur, at(e), e.vel ?? 0.6, ctx);
+      else other.triggerAttackRelease(Tone.Frequency(e.midi, 'midi'), e.dur * beatDur, at(e), e.vel ?? 0.6);
     }
   }
   const chord = prog.chordStarts[s];
-  if ($('synth').checked && chord) {
+  if ($('synth').checked && chord && toMidi('pad')) {
+    midiOut.playNotes('pad', padVoicing(parseChord(chord.symbol)), chord.beats * beatDur * 0.95, time, 0.6, ctx);
+  } else if ($('synth').checked && chord) {
     const notes = padVoicing(parseChord(chord.symbol)).map((m) => Tone.Frequency(m + (pad.transpose ?? 0), 'midi'));
     if (pad.strum) {
       notes.forEach((n, i) => pad.triggerAttackRelease(n, chord.beats * beatDur * 0.95 - i * pad.strum, time + i * pad.strum, 0.5));
@@ -797,8 +805,9 @@ function tick(time) {
     const hits = fileDrums
       ? prog.drumByBeat[s] ?? []
       : patternHits(choice === 'auto' ? prog.drumStyle : choice, s, prog.bpb, $('fills').checked);
-    for (const h of hits) kit.play(h, at(h));
-    if (s === 0 && !fileDrums) kit.play({ d: 'crash', v: 0.6 }, time);
+    const play = toMidi('drums') ? (h, t) => midiOut.playDrum(h, t, ctx) : (h, t) => kit.play(h, t);
+    for (const h of hits) play(h, at(h));
+    if (s === 0 && !fileDrums) play({ d: 'crash', v: 0.6 }, time);
   }
   if ($('metro').checked) {
     click.triggerAttackRelease(beat === 0 ? 'C6' : 'G5', '32n', time, beat === 0 ? 0.8 : 0.45);
@@ -872,6 +881,7 @@ function stop() {
   bass?.triggerRelease();
   pad?.releaseAll();
   other?.releaseAll();
+  midiOut.silence();
   stopUI();
 }
 
@@ -922,6 +932,81 @@ $('clearRange').addEventListener('click', () => {
 });
 
 renderMixer();
+
+// ---------- Instruments MIDI (réglages) ----------
+// Chaque piste : son interne, ou une sortie MIDI et son canal. Ordinateur seulement (Web MIDI).
+function renderMidi() {
+  const panel = $('midiPanel');
+  panel.replaceChildren();
+  const note = (text) => {
+    const p = document.createElement('p');
+    p.className = 'midi-note';
+    p.textContent = text;
+    panel.append(p);
+  };
+  if (!midiOut.midiSupported()) {
+    note('Disponible sur ordinateur avec Chrome, Edge ou Firefox (ni Safari ni iPhone).');
+    return;
+  }
+  if (!midiOut.midiReady()) {
+    note('Joue les accompagnements sur un synthé (USB ou interface MIDI) ou dans Ableton / GarageBand (bus IAC du Mac).');
+    const btn = document.createElement('button');
+    btn.textContent = 'Activer le MIDI';
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();   // le panneau se reconstruit : le clic ne doit pas passer pour un clic « en dehors »
+      const error = await midiOut.enableMidi(renderMidi);
+      if (!error) return;
+      // Firefox : refuse d'office si aucun appareil MIDI n'est branché, et demande d'installer
+      // un « module de permission » pour le site (à accepter).
+      const firefox = /firefox/i.test(navigator.userAgent);
+      showMessage(firefox
+        ? `Accès MIDI refusé par Firefox (${error}). Branche un instrument ou active le bus IAC, puis réessaie et accepte le module de permission. Sinon, utilise Chrome.`
+        : `Accès MIDI refusé par le navigateur (${error}).`);
+    });
+    panel.append(btn);
+    return;
+  }
+  const ports = midiOut.outputs();
+  if (!ports.length) note('Aucune sortie MIDI : branche un instrument, ou active le bus IAC (Configuration audio et MIDI).');
+  const row = (label, ...inputs) => {
+    const line = document.createElement('label');
+    line.className = 'midi-row';
+    const text = document.createElement('span');
+    text.textContent = label;
+    line.append(text, ...inputs);
+    panel.append(line);
+  };
+  const select = (options, value, onPick) => {
+    const sel = document.createElement('select');
+    for (const [v, text] of options) sel.append(new Option(text, v));
+    sel.value = value;
+    sel.addEventListener('change', () => onPick(sel.value));
+    return sel;
+  };
+  for (const [track, label] of Object.entries(midiOut.MIDI_TRACKS)) {
+    const r = midiOut.route(track);
+    const portOptions = [['', 'Son interne'], ...ports.map((o) => [o.id, o.name])];
+    // Sortie choisie mais débranchée : on la garde dans la liste pour ne pas perdre le réglage.
+    if (r.port && !ports.some((o) => o.id === r.port)) portOptions.push([r.port, '(débranché)']);
+    const channels = Array.from({ length: 16 }, (_, i) => [String(i + 1), `Canal ${i + 1}`]);
+    row(label,
+      select(portOptions, r.port, (port) => midiOut.setRoute(track, { port })),
+      select(channels, String(r.channel), (ch) => midiOut.setRoute(track, { channel: Number(ch) })));
+  }
+  const offset = document.createElement('input');
+  offset.type = 'number';
+  offset.min = -200;
+  offset.max = 500;
+  offset.step = 5;
+  offset.value = midiOut.latency();
+  offset.addEventListener('change', () => midiOut.setLatency(Number(offset.value) || 0));
+  const unit = document.createElement('span');
+  unit.textContent = 'ms';
+  row('Décalage', offset, unit);
+  note('Décalage : retarde les notes MIDI (valeur positive) ou les avance, pour les caler sur le son de l\'app.');
+}
+renderMidi();
+midiOut.restoreMidi(renderMidi);
 
 // Portée en clé de fa au-dessus de la tab : désactivée par défaut, choix retenu sur l'appareil.
 const STAFF_KEY = 'bassroutine-staff';

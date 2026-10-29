@@ -425,6 +425,21 @@ button.gear { font-size: 1.2rem; line-height: 1; padding: 6px 8px; }
 .mix-row input { width: 100%; accent-color: var(--accent); }
 .mix-row output { text-align: right; font-variant-numeric: tabular-nums; }
 
+/* Instruments MIDI : une ligne par piste (sortie + canal), puis le décalage. */
+.midi-head { margin-top: 18px; }
+.midi-note { color: var(--muted); font-size: 0.85rem; margin: 0 0 10px; }
+.midi-row { display: grid; grid-template-columns: 9em 1fr 7.5em; align-items: center; gap: 10px; margin-bottom: 8px; }
+.midi-row span { color: var(--muted); }
+.midi-row select, .midi-row input { width: 100%; min-width: 0; }
+.midi-row input {
+  font: inherit;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+
 /* ---------- Portée en clé de fa (même fond que la tablature, couleurs du thème) ---------- */
 
 .staff { position: absolute; top: 0; left: 0; }

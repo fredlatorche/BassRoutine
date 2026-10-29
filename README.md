@@ -8,6 +8,9 @@ et s'installe comme une application.
 En résumé : un groupe entier qui joue avec vous, ne se plaint jamais du tempo,
 ne rate aucune répétition et ne vous demande pas de porter l'ampli.
 
+**Version 2.0** : l'app peut désormais faire jouer l'accompagnement par vos propres instruments
+MIDI (synthés, boîte à rythmes, Ableton Live, GarageBand) : voir [Jouer avec ses instruments MIDI](#jouer-avec-ses-instruments-midi).
+
 ## Ouvrir l'app
 
 👉 **https://fredlatorche.github.io/BassRoutine/**
@@ -78,9 +81,59 @@ des transcriptions d'enregistrements.
 - 7 thèmes de couleurs (Nuit, Noir, Bois, Océan, Forêt, Violet, Clair).
 - Noms des notes en français (Do, Ré, Mi) ou en notation américaine (C, D, E).
 - Volume séparé pour la basse, les accords, la batterie, le métronome et les autres pistes.
+- **Instruments MIDI** : envoyer la basse, les accords, la batterie ou les autres pistes
+  vers vos instruments (voir ci-dessous).
 
 Tous les choix (mode, tempo, sons, gammes, boucle inventée…) sont retenus d'une visite à l'autre
 sur chaque appareil.
+
+## Jouer avec ses instruments MIDI
+
+Sur ordinateur, chaque piste peut être jouée par un instrument MIDI au lieu du son de l'app :
+le Moog fait la basse, l'orgue les accords, Ableton la batterie… et vous jouez par-dessus.
+
+**Navigateur** : Chrome ou Edge (le plus simple), ou Firefox. Pas Safari ni iPhone :
+l'app y garde ses sons internes.
+
+### Dans l'app
+
+1. Roue ⚙️ → **Instruments MIDI** → **Activer le MIDI**, et accepter la demande du navigateur
+   (une seule fois ; Firefox demande d'installer un petit module de permission pour le site,
+   et refuse si aucun appareil MIDI n'est branché).
+2. Pour chaque piste (Basse, Accords, Batterie, Autres pistes), choisir la **sortie** et le **canal**.
+   « Son interne » = le son de l'app. Une piste envoyée en MIDI se tait dans l'app.
+3. **Décalage** (ms) : si l'instrument sonne un peu en avance ou en retard sur le métronome
+   de l'app, le corriger ici.
+
+La liste des sorties montre les instruments branchés en USB (ou via une interface MIDI)
+et le **bus IAC** du Mac, qui mène aux logiciels. Après avoir branché un instrument, recharger la page.
+
+La batterie est envoyée en **General MIDI** (grosse caisse 36, caisse claire 38, charleston 42,
+ride 51, crash 49…), à mettre de préférence sur le **canal 10** : les kits d'Ableton et de GarageBand
+la jouent tels quels. À Stop, toutes les notes sont coupées.
+
+### Vers Ableton Live (ou GarageBand) sur Mac
+
+1. **Activer le bus IAC** (câble MIDI virtuel du Mac) : application *Configuration audio et MIDI*
+   (⌘ Espace), menu *Fenêtre → Afficher le studio MIDI* (⌘ 2), double-clic sur **Gestionnaire IAC**
+   (en vue liste ☰ s'il n'apparaît pas), cocher **« Le gestionnaire est en ligne »**, vérifier
+   qu'il existe un port « Bus 1 » (sinon **+**), **Appliquer**.
+2. **Relancer Ableton** pour qu'il voie le nouveau port, puis *Préférences → Link Tempo MIDI* :
+   sur la ligne **Entrée : Gestionnaire IAC (Bus 1)**, activer **Piste**. Laisser la sortie IAC
+   désactivée (sinon le MIDI tourne en rond). « Surface de contrôle » : laisser « Aucun ».
+3. **Une piste MIDI par instrument** : par exemple un **Drum Rack** avec *MIDI From* =
+   Gestionnaire IAC (Bus 1), **Ch. 10**, *Monitor* = **In** ; un piano ou un orgue sur **Ch. 2**
+   pour les accords ; un synthé de basse sur **Ch. 1**.
+4. Dans l'app, choisir **Gestionnaire IAC Bus 1** pour ces pistes, avec les mêmes canaux. Play.
+
+Ça ne sonne pas ? Le témoin MIDI en haut à droite d'Ableton clignote-t-il pendant la lecture ?
+S'il reste éteint, c'est l'étape 1 ou 2 ; s'il clignote, c'est le réglage de la piste (canal, *Monitor*).
+
+### Vers un synthé ou une boîte à rythmes
+
+Brancher l'instrument en USB (ou via une interface MIDI), recharger la page, le choisir comme sortie
+et régler le canal sur celui que l'instrument écoute (souvent 1 par défaut). Un synthé monophonique
+(Moog Subsequent 37…) est fait pour la basse, un orgue ou un clavier (Hammond SK1…) pour les accords.
 
 ## Organisation du code
 
@@ -96,6 +149,7 @@ sur chaque appareil.
 | `web/random-loop.js` | Mode 🎲 Inventer |
 | `web/scales.js` | Gammes et doigtés |
 | `web/drums.js` | Batterie et rythmes |
+| `web/midi-out.js` | Sortie vers les instruments MIDI |
 | `web/tab.js` | Tablature |
 | `web/staff.js` | Partition en clé de fa |
 | `web/midi-import.js` | Lecture des fichiers MIDI |
