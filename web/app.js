@@ -14,6 +14,7 @@ import { spellEvents, pitchName } from './spelling.js';
 import { setNotation, noteLabel } from './notation.js';
 import * as midiOut from './midi-out.js';
 import * as pitch from './pitch.js';
+import { createTuner } from './tuner.js';
 
 const BEATS = 4;
 const $ = (id) => document.getElementById(id);
@@ -857,6 +858,7 @@ async function start() {
   if (starting) return;
   starting = true;
   try {
+    setTunerOpen(false);   // l'accordeur libère l'entrée audio
     if ($('waitMode').checked) {
       await startWaiting();
       return;
@@ -1267,6 +1269,7 @@ $('theme').addEventListener('change', (e) => setTheme(e.target.value));
 
 // Panneau des réglages : fenêtre posée juste sous l'en-tête (visible même si la page a défilé).
 function setSettingsOpen(open) {
+  if (open) setTunerOpen(false);
   const panel = $('mixer');
   if (open) panel.style.top = `${document.querySelector('header').getBoundingClientRect().bottom + 6}px`;
   panel.hidden = !open;
@@ -1282,6 +1285,44 @@ document.addEventListener('click', (e) => {
 });
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && !$('mixer').hidden) setSettingsOpen(false);
+});
+
+// ---------- Accordeur (pictogramme diapason) ----------
+// Il écoute la même entrée audio que le mode attente : la lecture s'arrête à l'ouverture.
+const tuner = createTuner($('tuner'), {
+  async listen(onHear) {
+    if (!(await wakeAudio(true))) throw new Error('audio');
+    await pitch.openInput(Tone.getContext().rawContext, { onHear: (r) => onHear(r, pitch.inputSettings().threshold) });
+  },
+  stop: () => pitch.closeInput(),
+});
+function setTunerOpen(open) {
+  const panel = $('tuner');
+  if (open === !panel.hidden) return;
+  $('tunerBtn').setAttribute('aria-expanded', open);
+  if (!open) {
+    panel.hidden = true;
+    tuner.close();
+    return;
+  }
+  setSettingsOpen(false);
+  if (playing) stop();
+  panel.style.top = `${document.querySelector('header').getBoundingClientRect().bottom + 6}px`;
+  panel.hidden = false;
+  tuner.open().catch((err) => {
+    setTunerOpen(false);
+    showMessage(`Pas d'accès au micro / à l'interface audio (${err.name}). Autorise-le dans le navigateur.`);
+  });
+}
+$('tunerBtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  setTunerOpen($('tuner').hidden);
+});
+document.addEventListener('click', (e) => {
+  if (!$('tuner').hidden && !$('tuner').contains(e.target)) setTunerOpen(false);
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') setTunerOpen(false);
 });
 $('mixerReset').addEventListener('click', () => {
   $('mixerChannels').querySelectorAll('input').forEach((slider) => {

@@ -399,6 +399,34 @@ button.play {
 
 .header-right { display: flex; align-items: center; gap: 12px; }
 button.gear { font-size: 1.2rem; line-height: 1; padding: 6px 8px; }
+/* Pictogramme de l'accordeur : un diapason, à la taille de la roue crantée. */
+button.gear .fork { width: 1.2rem; height: 1.2rem; display: block; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+
+/* ---------- Accordeur ---------- */
+.tuner { width: min(420px, calc(100vw - 32px)); text-align: center; }
+.tuner-modes { display: flex; gap: 4px; }
+.tuner-modes button, .tuner-strings button { font-size: 0.85rem; padding: 4px 10px; color: var(--muted); }
+.tuner-modes button.on, .tuner-strings button.on { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.tuner-dial { width: 100%; max-width: 340px; display: block; margin: 4px auto 0; overflow: visible; }
+.dial-track { fill: none; stroke: var(--line); stroke-width: 10; stroke-linecap: round; }
+.dial-zone { fill: none; stroke: #3fb950; stroke-width: 10; }
+.dial-tick { stroke: var(--muted); stroke-width: 1.5; }
+.dial-tick.major { stroke-width: 2.5; }
+.dial-label { fill: var(--muted); font: 11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; text-anchor: middle; }
+.dial-needle { transform-origin: 150px 150px; transition: transform 0.12s ease-out; }
+.dial-needle line { stroke: var(--text); stroke-width: 3; stroke-linecap: round; }
+.dial-needle circle { fill: var(--text); }
+.tuner.in-tune .dial-needle line { stroke: #3fb950; }
+.tuner.in-tune .dial-needle circle { fill: #3fb950; }
+.tuner.idle .dial-needle { opacity: 0.35; }
+.tuner-note { font-size: 2.6rem; font-weight: 700; line-height: 1.1; margin-top: 4px; }
+.tuner.idle .tuner-note, .tuner.idle .tuner-detail { color: var(--muted); }
+.tuner-detail { color: var(--muted); font-variant-numeric: tabular-nums; min-height: 1.3em; }
+.tuner-status { font-weight: 600; margin: 6px 0 12px; min-height: 1.3em; }
+.tuner.in-tune .tuner-status { color: #3fb950; }
+.tuner-strings { display: flex; justify-content: center; gap: 8px; margin-bottom: 12px; }
+.tuner-strings button { min-width: 3.6em; padding: 8px 10px; font-size: 1rem; border-radius: 999px; }
+.tuner-ref { display: flex; justify-content: center; align-items: center; gap: 10px; color: var(--muted); font-size: 0.85rem; }
 
 /* Fenêtre des réglages, ancrée sous l'en-tête (top réglé à l'ouverture), au-dessus de la page. */
 .mixer {

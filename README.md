@@ -2,6 +2,7 @@
 
 Une application pour travailler la basse : des lignes de basse jouées par le synthé,
 avec accords, batterie, tablature qui défile et partition en clé de fa.
+Elle écoute aussi votre basse : un accordeur, et un mode où le curseur attend la bonne note.
 Elle s'ouvre dans le navigateur, sur ordinateur (Mac, Windows), iPhone et Android,
 et s'installe comme une application.
 
@@ -15,6 +16,9 @@ MIDI (synthés, boîte à rythmes, Ableton Live, GarageBand) : voir [Jouer avec 
 n'avance que sur la bonne note, jouée assez juste : à ± 50, 25, 12 ou 6 cents selon le niveau choisi,
 avec l'écart affiché en direct (« +14 c, trop haut »). De quoi affiner sa justesse note après note,
 sans frettes pour tricher : voir [Affiner sa justesse sur une fretless](#affiner-sa-justesse-sur-une-fretless).
+
+🎸 **Accordeur intégré** : un pictogramme diapason dans l'en-tête, en mode automatique ou corde par corde :
+voir [Accordeur](#accordeur).
 
 ## Ouvrir l'app
 
@@ -72,6 +76,20 @@ des transcriptions d'enregistrements.
   funk, half-time, reggae), réglage automatique selon le style, et petits breaks toutes les 4 mesures.
   Un batteur qui reste en place : c'est déjà la moitié du travail du bassiste.
 - **Métronome**.
+
+## Accordeur
+
+Le pictogramme **diapason**, à côté de la roue ⚙️, ouvre un accordeur (même entrée audio que
+le mode attente : interface audio ou micro).
+
+- **Auto** : l'accordeur reconnaît la note jouée et indique l'écart avec la plus proche.
+- **Corde par corde** : on choisit la corde à accorder (Mi, La, Ré, Sol) ; l'aiguille mesure l'écart
+  avec cette corde, même de loin (« bien trop bas de 2 demi-tons : tends la corde »).
+- Cadran de −50 à +50 cents, fréquence en Hz, et « Juste ! » à ± 3 cents.
+- Diapason de référence réglable (La = 440 Hz par défaut, de 430 à 450 Hz).
+- Ouvrir l'accordeur arrête la lecture ; Échap ou un clic en dehors le referme.
+- L'entrée audio et le seuil se règlent dans ⚙️ → **Entrée audio**. Avec une interface audio,
+  l'accordeur n'entend que la basse ; avec un micro, mieux vaut une pièce calme.
 
 ## ⏸ Attendre ma note
 
@@ -134,9 +152,11 @@ mais c'est sur une fretless qu'il prend tout son sens.
 - Volume séparé pour la basse, les accords, la batterie, le métronome et les autres pistes.
 - **Instruments MIDI** : envoyer la basse, les accords, la batterie ou les autres pistes
   vers vos instruments (voir ci-dessous).
+- **Entrée audio** (accordeur et mode attente) : choix de l'entrée (interface audio, micro…),
+  justesse demandée, seuil de niveau et vumètre.
 
-Tous les choix (mode, tempo, sons, gammes, boucle inventée…) sont retenus d'une visite à l'autre
-sur chaque appareil.
+Tous les choix (mode, tempo, sons, gammes, boucle inventée, réglages de l'accordeur…) sont retenus
+d'une visite à l'autre sur chaque appareil.
 
 ## Jouer avec ses instruments MIDI
 
@@ -202,6 +222,7 @@ et régler le canal sur celui que l'instrument écoute (souvent 1 par défaut). 
 | `web/drums.js` | Batterie et rythmes |
 | `web/midi-out.js` | Sortie vers les instruments MIDI |
 | `web/pitch.js` | Entrée audio et reconnaissance des notes jouées |
+| `web/tuner.js` | Accordeur |
 | `web/tab.js` | Tablature |
 | `web/staff.js` | Partition en clé de fa |
 | `web/midi-import.js` | Lecture des fichiers MIDI |
