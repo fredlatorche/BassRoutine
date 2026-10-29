@@ -1097,7 +1097,7 @@ $('chart').addEventListener('click', (e) => {
 });
 
 function setTempo(bpm) {
-  bpm = Math.min(240, Math.max(40, bpm));
+  bpm = Math.min(240, Math.max(30, bpm));
   $('tempo').value = bpm;
   $('tempoVal').textContent = `${bpm} BPM`;
   if (bass) Tone.Transport.bpm.rampTo(bpm, 0.1);
