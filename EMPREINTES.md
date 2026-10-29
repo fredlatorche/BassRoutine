@@ -8,26 +8,26 @@ change, l'empreinte change complètement. Associée à une date certaine (histor
 archive Software Heritage, horodatage OpenTimestamps ou enveloppe e-Soleau de l'INPI),
 cette liste prouve que ce code existait, sous cette forme, à cette date.
 
-**Empreinte globale de la version** : `1c61c113695f897174d1833b22bce2add0c0b0043dc5ac1004dfbfeae894bd26`
+**Empreinte globale de la version** : `429925b6ac53591e90a1931d137ffda7d390090a7ca9e9a21d350ad066d897ad`
 
 | Fichier | SHA-256 |
 |---|---|
 | `.gitignore` | `53f0c100a33a56ebada040287b3d0f5dbab21c6ec6b66209fec5515c508f1144` |
 | `LICENSE` | `1b29c7bf379ebc18668e0c8756402deab86025a63f224d61f456d2aeb200f01b` |
-| `README.md` | `54c7261ba4e0b4c7fc1ffa12cb226a22ee8463961f38ea1dfaaddd68da375153` |
+| `README.md` | `a0755ee9915358c1077fe1bd91f0995f43a9c4dcd55d3f7b5fc15ecb682223a1` |
 | `basse.swift` | `17ed483f5773f1f1507c5343da4dd967d044c771c5c75dbeef321852f08af382` |
 | `empreintes.py` | `71c4cf550bbb198d11eee811f024aa789d3ff8de7d92d09ed8e859c231f2144d` |
 | `exemples/test-basse.mid` | `6d8d8bf96c9feef098a1506d0101205c9af11ad231ac5ab573d436024def12fd` |
 | `index.html` | `1ab097b356ee429bd11c4b5c9dda8ec51514fac8086eca5cfde409baffa23637` |
 | `serve.py` | `b373da570e5234602b7997b9ea74c617e95abb4ef18a51561163112b362fe3fe` |
-| `web/app.js` | `c582cec2daabd8a2fadc588de2153e9e72d6944d63ad36237c7bc99ff8ca7f4d` |
+| `web/app.js` | `77d094bd85c29b7a91f7575b17b7a861f16daba10a66292e63006cc83231e141` |
 | `web/drums.js` | `657f9447a569dd26b8cfbd0336fba9324eacbcc19fd39a51a71e80513da46765` |
 | `web/icons/bass-light.png` | `fce175402346141974327847b0b0f55dcb97de967542bfeee025af9db37a724a` |
 | `web/icons/bass.png` | `467c80ce6204ee2cf73cc3cdbe56020d02655a0bccd9b8fe0a0d360da090ecf6` |
 | `web/icons/icon-180.png` | `78591f142a8c3f50510bc57570bb8c6f7a2fef33738618d62de6c0a2e48a8503` |
 | `web/icons/icon-192.png` | `48d982d53cce3c95ffefe8e119d98b52971589d91e3d203151409dcb826debf0` |
 | `web/icons/icon-512.png` | `52481dfecd5b451efe168b32640b7b5087bc04348a89e87dc66f60010cd83cfd` |
-| `web/index.html` | `1f5f73aff0f6fde190c38d3e50da342557f0003ea96aa21ffd392fa29780f68f` |
+| `web/index.html` | `54efde8e5f050f3b22deef6998896f4a1d313946c2040e1a30474af04c487876` |
 | `web/manifest.json` | `1bc934ddc101bfe26457da5b60ac5c1790e89d6394675d7fec00cb56b9892e86` |
 | `web/midi-import.js` | `2bd342ee783cf674f007c75262900928d38253c3fda1db9f05e9e79b610aafff` |
 | `web/midi-out.js` | `1ddaa7ddc7651ecc6247837332d242ffeb1a91f554573cae80887ad8cee874e8` |
@@ -38,10 +38,11 @@ cette liste prouve que ce code existait, sous cette forme, à cette date.
 | `web/songs.js` | `4b8c21fa68a18eb12ff052e998aed7fee5a4a1b8fd17e2edb3928fa3fabbbf4c` |
 | `web/spelling.js` | `f3732cf60dec2d0eedd214305edcffba8cf09f399669a92d8e1173283915015d` |
 | `web/staff.js` | `d1707001612b447221e7e74a3d0b0b2564c9dccab231a91d25c2769200859200` |
-| `web/style.css` | `c2bb9dadb90a4eb7d47bd8e7c064d5de8b9ebd5480ec5e85f40b5c53c0428983` |
-| `web/sw.js` | `172447403dc7ae0dcc6b1c7df749c4938256c4b7d59ea831a50c3fcdbb6ee6dd` |
+| `web/style.css` | `dc9086b00163ab1053f88eb9040d8ad7e90757c1818c943afaed2dcf3f091308` |
+| `web/sw.js` | `5f668eb33eca574c6373062722eb0cd92552e2ede8ad0b9602b85492265cd2d6` |
 | `web/tab.js` | `483382f288411fb3ba091c4188f0390a41569a3fb53643f1c14581fd5a5b1002` |
 | `web/theory.js` | `5bbb596047c749c3f4a592ba41a441db2988a8a3507e0ce5b1a05a01d845406e` |
+| `web/tuner.js` | `3b05d19aa2a8a7ae6b87332e1a723eccee4f320edb2d0e200c305e52d15f9f51` |
 | `web/vendor/Midi.LICENSE.md` | `6debbf1ddd278dcf5d8e7b6c42c7a827cb944943401fc37ee017e172bbccbaea` |
 | `web/vendor/Midi.js` | `9165a2b3de9d378eca970b80618c3747c60ed8188b12b0f059ccf44fc6a07cc0` |
 | `web/vendor/Tone.LICENSE.md` | `391ed5af60b7b5d1f74b31040c5fa645e6e238f3d9b4c971941a262a675bbdcd` |
