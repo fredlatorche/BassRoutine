@@ -8,7 +8,7 @@ change, l'empreinte change complètement. Associée à une date certaine (histor
 archive Software Heritage, horodatage OpenTimestamps ou enveloppe e-Soleau de l'INPI),
 cette liste prouve que ce code existait, sous cette forme, à cette date.
 
-**Empreinte globale de la version** : `7af77b7878e1cd9e8ae9cc18801e908a8220856de71aa14d1ccb228babddd6ef`
+**Empreinte globale de la version** : `3c5fd88885f56f82d734df1a91ce5f31699965d6da717f53ab595a1ba2aaa870`
 
 | Fichier | SHA-256 |
 |---|---|
@@ -20,7 +20,7 @@ cette liste prouve que ce code existait, sous cette forme, à cette date.
 | `exemples/test-basse.mid` | `6d8d8bf96c9feef098a1506d0101205c9af11ad231ac5ab573d436024def12fd` |
 | `index.html` | `1ab097b356ee429bd11c4b5c9dda8ec51514fac8086eca5cfde409baffa23637` |
 | `serve.py` | `b373da570e5234602b7997b9ea74c617e95abb4ef18a51561163112b362fe3fe` |
-| `web/app.js` | `abc9c49069b64e98d9288624b13a4efb21a885a2750e28528fedbd7bf212dd75` |
+| `web/app.js` | `6d81aaa03aaa26b2ec4d3225f750060d55fe8a7d579d11f8515596f09ea8ea1a` |
 | `web/drums.js` | `657f9447a569dd26b8cfbd0336fba9324eacbcc19fd39a51a71e80513da46765` |
 | `web/icons/bass-light.png` | `fce175402346141974327847b0b0f55dcb97de967542bfeee025af9db37a724a` |
 | `web/icons/bass.png` | `467c80ce6204ee2cf73cc3cdbe56020d02655a0bccd9b8fe0a0d360da090ecf6` |
@@ -37,7 +37,7 @@ cette liste prouve que ce code existait, sous cette forme, à cette date.
 | `web/spelling.js` | `f3732cf60dec2d0eedd214305edcffba8cf09f399669a92d8e1173283915015d` |
 | `web/staff.js` | `644f2b63793f0c3cf441c8074296f2aea370bab3c3525bc50426f3e687cbb4d1` |
 | `web/style.css` | `f78f81a295b9a6c44490247b74b5518116adcf0c8e10466a24fdec4330392082` |
-| `web/sw.js` | `bc4b3667c602ca831f8ee3b9023a3210147c4be04e0f88979916a5bb2e5f1b42` |
+| `web/sw.js` | `ec0be7720142cee811d2310377fa207cf4096ef99fc04697d9e0a59c8ce68263` |
 | `web/tab.js` | `91210cf7fdff29b2fc7c5309cab40820caaf4aea499279a41046cf0f34cdaf45` |
 | `web/theory.js` | `5bbb596047c749c3f4a592ba41a441db2988a8a3507e0ce5b1a05a01d845406e` |
 | `web/vendor/Midi.LICENSE.md` | `6debbf1ddd278dcf5d8e7b6c42c7a827cb944943401fc37ee017e172bbccbaea` |

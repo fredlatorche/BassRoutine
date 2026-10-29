@@ -107,7 +107,7 @@ const songState = {
 function applyPreset(name) {
   const p = PRESETS[name];
   if (!p) return;
-  $('loopInfo').hidden = true;
+  inventedLabel = '';
   loopState.chords = [];
   loopState.bass = [];
   loopState.frets = [];
@@ -140,8 +140,7 @@ function invent() {
   });
   $('preset').value = 'invented';
   const drumLabel = DRUM_STYLES[$('drumStyle').value === 'auto' ? drums : $('drumStyle').value];
-  $('loopInfo').textContent = `🎲 ${r.label}  ·  batterie : ${drumLabel}`;
-  $('loopInfo').hidden = false;
+  inventedLabel = `🎲 ${r.label}  ·  batterie : ${drumLabel}`;
   // C'est avec la nappe et la batterie que ça sonne : on les active.
   $('synth').checked = true;
   $('drums').checked = true;
@@ -312,6 +311,35 @@ const tab = createTab($('tab'), {
   labels: document.querySelector('.tab-labels'),
 });
 
+// Ligne orange sous les réglages : résumé du mode en cours (ligne inventée, gamme, morceau).
+let inventedLabel = '';   // description de la dernière ligne inventée (mode Boucle)
+const selectedText = (id) => $(id).selectedOptions[0]?.textContent ?? '';
+
+function updateInfo() {
+  let text;
+  if (mode === 'loop') {
+    text = $('preset').value === 'invented' && inventedLabel
+      ? inventedLabel
+      : `${selectedText('preset')} · ${loopState.bars} mesures`;
+  } else if (mode === 'scale') {
+    const what = scaleKeys.length > 1
+      ? `Gamme ${SCALE_TYPES[scaleState.type].label.toLowerCase()} · toutes les tonalités`
+      : scaleKeys[0]?.label.split(' · ')[0] ?? '';
+    const parts = [what];
+    if (scaleState.fingering === 'boxes') parts.push(selectedText('scaleBox'));
+    else parts.push(selectedText('scaleRange'));
+    parts.push(selectedText('scaleDir'), selectedText('scaleRhythm'), selectedText('scaleFinger'));
+    if (scaleState.fingering !== 'boxes' && scaleState.zone !== 'auto') parts.push(`zone ${selectedText('scaleZone').toLowerCase()}`);
+    text = parts.join(' · ');
+  } else {
+    text = usingMidi()
+      ? `MIDI : ${songState.midi.title}`
+      : `${currentSong().title} · ${songState.choruses} chorus · ${STYLES[songState.style]}`;
+  }
+  $('loopInfo').textContent = text;
+  $('loopInfo').hidden = !text;
+}
+
 const isLooping = () => (mode === 'loop' && $('loop').checked) || (mode === 'scale' && $('scaleLoop').checked);
 
 function refresh() {
@@ -325,6 +353,7 @@ function refresh() {
   tab.setCue(cue);
   $('clearRange').hidden = rangeEnd == null;
   tab.setKey(prog.barSig[cue / prog.bpb] ?? 0);
+  updateInfo();
 }
 
 // Se placer au début d'une mesure ; pendant la lecture, on y saute tout de suite.
@@ -1098,7 +1127,7 @@ function snapshot() {
     toggles: Object.fromEntries(TOGGLES.map((id) => [id, $(id).checked])),
     selects: Object.fromEntries(SELECTS.map((id) => [id, $(id).value])),
     loop: { ...loopState },
-    loopInfo: $('loopInfo').hidden ? '' : $('loopInfo').textContent,
+    loopInfo: inventedLabel,
     song: {
       songId: songState.songId === 'midi' ? SONGS[0].id : songState.songId,
       choruses: songState.choruses, seed: songState.seed, style: songState.style,
@@ -1140,10 +1169,7 @@ function restoreSettings() {
   } else {
     applyPreset($('preset').value in PRESETS ? $('preset').value : 'mi');
   }
-  if (saved.loopInfo) {
-    $('loopInfo').textContent = saved.loopInfo;
-    $('loopInfo').hidden = false;
-  }
+  if (saved.loopInfo && $('preset').value === 'invented') inventedLabel = saved.loopInfo;
 
   if (['loop', 'song', 'scale'].includes(saved.mode)) {
     $('mode').value = saved.mode;
