@@ -794,11 +794,38 @@ function frame() {
   requestAnimationFrame(frame);
 }
 
+// Réveille l'audio. Sur iPhone, le contexte audio peut être suspendu ou « interrompu »
+// (appel, autre app, écran verrouillé…) : on le relance sans jamais rester bloqué à l'attendre.
+async function wakeAudio() {
+  // iOS 17+ : joue même si le bouton silencieux est activé. À ne régler qu'une fois :
+  // le redéfinir pendant que l'audio tourne peut interrompre le son sur iPhone.
+  if (navigator.audioSession && navigator.audioSession.type !== 'playback') navigator.audioSession.type = 'playback';
+  const raw = Tone.getContext().rawContext;
+  if (raw.state !== 'running') {
+    await Promise.race([Tone.start(), new Promise((r) => setTimeout(r, 1000))]);
+  }
+  return raw.state === 'running';
+}
+
+let starting = false;   // évite deux démarrages si on touche Play deux fois très vite
 async function start() {
-  // iOS 17+ : joue même si le bouton silencieux est activé.
-  if (navigator.audioSession) navigator.audioSession.type = 'playback';
-  await Tone.start();
-  if (!bass) initAudio();
+  if (starting) return;
+  starting = true;
+  try {
+    const ok = await wakeAudio();
+    if (!ok) {
+      showMessage('Le son est bloqué par l\'iPhone : touche Play à nouveau.');
+      return;
+    }
+    if (!bass) initAudio();
+    if (Tone.Transport.state !== 'stopped') Tone.Transport.stop();   // transport resté en route : on repart propre
+    begin();
+  } finally {
+    starting = false;
+  }
+}
+
+function begin() {
   Tone.Transport.bpm.value = Number($('tempo').value);
   step = cue;
   cycle = 0;
@@ -825,6 +852,24 @@ function stopUI() {
   showBeat(null);
   tab.follow(null);
 }
+
+// ---------- Messages à l'écran ----------
+// Affiche un message quelques secondes (utile sur iPhone, où on ne voit pas la console).
+let messageTimer;
+function showMessage(text) {
+  const box = $('message');
+  box.textContent = text;
+  box.hidden = false;
+  clearTimeout(messageTimer);
+  messageTimer = setTimeout(() => { box.hidden = true; }, 6000);
+}
+window.addEventListener('error', (e) => showMessage(`Erreur : ${e.message}`));
+window.addEventListener('unhandledrejection', (e) => showMessage(`Erreur : ${e.reason?.message ?? e.reason}`));
+
+// Retour sur l'app (iPhone) : on relance l'audio s'il a été suspendu pendant la lecture.
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && playing) wakeAudio();
+});
 
 // ---------- Contrôles ----------
 

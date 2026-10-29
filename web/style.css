@@ -463,3 +463,19 @@ body.with-staff .hint { margin-bottom: 310px; }
   border-right: 2px dashed var(--accent);
   pointer-events: none;
 }
+
+/* Message temporaire (son bloqué, erreur…), au-dessus de la tab. */
+.message {
+  position: fixed;
+  left: 50%;
+  bottom: 190px;
+  transform: translateX(-50%);
+  z-index: 30;
+  max-width: calc(100% - 32px);
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
