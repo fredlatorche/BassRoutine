@@ -11,15 +11,23 @@ const BEAT_W = 60;                  // largeur d'un temps en pixels (minimum)
 const NOTE_W = 36;                  // place nécessaire pour une case à 2 chiffres + le numéro de doigt
 const MAX_BEAT_W = 150;
 
-// Largeur d'un temps : élargie quand les notes sont serrées (triolets, doubles croches),
-// pour que les numéros de case ne se chevauchent pas.
-function beatWidth(events) {
+const NOTE_X = 20;      // centre d'une note en début de mesure, après la barre (place pour une altération)
+const BAR_GAP = 26;     // espace minimal entre la dernière note d'une mesure et la barre suivante
+
+// Plus petit écart entre deux notes (en temps, au plus 1).
+function minGap(events) {
   let gap = 1;
   for (let i = 1; i < events.length; i++) {
     const d = events[i].t - events[i - 1].t;
     if (d > 0.01 && d < gap) gap = d;
   }
-  return Math.min(MAX_BEAT_W, Math.max(BEAT_W, Math.ceil(NOTE_W / gap)));
+  return gap;
+}
+
+// Largeur d'un temps : élargie quand les notes sont serrées (triolets, doubles croches),
+// pour que les numéros de case ne se chevauchent pas.
+function beatWidth(events) {
+  return Math.min(MAX_BEAT_W, Math.max(BEAT_W, Math.ceil(NOTE_W / minGap(events))));
 }
 const MAX_FRET = 20;
 
@@ -47,6 +55,9 @@ export function createTab(container, { onSeek, labels } = {}) {
   let track, playhead, cueMark, rangeMark, notes = [], events = [], current = -1, cueBeat = 0;
   let range = null;   // mesures sélectionnées à travailler : { start, end } en temps
   let bw = BEAT_W;   // largeur d'un temps pour l'affichage en cours
+  // Abscisse du centre d'une note : espacement régulier dans la mesure, très légèrement resserré
+  // si besoin pour laisser de l'air avant la barre de mesure suivante (notes rapides).
+  let xAt = (t) => t * bw + NOTE_X;
   let showStaff = false, everyAccidental = false, lastArgs = null, loop = 0, fifths = 0;
 
   // Un clic (ou un tap, pas un glissé) choisit le point de départ.
@@ -61,6 +72,12 @@ export function createTab(container, { onSeek, labels } = {}) {
   function render(evts, totalBeats, beatsPerBar, { loopLen = 0 } = {}) {
     lastArgs = [evts, totalBeats, beatsPerBar, { loopLen }];
     bw = beatWidth(evts);
+    const last = beatsPerBar - minGap(evts);   // position de la dernière note possible dans une mesure
+    const squeeze = Math.min(1, (beatsPerBar * bw - BAR_GAP - NOTE_X) / (last * bw || 1));
+    xAt = (t) => {
+      const b = Math.floor((t + 1e-6) / beatsPerBar);
+      return b * beatsPerBar * bw + NOTE_X + (t - b * beatsPerBar) * bw * squeeze;
+    };
     loop = loopLen;
     const basePos = fingerings(evts);   // même doigté pour toutes les copies
     let pos = basePos, doubles = [];
@@ -88,7 +105,7 @@ export function createTab(container, { onSeek, labels } = {}) {
     track.style.width = `${totalBeats * bw + 8}px`;
     track.style.height = `${140 + off}px`;
 
-    const staff = showStaff ? renderStaff(events, totalBeats, beatsPerBar, bw, doubles, everyAccidental) : null;
+    const staff = showStaff ? renderStaff(events, totalBeats, beatsPerBar, bw, doubles, everyAccidental, xAt) : null;
     if (staff) track.append(staff.svg);
 
     for (let s = 0; s < STRINGS.length; s++) {
@@ -109,7 +126,7 @@ export function createTab(container, { onSeek, labels } = {}) {
     }
 
     notes = events.map((e, i) => {
-      const x = e.t * bw + 14;   // aligné sous la note de la portée (marge après la barre de mesure)
+      const x = xAt(e.t) - 6;   // aligné sous la tête de note de la portée
       const el = document.createElement('b');
       el.className = 'tab-note';
       el.style.left = `${x}px`;

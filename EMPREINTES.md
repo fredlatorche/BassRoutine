@@ -8,7 +8,7 @@ change, l'empreinte change complètement. Associée à une date certaine (histor
 archive Software Heritage, horodatage OpenTimestamps ou enveloppe e-Soleau de l'INPI),
 cette liste prouve que ce code existait, sous cette forme, à cette date.
 
-**Empreinte globale de la version** : `3c5fd88885f56f82d734df1a91ce5f31699965d6da717f53ab595a1ba2aaa870`
+**Empreinte globale de la version** : `b9c1d6d9eab43340ceb612a1abebdc3fe3779cb9ae23a2df5a01dccda9dd0034`
 
 | Fichier | SHA-256 |
 |---|---|
@@ -35,10 +35,10 @@ cette liste prouve que ce code existait, sous cette forme, à cette date.
 | `web/scales.js` | `aed00296c7c0d8a6e29e60141f430787cfab0813e4fcc08c963c41696f29a252` |
 | `web/songs.js` | `4b8c21fa68a18eb12ff052e998aed7fee5a4a1b8fd17e2edb3928fa3fabbbf4c` |
 | `web/spelling.js` | `f3732cf60dec2d0eedd214305edcffba8cf09f399669a92d8e1173283915015d` |
-| `web/staff.js` | `644f2b63793f0c3cf441c8074296f2aea370bab3c3525bc50426f3e687cbb4d1` |
+| `web/staff.js` | `d1707001612b447221e7e74a3d0b0b2564c9dccab231a91d25c2769200859200` |
 | `web/style.css` | `f78f81a295b9a6c44490247b74b5518116adcf0c8e10466a24fdec4330392082` |
-| `web/sw.js` | `ec0be7720142cee811d2310377fa207cf4096ef99fc04697d9e0a59c8ce68263` |
-| `web/tab.js` | `91210cf7fdff29b2fc7c5309cab40820caaf4aea499279a41046cf0f34cdaf45` |
+| `web/sw.js` | `2d4fe5b8c0b1db1c68a873e7f86bba526afd23ccd5b368221477dac08cbfb343` |
+| `web/tab.js` | `483382f288411fb3ba091c4188f0390a41569a3fb53643f1c14581fd5a5b1002` |
 | `web/theory.js` | `5bbb596047c749c3f4a592ba41a441db2988a8a3507e0ce5b1a05a01d845406e` |
 | `web/vendor/Midi.LICENSE.md` | `6debbf1ddd278dcf5d8e7b6c42c7a827cb944943401fc37ee017e172bbccbaea` |
 | `web/vendor/Midi.js` | `9165a2b3de9d378eca970b80618c3747c60ed8188b12b0f059ccf44fc6a07cc0` |

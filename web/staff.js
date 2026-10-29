@@ -97,7 +97,8 @@ function flagPath(sx, sy, up) {
 // Dessine la portée ; renvoie le SVG et, pour chaque événement, son groupe (pour l'allumer en lecture).
 // doubles : positions (en temps) des doubles barres (fin / début de boucle).
 // everyNote : mode novice, l'altération est écrite sur chaque note altérée (même si l'armure l'indique déjà).
-export function renderStaff(events, totalBeats, bpb, beatW, doubles = [], everyNote = false) {
+// xAt(t) : abscisse du centre de la note, fournie par la tab (même placement des deux côtés).
+export function renderStaff(events, totalBeats, bpb, beatW, doubles = [], everyNote = false, xAt = (t) => t * beatW + 20) {
   const width = totalBeats * beatW + 8;
   const svg = el('svg', { width, height: STAFF_H, class: 'staff' });
   el('rect', { width, height: STAFF_H, class: 'staff-bg' }, svg);
@@ -115,7 +116,7 @@ export function renderStaff(events, totalBeats, bpb, beatW, doubles = [], everyN
   // 1. Têtes de notes, lignes supplémentaires et altérations ; valeur de chaque note.
   let barIdx = -1, shown = new Map();   // altérations déjà écrites dans la mesure
   const notes = events.map((e, i) => {
-    const x = e.t * beatW + 20;   // marge après la barre de mesure, pour une éventuelle altération
+    const x = xAt(e.t);
     const { d, acc } = spelling(e.midi, e.name);
     const y = yOf(d);
     const g = el('g', { class: 'staff-note' }, svg);
