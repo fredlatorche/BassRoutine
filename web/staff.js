@@ -103,8 +103,12 @@ export function renderStaff(events, totalBeats, bpb, beatW, doubles = [], everyN
   staffLines(svg, width);
   for (let b = 0; b * bpb <= totalBeats; b++) {
     const x = b * bpb * beatW;
-    el('line', { x1: x, x2: x, y1: BOTTOM - 8 * STEP, y2: BOTTOM, class: 'staff-bar' }, svg);
-    if (doubles.includes(b * bpb)) el('line', { x1: x - 4, x2: x - 4, y1: BOTTOM - 8 * STEP, y2: BOTTOM, class: 'staff-bar' }, svg);
+    // Calées sur les barres de la tab : trait de 2 px à partir de x ; double barre = traits à x et x + 4.
+    if (doubles.includes(b * bpb)) {
+      for (const dx of [1, 5]) el('line', { x1: x + dx, x2: x + dx, y1: BOTTOM - 8 * STEP, y2: BOTTOM, class: 'staff-bar double' }, svg);
+    } else {
+      el('line', { x1: x + 1, x2: x + 1, y1: BOTTOM - 8 * STEP, y2: BOTTOM, class: 'staff-bar' }, svg);
+    }
   }
 
   // 1. Têtes de notes, lignes supplémentaires et altérations ; valeur de chaque note.
