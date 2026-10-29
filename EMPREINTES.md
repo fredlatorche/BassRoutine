@@ -1,43 +1,44 @@
 # Empreintes de Bass Routine
 
 Auteur : **FredLatorche** — https://github.com/fredlatorche/BassRoutine
-Version : 1.0 — 2026-10-29
+Version : 2.0 — 2026-10-29
 
 Chaque fichier du projet est identifié par son empreinte SHA-256 : si un seul caractère
 change, l'empreinte change complètement. Associée à une date certaine (historique GitHub,
 archive Software Heritage, horodatage OpenTimestamps ou enveloppe e-Soleau de l'INPI),
 cette liste prouve que ce code existait, sous cette forme, à cette date.
 
-**Empreinte globale de la version** : `55df372569bc3b9d98df66f6cea58358165de02631498a70bcf74aa63ade44a6`
+**Empreinte globale de la version** : `eefe004a87db072448922ad3870dce0004bdae4a2b9f2e789ffcc7605af35d47`
 
 | Fichier | SHA-256 |
 |---|---|
 | `.gitignore` | `53f0c100a33a56ebada040287b3d0f5dbab21c6ec6b66209fec5515c508f1144` |
 | `LICENSE` | `1b29c7bf379ebc18668e0c8756402deab86025a63f224d61f456d2aeb200f01b` |
-| `README.md` | `7a40ca843a980f6cfc8cab445aac84245c3bcf328bec7fe029d29ba55e6b69f3` |
+| `README.md` | `545f555743df6b906df0dd3796fdaf357c69edbf882f5b0316399b6b9da66a49` |
 | `basse.swift` | `17ed483f5773f1f1507c5343da4dd967d044c771c5c75dbeef321852f08af382` |
-| `empreintes.py` | `ff67a1a557d6655124b9c29c2d2bccd7db2cc2545acf4d31f9e280e75c70c53a` |
+| `empreintes.py` | `71c4cf550bbb198d11eee811f024aa789d3ff8de7d92d09ed8e859c231f2144d` |
 | `exemples/test-basse.mid` | `6d8d8bf96c9feef098a1506d0101205c9af11ad231ac5ab573d436024def12fd` |
 | `index.html` | `1ab097b356ee429bd11c4b5c9dda8ec51514fac8086eca5cfde409baffa23637` |
 | `serve.py` | `b373da570e5234602b7997b9ea74c617e95abb4ef18a51561163112b362fe3fe` |
-| `web/app.js` | `324b3c944bd1e160df48ee0bdf25d27dc39004d29ecd5f6e89099c3e96c2ca6a` |
+| `web/app.js` | `a7fa3bbd8943955c4d766dac230472bab9002fd1601db4c57fb52b388708639b` |
 | `web/drums.js` | `657f9447a569dd26b8cfbd0336fba9324eacbcc19fd39a51a71e80513da46765` |
 | `web/icons/bass-light.png` | `fce175402346141974327847b0b0f55dcb97de967542bfeee025af9db37a724a` |
 | `web/icons/bass.png` | `467c80ce6204ee2cf73cc3cdbe56020d02655a0bccd9b8fe0a0d360da090ecf6` |
 | `web/icons/icon-180.png` | `78591f142a8c3f50510bc57570bb8c6f7a2fef33738618d62de6c0a2e48a8503` |
 | `web/icons/icon-192.png` | `48d982d53cce3c95ffefe8e119d98b52971589d91e3d203151409dcb826debf0` |
 | `web/icons/icon-512.png` | `52481dfecd5b451efe168b32640b7b5087bc04348a89e87dc66f60010cd83cfd` |
-| `web/index.html` | `84e87cb62c9e318cf73a5792d6bf87c421cb9eb220c3d34221e47c8c521aeeed` |
+| `web/index.html` | `e8aa48d8f42bdd34864b34541efd456503449872469a69364e5153f24d7df8e9` |
 | `web/manifest.json` | `1bc934ddc101bfe26457da5b60ac5c1790e89d6394675d7fec00cb56b9892e86` |
 | `web/midi-import.js` | `2bd342ee783cf674f007c75262900928d38253c3fda1db9f05e9e79b610aafff` |
+| `web/midi-out.js` | `1ddaa7ddc7651ecc6247837332d242ffeb1a91f554573cae80887ad8cee874e8` |
 | `web/notation.js` | `bfd8f70dfdf8d0f1722ed8e42b4fad5b98f2aaaeccd7da6943a9a47ada3b9738` |
 | `web/random-loop.js` | `8f922ede069994516c8fc672b0b7687f0d1573d467ede236e3b251d6752e1368` |
-| `web/scales.js` | `aed00296c7c0d8a6e29e60141f430787cfab0813e4fcc08c963c41696f29a252` |
+| `web/scales.js` | `f1a2112a6451a16b59bc2372f2c6e5e2a4de83b1be0553eb4400e765eb5cd1a1` |
 | `web/songs.js` | `4b8c21fa68a18eb12ff052e998aed7fee5a4a1b8fd17e2edb3928fa3fabbbf4c` |
 | `web/spelling.js` | `f3732cf60dec2d0eedd214305edcffba8cf09f399669a92d8e1173283915015d` |
 | `web/staff.js` | `d1707001612b447221e7e74a3d0b0b2564c9dccab231a91d25c2769200859200` |
-| `web/style.css` | `c9bd0eb0e35d87db9f8ead06127fcd561b7388068155721c83f0c6e851a12dae` |
-| `web/sw.js` | `0d5a00a13e1da37d8f79456e70b8d4ea18b8f6f4928e198be8062568efaabfd8` |
+| `web/style.css` | `44dfa6467f90b0aeef8957a0dc5ef524d99726f5d51a3ec77e2aafbb63de09c8` |
+| `web/sw.js` | `51e89e988524d6cb73ea968d26aaa395d21ba15e5292bdbb8ba64bfdbc655c78` |
 | `web/tab.js` | `483382f288411fb3ba091c4188f0390a41569a3fb53643f1c14581fd5a5b1002` |
 | `web/theory.js` | `5bbb596047c749c3f4a592ba41a441db2988a8a3507e0ce5b1a05a01d845406e` |
 | `web/vendor/Midi.LICENSE.md` | `6debbf1ddd278dcf5d8e7b6c42c7a827cb944943401fc37ee017e172bbccbaea` |
