@@ -11,6 +11,11 @@ ne rate aucune répétition et ne vous demande pas de porter l'ampli.
 **Version 2.0** : l'app peut désormais faire jouer l'accompagnement par vos propres instruments
 MIDI (synthés, boîte à rythmes, Ableton Live, GarageBand) : voir [Jouer avec ses instruments MIDI](#jouer-avec-ses-instruments-midi).
 
+🎯 **Fretless : l'app vous écoute et vous dit si vous jouez juste.** Branchez la basse, et le curseur
+n'avance que sur la bonne note, jouée assez juste : à ± 50, 25, 12 ou 6 cents selon le niveau choisi,
+avec l'écart affiché en direct (« +14 c, trop haut »). De quoi affiner sa justesse note après note,
+sans frettes pour tricher : voir [Affiner sa justesse sur une fretless](#affiner-sa-justesse-sur-une-fretless).
+
 ## Ouvrir l'app
 
 👉 **https://fredlatorche.github.io/BassRoutine/**
@@ -67,6 +72,49 @@ des transcriptions d'enregistrements.
   funk, half-time, reggae), réglage automatique selon le style, et petits breaks toutes les 4 mesures.
   Un batteur qui reste en place : c'est déjà la moitié du travail du bassiste.
 - **Métronome**.
+
+## ⏸ Attendre ma note
+
+Pour travailler sans pression de tempo : cocher **⏸ Attendre ma note** (bloc Accompagnement)
+puis Play. Le curseur reste sur la note à jouer tant qu'elle n'est pas entendue, puis passe
+à la suivante. Marche dans les trois modes (Boucle, Morceau, Gammes), avec la sélection de mesures.
+
+- **Entrée** : la basse branchée dans une interface audio (le plus fiable), ou le micro de
+  l'ordinateur ou du téléphone. Le navigateur demande l'accès la première fois.
+- La note doit être **exacte, octave comprise** : la même que dans la tab.
+- **Justesse** réglable (⚙️ → Entrée audio) : Large (± 50 cents, la note la plus proche), Moyen (± 25),
+  Précis (± 12) ou Très précis (± 6), pour travailler la justesse sur une fretless.
+- En haut de la tab : la note attendue ; en rouge la note entendue si elle est fausse, en orange
+  l'écart en cents si elle est un peu trop haute ou trop basse. Sur une fretless, on peut corriger
+  en glissant sans rejouer : la note est validée dès qu'elle est assez juste.
+- Pas d'accompagnement pendant l'attente (ni batterie, ni accords, ni métronome).
+- Réglages ⚙️ → **Entrée audio** : choix de l'entrée (interface audio, micro…), justesse, **seuil** de niveau
+  (à monter si des bruits ou des cordes qui résonnent sont pris pour des notes) et vumètre.
+
+Une même note rejouée est reconnue à sa nouvelle attaque. Avec un micro, mieux vaut une pièce calme.
+
+### Affiner sa justesse sur une fretless
+
+Sur une fretless, trouver la note ne suffit pas : il faut la poser juste, et l'oreille
+s'habitue vite à « presque juste ». Ici, c'est l'app qui tranche, au cent près, sans fatigue
+ni complaisance.
+
+- **Un écart mesuré, pas deviné** : à chaque note, l'app affiche de combien vous êtes trop haut
+  ou trop bas (en cents, un centième de demi-ton). On sait tout de suite s'il faut avancer
+  ou reculer le doigt, et de combien.
+- **Corriger en glissant** : si la note est un peu fausse, pas besoin de la rejouer. On glisse
+  le doigt en écoutant, et la note est validée à l'instant où elle entre dans la tolérance :
+  l'oreille et la main apprennent ensemble où se trouve la bonne place.
+- **Monter le niveau peu à peu** : commencer en *Moyen* (± 25 cents), passer en *Précis* (± 12)
+  quand les notes passent du premier coup, puis viser *Très précis* (± 6), la précision d'un accordeur.
+- **Les exercices s'y prêtent** : les gammes en position (le doigt de chaque note est indiqué),
+  la walking aiguë pensée pour la fretless, ou la ligne inventée sur **tout le manche** pour
+  travailler la justesse dans les positions hautes, là où les repères manquent.
+- **Au-delà des repères** : les points sur le côté de la touche aident à se placer, pas à jouer juste.
+  L'app, elle, juge ce qui sonne vraiment.
+
+Sur une basse frettée aussi, le mode attente aide à apprendre les notes et les positions,
+mais c'est sur une fretless qu'il prend tout son sens.
 
 ## Tablature et partition
 
@@ -151,6 +199,7 @@ et régler le canal sur celui que l'instrument écoute (souvent 1 par défaut). 
 | `web/scales.js` | Gammes et doigtés |
 | `web/drums.js` | Batterie et rythmes |
 | `web/midi-out.js` | Sortie vers les instruments MIDI |
+| `web/pitch.js` | Entrée audio et reconnaissance des notes jouées |
 | `web/tab.js` | Tablature |
 | `web/staff.js` | Partition en clé de fa |
 | `web/midi-import.js` | Lecture des fichiers MIDI |

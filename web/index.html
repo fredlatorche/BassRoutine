@@ -66,6 +66,10 @@
       <strong>Instruments MIDI</strong>
     </div>
     <div id="midiPanel"></div>
+    <div class="mixer-head midi-head">
+      <strong>Entrée audio (⏸ Attendre ma note)</strong>
+    </div>
+    <div id="inputPanel"></div>
   </section>
 
   <section class="controls">
@@ -256,6 +260,9 @@
       <div class="field check">
         <label class="toggle"><input id="metro" type="checkbox"> Métronome</label>
       </div>
+      <div class="field check">
+        <label class="toggle" title="Le curseur attend que tu joues la bonne note (basse branchée dans l'interface audio, ou micro), sans accompagnement"><input id="waitMode" type="checkbox"> ⏸ Attendre ma note</label>
+      </div>
     </div>
   </section>
 
@@ -287,6 +294,7 @@
   <div id="message" class="message" role="status" hidden></div>
 
   <footer id="tabPanel">
+    <div id="waitStatus" class="wait-status" hidden aria-live="polite"></div>
     <!-- Toucher la tab place le début ou la fin des mesures à travailler en boucle. -->
     <div class="tab-tools" role="group" aria-label="Toucher la tablature pour placer">
       <button data-touch="start" class="on" aria-pressed="true" title="Toucher la tab place le début">▶ Début</button>

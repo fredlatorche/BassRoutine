@@ -13,6 +13,7 @@ import { inventLoop, KEY_CHOICES, fifthsFromLabel } from './random-loop.js';
 import { spellEvents, pitchName } from './spelling.js';
 import { setNotation, noteLabel } from './notation.js';
 import * as midiOut from './midi-out.js';
+import * as pitch from './pitch.js';
 
 const BEATS = 4;
 const $ = (id) => document.getElementById(id);
@@ -355,6 +356,7 @@ function refresh() {
   $('clearRange').hidden = rangeEnd == null;
   tab.setKey(prog.barSig[cue / prog.bpb] ?? 0);
   updateInfo();
+  if (waiting) resetWaiting();   // exercice modifié pendant l'attente : on repart de son début
 }
 
 // Se placer au début d'une mesure ; pendant la lecture, on y saute tout de suite.
@@ -375,7 +377,9 @@ function seek(bar) {
   tab.setRange(rangeEnd != null ? { start: cue, end: rangeEnd } : null);
   tab.setCue(cue);
   $('clearRange').hidden = rangeEnd == null;
-  if (playing) {
+  if (waiting) {
+    resetWaiting();   // mode attente : on attend la première note de la nouvelle position
+  } else if (playing) {
     // Pendant la lecture : on saute au début (ou on y revient si on est sorti de la sélection).
     if (touchMode === 'end' && step >= cue && step < rangeEnd) return;
     step = cue;
@@ -835,10 +839,12 @@ function frame() {
 
 // Réveille l'audio. Sur iPhone, le contexte audio peut être suspendu ou « interrompu »
 // (appel, autre app, écran verrouillé…) : on le relance sans jamais rester bloqué à l'attendre.
-async function wakeAudio() {
-  // iOS 17+ : joue même si le bouton silencieux est activé. À ne régler qu'une fois :
+// record : le micro va servir (mode attente), il faut une session « lecture et enregistrement ».
+async function wakeAudio(record = false) {
+  // iOS 17+ : joue même si le bouton silencieux est activé. À ne régler que si ça change :
   // le redéfinir pendant que l'audio tourne peut interrompre le son sur iPhone.
-  if (navigator.audioSession && navigator.audioSession.type !== 'playback') navigator.audioSession.type = 'playback';
+  const session = record ? 'play-and-record' : 'playback';
+  if (navigator.audioSession && navigator.audioSession.type !== session) navigator.audioSession.type = session;
   const raw = Tone.getContext().rawContext;
   if (raw.state !== 'running') {
     await Promise.race([Tone.start(), new Promise((r) => setTimeout(r, 1000))]);
@@ -851,6 +857,10 @@ async function start() {
   if (starting) return;
   starting = true;
   try {
+    if ($('waitMode').checked) {
+      await startWaiting();
+      return;
+    }
     const ok = await wakeAudio();
     if (!ok) {
       showMessage('Le son est bloqué par l\'iPhone : touche Play à nouveau.');
@@ -882,8 +892,198 @@ function stop() {
   pad?.releaseAll();
   other?.releaseAll();
   midiOut.silence();
+  stopWaiting();
   stopUI();
 }
+
+// ---------- Mode « Attendre ma note » ----------
+// Pas de tempo ni d'accompagnement : le curseur reste sur la note à jouer jusqu'à ce que
+// l'entrée audio (basse ou micro) l'entende, octave comprise, puis passe à la suivante.
+
+let waiting = null;   // { notes, i, cycle } pendant l'attente
+
+// La note attendue est celle de la tab (sous le Mi grave, la tab la place une octave plus haut).
+const expectedMidi = (e) => (e.fret == null && e.midi < LOW_E ? e.midi + 12 : e.midi);
+// Nom d'une note avec son registre, comme dans la grille de la boucle. La note attendue garde
+// l'orthographe de l'exercice ; une note entendue a un nom simple (dièses, ou bémols si l'armure en a).
+const SHARP_NAMES = ['Do', 'Do♯', 'Ré', 'Ré♯', 'Mi', 'Fa', 'Fa♯', 'Sol', 'Sol♯', 'La', 'La♯', 'Si'];
+const FLAT_NAMES = ['Do', 'Ré♭', 'Ré', 'Mi♭', 'Mi', 'Fa', 'Sol♭', 'Sol', 'La♭', 'La', 'Si♭', 'Si'];
+const register = (m) => (m >= LOW_E + 24 ? ' suraigu' : m >= LOW_E + 12 ? ' aigu' : ' grave');
+const expectedLabel = (e) => noteLabel(e.name ?? pitchName(expectedMidi(e), e.sig ?? 0)) + register(expectedMidi(e));
+const heardLabel = (m, sig) => noteLabel((sig < 0 ? FLAT_NAMES : SHARP_NAMES)[m % 12]) + register(m);
+
+function waitingNotes() {
+  const end = rangeEnd ?? prog.totalBeats;
+  return prog.bassEvents.filter((e) => e.midi != null && e.t >= cue && e.t < end);
+}
+
+async function startWaiting() {
+  if (!pitch.inputSupported()) {
+    showMessage('Ce navigateur ne donne pas accès au micro ni à l\'interface audio.');
+    return;
+  }
+  const notes = waitingNotes();
+  if (!notes.length) {
+    showMessage('Aucune note à jouer à partir d\'ici.');
+    return;
+  }
+  if (!(await wakeAudio(true))) {
+    showMessage('Le son est bloqué : touche Play à nouveau.');
+    return;
+  }
+  try {
+    await pitch.openInput(Tone.getContext().rawContext, { onNote: heardNote });
+  } catch (err) {
+    showMessage(`Pas d'accès au micro / à l'interface audio (${err.name}). Autorise-le dans le navigateur.`);
+    return;
+  }
+  renderInputPanel();   // les noms des entrées sont visibles maintenant que l'accès est donné
+  waiting = { notes, i: 0, cycle: 0, listening: false };
+  playing = true;
+  $('play').textContent = '■ Stop';
+  $('waitStatus').hidden = false;
+  showWaiting();
+}
+
+function resetWaiting() {
+  const notes = waitingNotes();
+  if (!notes.length) { stop(); return; }
+  Object.assign(waiting, { notes, i: 0, cycle: 0, listening: false });
+  showWaiting();
+}
+
+function stopWaiting() {
+  if (!waiting) return;
+  waiting = null;
+  pitch.closeInput();
+  $('waitStatus').hidden = true;
+}
+
+// feedback : { text, cls } affiché après la note attendue (note fausse, ou justesse à corriger).
+function showWaiting(feedback = null) {
+  const e = waiting.notes[waiting.i];
+  // En boucle, la tab affiche la suite après la fin : à partir du 2e passage, on suit cette copie (comme frame()).
+  const copy = isLooping() && rangeEnd == null && waiting.cycle >= 1 ? prog.totalBeats : 0;
+  tab.follow(e.t + copy);
+  showBeat(Math.floor(e.t));
+  const box = $('waitStatus');
+  box.replaceChildren(`À jouer : ${expectedLabel(e)}`);
+  if (feedback) {
+    const span = document.createElement('span');
+    span.className = feedback.cls;
+    span.textContent = ` · ${feedback.text}`;
+    box.append(span);
+  }
+}
+
+// Appelé tant qu'une note stable sonne. Une note attaquée est jugée ; si elle n'est pas juste,
+// on continue de l'écouter : sur une fretless, on peut corriger en glissant sans rejouer.
+let okTimer;
+function heardNote({ pitch: played, midi, attack }) {
+  if (!waiting) return;
+  if (attack) waiting.listening = true;
+  if (!waiting.listening) return;   // note déjà validée qui continue de sonner
+  const e = waiting.notes[waiting.i];
+  const sig = e.sig ?? 0;
+  const cents = Math.round((played - expectedMidi(e)) * 100);
+  if (Math.abs(cents) <= pitch.inputSettings().tolerance) {
+    nextWaitingNote();
+  } else if (Math.abs(cents) < 100) {
+    const sign = cents > 0 ? '+' : '−';
+    showWaiting({ text: `${sign}${Math.abs(cents)} c, trop ${cents > 0 ? 'haut' : 'bas'}`, cls: 'off' });
+  } else {
+    showWaiting({ text: `entendu : ${heardLabel(midi, sig)}`, cls: 'wrong' });
+  }
+}
+
+function nextWaitingNote() {
+  const box = $('waitStatus');
+  box.classList.add('ok');
+  clearTimeout(okTimer);
+  okTimer = setTimeout(() => box.classList.remove('ok'), 250);
+  waiting.listening = false;   // la note suivante devra être attaquée
+  waiting.i++;
+  if (waiting.i >= waiting.notes.length) {
+    if (!isLooping() && rangeEnd == null) {
+      stop();
+      showMessage('Bravo, tout est joué !');
+      return;
+    }
+    waiting.i = 0;   // boucle ou sélection : on recommence
+    waiting.cycle++;
+  }
+  showWaiting();
+}
+
+// Réglages : choix de l'entrée audio, seuil de niveau et vumètre.
+function renderInputPanel() {
+  const panel = $('inputPanel');
+  panel.replaceChildren();
+  const note = (text) => {
+    const p = document.createElement('p');
+    p.className = 'midi-note';
+    p.textContent = text;
+    panel.append(p);
+  };
+  if (!pitch.inputSupported()) {
+    note('Ce navigateur ne donne pas accès au micro ni à l\'interface audio.');
+    return;
+  }
+  note('Branche la basse dans l\'interface audio (ou utilise le micro), coche « ⏸ Attendre ma note » puis Play : le curseur avance quand la bonne note est jouée.');
+  const settings = pitch.inputSettings();
+  const row = (label, ...inputs) => {
+    const line = document.createElement('label');
+    line.className = 'midi-row';
+    const text = document.createElement('span');
+    text.textContent = label;
+    line.append(text, ...inputs);
+    panel.append(line);
+  };
+  const device = document.createElement('select');
+  device.append(new Option('Entrée par défaut', ''));
+  device.value = settings.device;
+  device.addEventListener('change', () => pitch.setInput({ device: device.value }));
+  pitch.listInputs().then((inputs) => {
+    for (const d of inputs) {
+      if (d.deviceId === 'default' || !d.deviceId) continue;
+      device.append(new Option(d.label || 'Entrée audio (nom visible après autorisation)', d.deviceId));
+    }
+    device.value = settings.device;
+  });
+  row('Entrée', device, document.createElement('span'));
+  // Justesse : sur une fretless, resserrer pour travailler la justesse.
+  const tolerance = document.createElement('select');
+  for (const [cents, label] of Object.entries(pitch.TOLERANCES).reverse()) tolerance.append(new Option(label, cents));
+  tolerance.value = String(settings.tolerance);
+  tolerance.addEventListener('change', () => pitch.setInput({ tolerance: Number(tolerance.value) }));
+  row('Justesse', tolerance, document.createElement('span'));
+  // Seuil : en dessous, le son est ignoré (bruit, cordes qui résonnent).
+  const threshold = document.createElement('input');
+  threshold.type = 'range';
+  threshold.min = 0.002;
+  threshold.max = 0.1;
+  threshold.step = 0.002;
+  threshold.value = settings.threshold;
+  threshold.addEventListener('input', () => pitch.setInput({ threshold: Number(threshold.value) }));
+  const meter = document.createElement('div');
+  meter.className = 'input-meter';
+  meter.title = 'Niveau entendu (pendant l\'attente)';
+  const bar = document.createElement('div');
+  meter.append(bar);
+  row('Seuil', threshold, meter);
+  // Vumètre (il bouge pendant l'attente) : rafraîchi souvent seulement quand les réglages sont ouverts.
+  const refreshMeter = () => {
+    if (!meter.isConnected) return;   // panneau reconstruit : ce vumètre n'existe plus
+    const level = pitch.inputLevel();
+    bar.style.width = `${Math.min(100, (level / 0.2) * 100)}%`;
+    bar.style.background = level > Number(threshold.value) ? 'var(--accent)' : 'var(--muted)';
+    if ($('mixer').hidden) setTimeout(refreshMeter, 500);
+    else requestAnimationFrame(refreshMeter);
+  };
+  refreshMeter();
+}
+renderInputPanel();
+$('waitMode').addEventListener('change', () => { if (playing) stop(); });
 
 function stopUI() {
   playing = false;
@@ -1210,7 +1410,7 @@ document.addEventListener('keydown', (e) => {
 // Le fichier MIDI importé n'est pas gardé (il faut le réimporter).
 
 const SETTINGS_KEY = 'bassroutine-settings';
-const TOGGLES = ['synth', 'drums', 'fills', 'metro', 'others', 'loop', 'scaleLoop'];
+const TOGGLES = ['synth', 'drums', 'fills', 'metro', 'others', 'loop', 'scaleLoop', 'waitMode'];
 const SELECTS = ['padSound', 'drumStyle', 'randKey', 'randMode', 'randRegister', 'preset', 'bars'];
 const SCALE_SELECTS = {
   scaleType: 'type', scaleKey: 'key', scaleRange: 'range', scaleDir: 'direction',
