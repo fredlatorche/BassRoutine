@@ -264,8 +264,15 @@ button.play {
 .chart-bar.playing { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
 
 .hint { color: var(--muted); font-size: 0.85rem; margin-top: 20px; margin-bottom: 0; }
-.copyright { color: var(--muted); font-size: 0.8rem; margin: 10px 0 200px; }
+.copyright { color: var(--muted); font-size: 0.8rem; margin: 10px 0 0; }
 .copyright a { color: var(--accent); }
+
+/* Les deux basses : têtes en haut au centre, corps écartés vers le bas (pivot sur la tête). */
+.bass-duo { position: relative; height: 265px; max-width: 420px; margin: 16px auto 200px; pointer-events: none; }
+.bass-duo img { position: absolute; top: 0; width: 240px; height: auto; transform-origin: right center; filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.35)); }
+.bass-duo .bass-noire { right: calc(50% + 24px); transform: rotate(-74deg); }
+.bass-duo .bass-creme { right: calc(50% - 24px); transform: rotate(-106deg); }
+:root:not([data-theme="clair"]) .bass-duo .bass-noire { filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.45)) drop-shadow(0 6px 8px rgba(0, 0, 0, 0.35)); }
 
 /* ---------- Tablature (fixée en bas) ---------- */
 
@@ -437,7 +444,7 @@ button.gear { font-size: 1.2rem; line-height: 1; padding: 6px 8px; }
 .staff-note.playing .staff-acc { fill: var(--accent); }
 
 .mixer-option { margin-bottom: 14px; }
-body.with-staff .copyright { margin-bottom: 310px; }
+body.with-staff .bass-duo { margin-bottom: 310px; }
 
 /* Double trait : fin d'un passage de la boucle et début du suivant. */
 .tab-bar.double { border-left: 6px double var(--accent); }
