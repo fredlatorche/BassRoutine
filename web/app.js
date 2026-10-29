@@ -980,10 +980,23 @@ function setTheme(name) {
 $('theme').value = document.documentElement.dataset.theme ?? '';
 $('theme').addEventListener('change', (e) => setTheme(e.target.value));
 
-$('mixerBtn').addEventListener('click', () => {
-  const open = $('mixer').hidden;
-  $('mixer').hidden = !open;
+// Panneau des réglages : fenêtre posée juste sous l'en-tête (visible même si la page a défilé).
+function setSettingsOpen(open) {
+  const panel = $('mixer');
+  if (open) panel.style.top = `${document.querySelector('header').getBoundingClientRect().bottom + 6}px`;
+  panel.hidden = !open;
   $('mixerBtn').setAttribute('aria-expanded', open);
+}
+$('mixerBtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  setSettingsOpen($('mixer').hidden);
+});
+// Fermeture : clic en dehors du panneau, ou touche Échap.
+document.addEventListener('click', (e) => {
+  if (!$('mixer').hidden && !$('mixer').contains(e.target)) setSettingsOpen(false);
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && !$('mixer').hidden) setSettingsOpen(false);
 });
 $('mixerReset').addEventListener('click', () => {
   $('mixerChannels').querySelectorAll('input').forEach((slider) => {

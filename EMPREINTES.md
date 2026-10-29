@@ -8,7 +8,7 @@ change, l'empreinte change complètement. Associée à une date certaine (histor
 archive Software Heritage, horodatage OpenTimestamps ou enveloppe e-Soleau de l'INPI),
 cette liste prouve que ce code existait, sous cette forme, à cette date.
 
-**Empreinte globale de la version** : `b9c1d6d9eab43340ceb612a1abebdc3fe3779cb9ae23a2df5a01dccda9dd0034`
+**Empreinte globale de la version** : `24166e6f345d2944c4dae1720f775e59d03138e667d08125f8be25d3f92193f2`
 
 | Fichier | SHA-256 |
 |---|---|
@@ -20,7 +20,7 @@ cette liste prouve que ce code existait, sous cette forme, à cette date.
 | `exemples/test-basse.mid` | `6d8d8bf96c9feef098a1506d0101205c9af11ad231ac5ab573d436024def12fd` |
 | `index.html` | `1ab097b356ee429bd11c4b5c9dda8ec51514fac8086eca5cfde409baffa23637` |
 | `serve.py` | `b373da570e5234602b7997b9ea74c617e95abb4ef18a51561163112b362fe3fe` |
-| `web/app.js` | `6d81aaa03aaa26b2ec4d3225f750060d55fe8a7d579d11f8515596f09ea8ea1a` |
+| `web/app.js` | `324b3c944bd1e160df48ee0bdf25d27dc39004d29ecd5f6e89099c3e96c2ca6a` |
 | `web/drums.js` | `657f9447a569dd26b8cfbd0336fba9324eacbcc19fd39a51a71e80513da46765` |
 | `web/icons/bass-light.png` | `fce175402346141974327847b0b0f55dcb97de967542bfeee025af9db37a724a` |
 | `web/icons/bass.png` | `467c80ce6204ee2cf73cc3cdbe56020d02655a0bccd9b8fe0a0d360da090ecf6` |
@@ -36,8 +36,8 @@ cette liste prouve que ce code existait, sous cette forme, à cette date.
 | `web/songs.js` | `4b8c21fa68a18eb12ff052e998aed7fee5a4a1b8fd17e2edb3928fa3fabbbf4c` |
 | `web/spelling.js` | `f3732cf60dec2d0eedd214305edcffba8cf09f399669a92d8e1173283915015d` |
 | `web/staff.js` | `d1707001612b447221e7e74a3d0b0b2564c9dccab231a91d25c2769200859200` |
-| `web/style.css` | `f78f81a295b9a6c44490247b74b5518116adcf0c8e10466a24fdec4330392082` |
-| `web/sw.js` | `2d4fe5b8c0b1db1c68a873e7f86bba526afd23ccd5b368221477dac08cbfb343` |
+| `web/style.css` | `aab0a2534750d32abf100b56bbf9c9828d670f7e1239ac748592499a6d9b4b35` |
+| `web/sw.js` | `575609586ef3da756e2d14d1872c2bdeb011f597a656738a4b8f1cc64bb8c675` |
 | `web/tab.js` | `483382f288411fb3ba091c4188f0390a41569a3fb53643f1c14581fd5a5b1002` |
 | `web/theory.js` | `5bbb596047c749c3f4a592ba41a441db2988a8a3507e0ce5b1a05a01d845406e` |
 | `web/vendor/Midi.LICENSE.md` | `6debbf1ddd278dcf5d8e7b6c42c7a827cb944943401fc37ee017e172bbccbaea` |
