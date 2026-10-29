@@ -8,13 +8,13 @@ change, l'empreinte change complètement. Associée à une date certaine (histor
 archive Software Heritage, horodatage OpenTimestamps ou enveloppe e-Soleau de l'INPI),
 cette liste prouve que ce code existait, sous cette forme, à cette date.
 
-**Empreinte globale de la version** : `f782dee8b7c0228de0e2402d251bd202b1337aa01a6328ee27e831ab89e15087`
+**Empreinte globale de la version** : `1c61c113695f897174d1833b22bce2add0c0b0043dc5ac1004dfbfeae894bd26`
 
 | Fichier | SHA-256 |
 |---|---|
 | `.gitignore` | `53f0c100a33a56ebada040287b3d0f5dbab21c6ec6b66209fec5515c508f1144` |
 | `LICENSE` | `1b29c7bf379ebc18668e0c8756402deab86025a63f224d61f456d2aeb200f01b` |
-| `README.md` | `9cca9191ce5e96498ce297e9a16073113885cc2f7a06b346a46dc6b3a88bec01` |
+| `README.md` | `54c7261ba4e0b4c7fc1ffa12cb226a22ee8463961f38ea1dfaaddd68da375153` |
 | `basse.swift` | `17ed483f5773f1f1507c5343da4dd967d044c771c5c75dbeef321852f08af382` |
 | `empreintes.py` | `71c4cf550bbb198d11eee811f024aa789d3ff8de7d92d09ed8e859c231f2144d` |
 | `exemples/test-basse.mid` | `6d8d8bf96c9feef098a1506d0101205c9af11ad231ac5ab573d436024def12fd` |
@@ -32,14 +32,14 @@ cette liste prouve que ce code existait, sous cette forme, à cette date.
 | `web/midi-import.js` | `2bd342ee783cf674f007c75262900928d38253c3fda1db9f05e9e79b610aafff` |
 | `web/midi-out.js` | `1ddaa7ddc7651ecc6247837332d242ffeb1a91f554573cae80887ad8cee874e8` |
 | `web/notation.js` | `bfd8f70dfdf8d0f1722ed8e42b4fad5b98f2aaaeccd7da6943a9a47ada3b9738` |
-| `web/pitch.js` | `686ff0d3411b073a4a89d079f5af71e74406c73ea3b9e6cd02bc078a10811a15` |
+| `web/pitch.js` | `4cedae4202740aeda65170474f11eb701a07ed524f255b0ae41fd0d3c1ce48e1` |
 | `web/random-loop.js` | `a40398e19063eeeb9253fa1734c0d05423bd2c34e2b7d0b45a84852eb61ef163` |
 | `web/scales.js` | `f1a2112a6451a16b59bc2372f2c6e5e2a4de83b1be0553eb4400e765eb5cd1a1` |
 | `web/songs.js` | `4b8c21fa68a18eb12ff052e998aed7fee5a4a1b8fd17e2edb3928fa3fabbbf4c` |
 | `web/spelling.js` | `f3732cf60dec2d0eedd214305edcffba8cf09f399669a92d8e1173283915015d` |
 | `web/staff.js` | `d1707001612b447221e7e74a3d0b0b2564c9dccab231a91d25c2769200859200` |
 | `web/style.css` | `c2bb9dadb90a4eb7d47bd8e7c064d5de8b9ebd5480ec5e85f40b5c53c0428983` |
-| `web/sw.js` | `837654859d0ba197af86b298eedbb4fca53d09718af6a2888a14fa8a09410517` |
+| `web/sw.js` | `172447403dc7ae0dcc6b1c7df749c4938256c4b7d59ea831a50c3fcdbb6ee6dd` |
 | `web/tab.js` | `483382f288411fb3ba091c4188f0390a41569a3fb53643f1c14581fd5a5b1002` |
 | `web/theory.js` | `5bbb596047c749c3f4a592ba41a441db2988a8a3507e0ce5b1a05a01d845406e` |
 | `web/vendor/Midi.LICENSE.md` | `6debbf1ddd278dcf5d8e7b6c42c7a827cb944943401fc37ee017e172bbccbaea` |
