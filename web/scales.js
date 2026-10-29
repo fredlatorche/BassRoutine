@@ -123,9 +123,13 @@ function candidates(midi, zone) {
         cost = k === -1 ? 0.6 : 0;
       }
       const outside = p < pMin ? pMin - p : p > pMax ? p - pMax : 0;   // hors de la zone demandée
-      out.push({ string, fret, p, finger, cost: cost + outside + p * 0.01 });   // à égalité, le bas du manche
+      out.push({ string, fret, p, finger, outside, cost: cost + p * 0.01 });   // à égalité, le bas du manche
     }
   });
+  // Une note injouable dans la zone (gamme qui en déborde) n'est pas pénalisée : sinon la main
+  // sortirait le moins possible, en jouant ces notes des doigts du haut, sans l'index.
+  const forcedOut = Math.min(...out.map((c) => c.outside)) > 0;
+  if (!forcedOut) out.forEach((c) => { c.cost += c.outside; });
   return out;
 }
 
@@ -134,7 +138,14 @@ function transition(a, b, interval) {
   if (a.p !== b.p) {
     // Déplacement de main : plusieurs petits (sur un ton) valent mieux qu'un grand saut ; jamais sur un demi-ton.
     cost += 1.5 + 0.6 * Math.abs(b.p - a.p) + (Math.abs(interval) === 1 ? 3 : 0);
+    // En montant, la main se déplace en arrivant sur l'index (la descente reprend le doigté à l'envers :
+    // elle arrive alors sur l'auriculaire). Sinon les doigts du haut s'enchaînent et l'index ne sert plus.
+    // On part d'un doigt du haut, pas de l'index (pas d'index qui glisse d'une case à l'autre).
+    if (b.p > a.p && b.finger > 1) cost += 2;
+    if (b.p > a.p && a.finger === 1) cost += 2;
   }
+  // Le même doigt sur deux cases d'une même corde (glissé, ou index en extension puis à sa place) : à éviter.
+  if (b.string === a.string && b.finger > 0 && b.finger === a.finger && b.fret !== a.fret) cost += 4;
   const jump = Math.abs(b.string - a.string);
   if (jump > 1) cost += 0.5 * (jump - 1);                 // sauter une corde
   if ((interval > 0 && b.string < a.string) || (interval < 0 && b.string > a.string)) cost += 6;   // contre le sens de la gamme
