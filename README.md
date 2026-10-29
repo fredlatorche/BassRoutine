@@ -83,7 +83,7 @@ puis Play. Le curseur reste sur la note à jouer tant qu'elle n'est pas entendue
   l'ordinateur ou du téléphone. Le navigateur demande l'accès la première fois.
 - La note doit être **exacte, octave comprise** : la même que dans la tab.
 - **Justesse** réglable (⚙️ → Entrée audio) : Large (± 50 cents, la note la plus proche), Moyen (± 25),
-  Précis (± 12) ou Très précis (± 6), pour travailler la justesse sur une fretless.
+  **Précis (± 12, recommandé et réglé par défaut)** ou Très précis (± 6), pour travailler la justesse sur une fretless.
 - En haut de la tab : la note attendue ; en rouge la note entendue si elle est fausse, en orange
   l'écart en cents si elle est un peu trop haute ou trop basse. Sur une fretless, on peut corriger
   en glissant sans rejouer : la note est validée dès qu'elle est assez juste.
@@ -105,8 +105,10 @@ ni complaisance.
 - **Corriger en glissant** : si la note est un peu fausse, pas besoin de la rejouer. On glisse
   le doigt en écoutant, et la note est validée à l'instant où elle entre dans la tolérance :
   l'oreille et la main apprennent ensemble où se trouve la bonne place.
-- **Monter le niveau peu à peu** : commencer en *Moyen* (± 25 cents), passer en *Précis* (± 12)
-  quand les notes passent du premier coup, puis viser *Très précis* (± 6), la précision d'un accordeur.
+- **Quel niveau viser ?** *Précis* (± 12 cents, le réglage par défaut) : c'est la justesse qui passe
+  inaperçue en jeu de groupe. *Moyen* (± 25) sert à débuter : l'écart s'entend encore, surtout sur une
+  note tenue. *Très précis* (± 6), la précision d'un accordeur, pour les notes longues, les positions
+  hautes et l'unisson avec un piano.
 - **Les exercices s'y prêtent** : les gammes en position (le doigt de chaque note est indiqué),
   la walking aiguë pensée pour la fretless, ou la ligne inventée sur **tout le manche** pour
   travailler la justesse dans les positions hautes, là où les repères manquent.

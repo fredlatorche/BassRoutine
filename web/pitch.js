@@ -130,10 +130,10 @@ export function createTracker(threshold = 0.01) {
 export const TOLERANCES = {
   50: 'Large (± 50 cents : la note la plus proche)',
   25: 'Moyen (± 25 cents)',
-  12: 'Précis (± 12 cents)',
+  12: 'Précis (± 12 cents) — recommandé',
   6: 'Très précis (± 6 cents)',
 };
-const settings = { device: '', threshold: 0.01, tolerance: 50 };
+const settings = { device: '', threshold: 0.01, tolerance: 12 };   // Précis par défaut
 try { Object.assign(settings, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch { /* stockage indisponible */ }
 const save = () => {
   try { localStorage.setItem(KEY, JSON.stringify(settings)); } catch { /* stockage indisponible */ }
