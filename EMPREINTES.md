@@ -8,7 +8,7 @@ change, l'empreinte change complètement. Associée à une date certaine (histor
 archive Software Heritage, horodatage OpenTimestamps ou enveloppe e-Soleau de l'INPI),
 cette liste prouve que ce code existait, sous cette forme, à cette date.
 
-**Empreinte globale de la version** : `3c46d6103a4deaad30c403a5e79bb135f51e8302e13162f06dcfb0f771b2de7b`
+**Empreinte globale de la version** : `56123c74549b9082fd62ed414de84d912ec98cb30c04991333b95ef843bfd6b3`
 
 | Fichier | SHA-256 |
 |---|---|
@@ -20,14 +20,14 @@ cette liste prouve que ce code existait, sous cette forme, à cette date.
 | `exemples/test-basse.mid` | `6d8d8bf96c9feef098a1506d0101205c9af11ad231ac5ab573d436024def12fd` |
 | `index.html` | `1ab097b356ee429bd11c4b5c9dda8ec51514fac8086eca5cfde409baffa23637` |
 | `serve.py` | `b373da570e5234602b7997b9ea74c617e95abb4ef18a51561163112b362fe3fe` |
-| `web/app.js` | `a7fa3bbd8943955c4d766dac230472bab9002fd1601db4c57fb52b388708639b` |
+| `web/app.js` | `b20fb6a2581e78e969959e5b6800c60a88e134834be71dc812ae75c5ef1cad91` |
 | `web/drums.js` | `657f9447a569dd26b8cfbd0336fba9324eacbcc19fd39a51a71e80513da46765` |
 | `web/icons/bass-light.png` | `fce175402346141974327847b0b0f55dcb97de967542bfeee025af9db37a724a` |
 | `web/icons/bass.png` | `467c80ce6204ee2cf73cc3cdbe56020d02655a0bccd9b8fe0a0d360da090ecf6` |
 | `web/icons/icon-180.png` | `78591f142a8c3f50510bc57570bb8c6f7a2fef33738618d62de6c0a2e48a8503` |
 | `web/icons/icon-192.png` | `48d982d53cce3c95ffefe8e119d98b52971589d91e3d203151409dcb826debf0` |
 | `web/icons/icon-512.png` | `52481dfecd5b451efe168b32640b7b5087bc04348a89e87dc66f60010cd83cfd` |
-| `web/index.html` | `f0842339fe0c6213803f96f2c286852e7c4e1293aec9821e6be6367f68f96f87` |
+| `web/index.html` | `d25e235b9a1a0f7dfcc456bdde3328c92ea9731fffc4a87c29a8619a7fe3de40` |
 | `web/manifest.json` | `1bc934ddc101bfe26457da5b60ac5c1790e89d6394675d7fec00cb56b9892e86` |
 | `web/midi-import.js` | `2bd342ee783cf674f007c75262900928d38253c3fda1db9f05e9e79b610aafff` |
 | `web/midi-out.js` | `1ddaa7ddc7651ecc6247837332d242ffeb1a91f554573cae80887ad8cee874e8` |
@@ -38,7 +38,7 @@ cette liste prouve que ce code existait, sous cette forme, à cette date.
 | `web/spelling.js` | `f3732cf60dec2d0eedd214305edcffba8cf09f399669a92d8e1173283915015d` |
 | `web/staff.js` | `d1707001612b447221e7e74a3d0b0b2564c9dccab231a91d25c2769200859200` |
 | `web/style.css` | `44dfa6467f90b0aeef8957a0dc5ef524d99726f5d51a3ec77e2aafbb63de09c8` |
-| `web/sw.js` | `63552135c8e843c33cd9270578674aa32616f2f87679f7fdede46eb0d303fa1e` |
+| `web/sw.js` | `b90151b552e607a3d24e38b7acb9b571d4694622d8be4b1499803add50535581` |
 | `web/tab.js` | `483382f288411fb3ba091c4188f0390a41569a3fb53643f1c14581fd5a5b1002` |
 | `web/theory.js` | `5bbb596047c749c3f4a592ba41a441db2988a8a3507e0ce5b1a05a01d845406e` |
 | `web/vendor/Midi.LICENSE.md` | `6debbf1ddd278dcf5d8e7b6c42c7a827cb944943401fc37ee017e172bbccbaea` |
