@@ -440,3 +440,26 @@ body.with-staff .hint { margin-bottom: 310px; }
   color: var(--muted);
 }
 .detail-toggle:hover { color: var(--text); border-color: var(--muted); }
+
+/* ---------- Sélection de mesures à travailler en boucle ---------- */
+
+.tab-tools {
+  position: absolute;
+  top: 4px;
+  right: 16px;
+  z-index: 5;
+  display: flex;
+  gap: 4px;
+  font: 600 12px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+.tab-tools button { padding: 4px 8px; font-size: 12px; border-radius: 6px; background: var(--bg); color: var(--muted); }
+.tab-tools button.on { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+
+.tab-range {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  border-right: 2px dashed var(--accent);
+  pointer-events: none;
+}

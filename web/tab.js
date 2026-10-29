@@ -43,7 +43,8 @@ function fingerings(events) {
 
 // onSeek(temps) est appelé quand on touche / clique la tab ; labels : colonne des noms de cordes.
 export function createTab(container, { onSeek, labels } = {}) {
-  let track, playhead, cueMark, notes = [], events = [], current = -1, cueBeat = 0;
+  let track, playhead, cueMark, rangeMark, notes = [], events = [], current = -1, cueBeat = 0;
+  let range = null;   // mesures sélectionnées à travailler : { start, end } en temps
   let bw = BEAT_W;   // largeur d'un temps pour l'affichage en cours
   let showStaff = false, everyAccidental = false, lastArgs = null, loop = 0, fifths = 0;
 
@@ -133,7 +134,10 @@ export function createTab(container, { onSeek, labels } = {}) {
     playhead.hidden = true;
     cueMark = document.createElement('div');
     cueMark.className = 'tab-cue';
-    track.append(cueMark, playhead);
+    rangeMark = document.createElement('div');
+    rangeMark.className = 'tab-range';
+    track.append(rangeMark, cueMark, playhead);
+    drawRange();
 
     container.replaceChildren(track);
     container.scrollLeft = 0;
@@ -175,7 +179,22 @@ export function createTab(container, { onSeek, labels } = {}) {
     cueBeat = beat;
     if (!cueMark) return;
     cueMark.style.left = `${beat * bw}px`;
-    cueMark.hidden = beat === 0;
+    cueMark.hidden = beat === 0 && !range;
+  }
+
+  // Zone surlignée des mesures sélectionnées (null = pas de sélection).
+  function setRange(r) {
+    range = r;
+    drawRange();
+    setCue(cueBeat);
+  }
+
+  function drawRange() {
+    if (!rangeMark) return;
+    rangeMark.hidden = !range;
+    if (!range) return;
+    rangeMark.style.left = `${range.start * bw}px`;
+    rangeMark.style.width = `${(range.end - range.start) * bw}px`;
   }
 
   // Clé et armure dans la colonne de gauche.
@@ -226,5 +245,5 @@ export function createTab(container, { onSeek, labels } = {}) {
     setCue(cueBeat);
   }
 
-  return { render, follow, setCue, setStaff, setKey, setEveryAccidental, redraw };
+  return { render, follow, setCue, setRange, setStaff, setKey, setEveryAccidental, redraw };
 }

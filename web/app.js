@@ -277,6 +277,10 @@ function buildSongProgram() {
 
 // Point de départ de la lecture (en temps, toujours au début d'une mesure).
 let cue = 0;
+// Fin de la sélection (en temps, fin de mesure) : null = pas de sélection. Avec une fin,
+// la lecture tourne en boucle de cue à rangeEnd pour travailler ces mesures.
+let rangeEnd = null;
+let touchMode = 'start';   // ce que place un toucher sur la tab : 'start' (début) ou 'end' (fin)
 
 const scaleState = {
   type: 'major',
@@ -311,19 +315,38 @@ const isLooping = () => (mode === 'loop' && $('loop').checked) || (mode === 'sca
 
 function refresh() {
   prog = mode === 'loop' ? buildLoopProgram() : mode === 'song' ? buildSongProgram() : buildScaleProgram();
-  // En boucle, la tab montre la suite (le début de la séquence suivante) après un double trait.
-  tab.render(prog.bassEvents, prog.totalBeats, prog.bpb, { loopLen: isLooping() ? prog.totalBeats : 0 });
   if (cue >= prog.totalBeats) cue = 0;
+  if (rangeEnd != null && (rangeEnd > prog.totalBeats || rangeEnd <= cue)) rangeEnd = null;
+  // En boucle, la tab montre la suite (le début de la séquence suivante) après un double trait
+  // (pas pendant le travail d'une sélection, qui revient simplement à son début).
+  tab.render(prog.bassEvents, prog.totalBeats, prog.bpb, { loopLen: isLooping() && rangeEnd == null ? prog.totalBeats : 0 });
+  tab.setRange(rangeEnd != null ? { start: cue, end: rangeEnd } : null);
   tab.setCue(cue);
+  $('clearRange').hidden = rangeEnd == null;
   tab.setKey(prog.barSig[cue / prog.bpb] ?? 0);
 }
 
 // Se placer au début d'une mesure ; pendant la lecture, on y saute tout de suite.
 function seek(bar) {
   const bars = prog.totalBeats / prog.bpb;
-  cue = Math.min(Math.max(0, bar), bars - 1) * prog.bpb;
+  bar = Math.min(Math.max(0, bar), bars - 1);
+  const hadRange = rangeEnd != null;
+  if (touchMode === 'end') {
+    // Fin de la sélection = fin de la mesure touchée (si elle est avant le début, on inverse).
+    const startBar = cue / prog.bpb;
+    if (bar >= startBar) rangeEnd = (bar + 1) * prog.bpb;
+    else { rangeEnd = (startBar + 1) * prog.bpb; cue = bar * prog.bpb; }
+  } else {
+    cue = bar * prog.bpb;
+    if (rangeEnd != null && cue >= rangeEnd) rangeEnd = null;
+  }
+  if (hadRange !== (rangeEnd != null)) refresh();   // la tab change d'affichage (copies de boucle)
+  tab.setRange(rangeEnd != null ? { start: cue, end: rangeEnd } : null);
   tab.setCue(cue);
+  $('clearRange').hidden = rangeEnd == null;
   if (playing) {
+    // Pendant la lecture : on saute au début (ou on y revient si on est sorti de la sélection).
+    if (touchMode === 'end' && step >= cue && step < rangeEnd) return;
     step = cue;
     bass.triggerRelease();
     pad.releaseAll();
@@ -338,8 +361,10 @@ function seek(bar) {
 function showCue() {
   tab.setKey(prog.barSig[cue / prog.bpb] ?? 0);
   const bar = cue / prog.bpb;
-  $('position').textContent = cue === 0 ? '– / –' : `${bar + 1} / 1`;
-  $('position').title = cue === 0 ? 'Mesure / temps' : `Départ : ${prog.labels[bar]}`;
+  $('position').textContent = cue === 0 && rangeEnd == null ? '– / –' : `${bar + 1} / 1`;
+  $('position').title = rangeEnd != null
+    ? `Boucle sur les mesures ${bar + 1} à ${rangeEnd / prog.bpb}`
+    : cue === 0 ? 'Mesure / temps' : `Départ : ${prog.labels[bar]}`;
 }
 
 // ---------- Interface ----------
@@ -448,6 +473,7 @@ function setMode(m) {
   if (playing) stop();
   mode = m;
   cue = 0;
+  rangeEnd = null;
   $('loopControls').hidden = mode !== 'loop';
   $('songControls').hidden = mode !== 'song';
   $('scaleControls').hidden = mode !== 'scale';
@@ -702,6 +728,7 @@ const makePad = (kind) => (PAD_SOUNDS[kind] ?? PAD_SOUNDS.epiano)(reverb);
 
 // Appelé à chaque temps : joue tous les événements qui tombent dans ce temps.
 function tick(time) {
+  if (rangeEnd != null && step >= rangeEnd) step = cue;   // sélection : retour à son début
   if (step >= prog.totalBeats) {
     if (!isLooping()) {
       Tone.Transport.stop(time);
@@ -748,6 +775,7 @@ function tick(time) {
   }
   const c = cycle;
   Tone.Draw.schedule(() => {
+    if (!playing) return;   // temps préparé juste avant Stop : on ne l'affiche pas
     beatClock = { s, time, cycle: c };
     showBeat(s);
   }, time);
@@ -760,7 +788,7 @@ function frame() {
     const frac = Math.min(1, Math.max(0, (Tone.context.currentTime - beatClock.time) / beatDur));
     // En boucle, à partir du 2e passage on suit la 2e copie de la séquence dans la tab :
     // le retour de la fin de la 2e copie au début de la 2e est invisible (contenu identique).
-    const copy = isLooping() && beatClock.cycle >= 1 ? prog.totalBeats : 0;
+    const copy = isLooping() && rangeEnd == null && beatClock.cycle >= 1 ? prog.totalBeats : 0;
     tab.follow(beatClock.s + frac + copy);
   }
   requestAnimationFrame(frame);
@@ -783,6 +811,7 @@ async function start() {
 
 function stop() {
   Tone.Transport.stop();
+  Tone.Draw.cancel(0);   // affichages déjà programmés (temps suivants) : on les annule
   bass?.triggerRelease();
   pad?.releaseAll();
   other?.releaseAll();
@@ -800,6 +829,22 @@ function stopUI() {
 // ---------- Contrôles ----------
 
 $('play').addEventListener('click', () => (playing ? stop() : start()));
+
+// Barre d'outils de la tab : un toucher place le début ou la fin de la sélection.
+function setTouchMode(m) {
+  touchMode = m;
+  document.querySelectorAll('[data-touch]').forEach((b) => {
+    const on = b.dataset.touch === m;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-pressed', on);
+  });
+}
+document.querySelectorAll('[data-touch]').forEach((b) => b.addEventListener('click', () => setTouchMode(b.dataset.touch)));
+$('clearRange').addEventListener('click', () => {
+  rangeEnd = null;
+  refresh();
+  showCue();
+});
 
 renderMixer();
 
@@ -905,6 +950,7 @@ const scaleControl = (id, field, parse = (v) => v) => $(id).addEventListener('ch
   scaleState[field] = parse(e.target.value);
   if (field === 'type' || field === 'fingering') updateKeySelect();   // noms de tonalités, boxes, menus visibles
   cue = 0;
+  rangeEnd = null;
   renderScales();
 });
 scaleControl('scaleType', 'type');
@@ -931,6 +977,7 @@ $('song').addEventListener('change', (e) => {
   if (playing) stop();
   songState.songId = e.target.value;
   cue = 0;
+  rangeEnd = null;
   setTempo(usingMidi() ? songState.midi.bpm : currentSong().bpm);
   renderSong();
 });
@@ -959,6 +1006,7 @@ $('midiFile').addEventListener('change', async (e) => {
     songState.track = guessBassTrack(m.tracks);
     songState.songId = 'midi';
     cue = 0;
+    rangeEnd = null;
     const trackSel = $('track');
     trackSel.innerHTML = '';
     m.tracks.forEach((t, i) => trackSel.append(option(i, `${t.name}${t.percussion ? ' (batterie)' : ''}`, i === songState.track)));

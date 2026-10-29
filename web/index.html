@@ -265,11 +265,18 @@
     </div>
   </main>
 
-  <p class="hint">Touche la tablature (ou une mesure de la grille) pour choisir d'où repartir ; touche la mesure 1 pour revenir au début. En haut à droite : mesure / temps.<br>
+  <p class="hint">Touche la tablature (ou une mesure de la grille) pour choisir d'où repartir ; touche la mesure 1 pour revenir au début.
+    Pour travailler quelques mesures en boucle : choisis « Fin ◀ » sur la tab puis touche la dernière mesure (✕ efface la sélection). En haut à droite : mesure / temps.<br>
     Gammes : le petit chiffre à côté de la case est le doigt (1 index, 2 majeur, 3 annulaire, 4 auriculaire, 0 corde à vide).<br>
     Sur iPhone : si tu n'entends rien, vérifie le bouton silencieux et le volume.</p>
 
   <footer id="tabPanel">
+    <!-- Toucher la tab place le début ou la fin des mesures à travailler en boucle. -->
+    <div class="tab-tools" role="group" aria-label="Toucher la tablature pour placer">
+      <button data-touch="start" class="on" aria-pressed="true" title="Toucher la tab place le début">▶ Début</button>
+      <button data-touch="end" aria-pressed="false" title="Toucher la tab place la fin : la sélection tourne en boucle">Fin ◀</button>
+      <button id="clearRange" hidden title="Effacer la sélection">✕</button>
+    </div>
     <div class="tab-labels">
       <span>G</span><span>D</span><span>A</span><span>E</span>
     </div>
