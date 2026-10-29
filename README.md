@@ -5,6 +5,9 @@ avec accords, batterie, tablature qui défile et partition en clé de fa.
 Elle s'ouvre dans le navigateur, sur ordinateur (Mac, Windows), iPhone et Android,
 et s'installe comme une application.
 
+En résumé : un groupe entier qui joue avec vous, ne se plaint jamais du tempo,
+ne rate aucune répétition et ne vous demande pas de porter l'ampli.
+
 ## Ouvrir l'app
 
 👉 **https://fredlatorche.github.io/BassRoutine/**
@@ -15,7 +18,7 @@ Pour l'installer :
 - **Android** : ouvrir le lien dans Chrome, puis *Installer l'application*.
 - **Ordinateur** : dans Chrome ou Edge, cliquer sur l'icône *Installer* dans la barre d'adresse.
 
-Une fois installée, l'app fonctionne aussi hors connexion.
+Une fois installée, l'app fonctionne aussi hors connexion. Même au fond d'une cave de répétition.
 
 ## Trois façons de travailler
 
@@ -28,6 +31,7 @@ Une fois installée, l'app fonctionne aussi hors connexion.
   en majeur ou en mineur, en grave ou en aigu. Chaque clic propose une nouvelle ligne,
   même pendant la lecture.
 - Boucles de 4, 8, 16 ou 32 mesures, notes et accords modifiables dans la grille.
+  (32 mesures de Mi par temps : idéal pour vérifier sa patience.)
 - En boucle, la tablature montre déjà le début du tour suivant après un double trait.
 
 ### Morceau
@@ -57,6 +61,7 @@ des transcriptions d'enregistrements.
 - **Accords** : piano électrique, nappe, vibraphone, cordes, cuivres, flûtes, orgue, guitare jazz.
 - **Batterie** : 10 rythmes (swing, balais, two-feel, shuffle, bossa nova, rock, pop/disco,
   funk, half-time, reggae), réglage automatique selon le style, et petits breaks toutes les 4 mesures.
+  Un batteur qui reste en place : c'est déjà la moitié du travail du bassiste.
 - **Métronome**.
 
 ## Tablature et partition
@@ -102,3 +107,8 @@ sur chaque appareil.
 
 - [Tone.js](https://tonejs.github.io/) 14.8.49 (licence MIT), dans `web/vendor/Tone.js`
 - [@tonejs/midi](https://github.com/Tonejs/Midi) 2.0.28 (licence MIT), dans `web/vendor/Midi.js`
+
+## Le mot de la fin
+
+La basse ne va pas se travailler toute seule, et l'app est prête avant vous.
+**Plus d'excuses : au boulot !**
