@@ -104,7 +104,9 @@ des transcriptions d'enregistrements.
 - Trois doigtés : **3 notes par corde**, **en position** (le moins de déplacements de main),
   ou par **boxes** (5 en pentatonique, 7 sinon), avec le choix de la zone du manche
   (grave, médium, aiguë) et les cordes à vide quand c'est possible.
-- Le numéro du doigt est indiqué à côté de chaque case.
+- Le numéro du doigt est indiqué à côté de chaque case. Dans les réglages (⚙️), l'option
+  **Doigtés** l'affiche aussi pour tous les autres exercices (boucle, walking, morceau importé),
+  avec des cases choisies pour jouer en position.
 
 ## Accompagnement
 

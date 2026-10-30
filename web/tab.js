@@ -5,6 +5,7 @@
 import { NAMES } from './theory.js';
 import { STAFF_H, renderStaff, clefSvg, clefWidth } from './staff.js';
 import { noteLabel } from './notation.js';
+import { lineFingering } from './scales.js';
 
 const STRINGS = [43, 38, 33, 28];   // G, D, A, E (de haut en bas, comme sur une tab)
 const BEAT_W = 60;                  // largeur d'un temps en pixels (minimum)
@@ -33,7 +34,12 @@ const MAX_FRET = 20;
 
 // Choix des cases : on reste près de la position de la main, les cordes à vide sont « gratuites ».
 // Les exercices de gammes fournissent leur propre doigté (string, fret, finger).
-function fingerings(events) {
+// withFingers : doigté calculé pour les autres exercices aussi (cases choisies en position).
+function fingerings(events, withFingers) {
+  if (withFingers && events.some((e) => e.fret == null)) {
+    const line = lineFingering(events.map((e) => e.midi));
+    return events.map((e, i) => (e.fret != null ? { string: e.string, fret: e.fret, finger: e.finger } : line[i]));
+  }
   let hand = 2;
   return events.map((e) => {
     if (e.fret != null) return { string: e.string, fret: e.fret, finger: e.finger };
@@ -58,7 +64,7 @@ export function createTab(container, { onSeek, labels } = {}) {
   // Abscisse du centre d'une note : espacement régulier dans la mesure, très légèrement resserré
   // si besoin pour laisser de l'air avant la barre de mesure suivante (notes rapides).
   let xAt = (t) => t * bw + NOTE_X;
-  let showStaff = false, everyAccidental = false, lastArgs = null, loop = 0, fifths = 0;
+  let showStaff = false, everyAccidental = false, showFingers = false, lastArgs = null, loop = 0, fifths = 0;
 
   // Un clic (ou un tap, pas un glissé) choisit le point de départ.
   container.addEventListener('click', (e) => {
@@ -79,7 +85,7 @@ export function createTab(container, { onSeek, labels } = {}) {
       return b * beatsPerBar * bw + NOTE_X + (t - b * beatsPerBar) * bw * squeeze;
     };
     loop = loopLen;
-    const basePos = fingerings(evts);   // même doigté pour toutes les copies
+    const basePos = fingerings(evts, showFingers);   // même doigté pour toutes les copies
     let pos = basePos, doubles = [];
     if (loopLen) {
       const head = Math.min(loopLen, Math.ceil(container.clientWidth / bw) + beatsPerBar);
@@ -263,5 +269,11 @@ export function createTab(container, { onSeek, labels } = {}) {
     setCue(cueBeat);
   }
 
-  return { render, follow, setCue, setRange, setStaff, setKey, setEveryAccidental, redraw };
+  // Doigts affichés sur tous les exercices (les gammes ont toujours le leur).
+  function setFingers(on) {
+    showFingers = on;
+    redraw();
+  }
+
+  return { render, follow, setCue, setRange, setStaff, setKey, setEveryAccidental, setFingers, redraw };
 }

@@ -154,19 +154,43 @@ function transition(a, b, interval) {
 
 // layers : candidats par note. Renvoie { path, cost } de moindre coût.
 function bestPath(midis, layers) {
-  let best = layers[0].map((c) => ({ cost: c.cost, path: [c] }));
+  let best = layers[0].map((c) => ({ cost: c.cost, back: -1 }));
+  const backs = [best];
   for (let i = 1; i < layers.length; i++) {
     const interval = midis[i] - midis[i - 1];
+    const prevLayer = layers[i - 1];
     best = layers[i].map((c) => {
       let pick = null;
-      for (const prev of best) {
-        const cost = prev.cost + transition(prev.path[prev.path.length - 1], c, interval) + c.cost;
-        if (!pick || cost < pick.cost) pick = { cost, prev };
-      }
-      return { cost: pick.cost, path: [...pick.prev.path, c] };
+      best.forEach((prev, j) => {
+        const cost = prev.cost + transition(prevLayer[j], c, interval) + c.cost;
+        if (!pick || cost < pick.cost) pick = { cost, back: j };
+      });
+      return pick;
     });
+    backs.push(best);
   }
-  return best.reduce((a, b) => (b.cost < a.cost ? b : a));
+  // Remontée des choix, de la dernière note à la première.
+  let j = best.reduce((a, b, k) => (b.cost < best[a].cost ? k : a), 0);
+  const cost = best[j].cost, path = [];
+  for (let i = layers.length - 1; i >= 0; i--) {
+    path[i] = layers[i][j];
+    j = backs[i][j].back;
+  }
+  return { path, cost };
+}
+
+// Doigté « en position » d'une ligne quelconque (walking, morceau, boucle…) : cases et doigts.
+// Renvoie, pour chaque note, { string, fret, finger } avec la corde au format de la tab (0 = G).
+export function lineFingering(midis) {
+  if (!midis.length) return [];
+  const top = OPEN[3] + MAX_FRET;
+  const playable = midis.map((m) => {
+    while (m < OPEN[0]) m += 12;   // trop grave pour une 4 cordes : octave au-dessus
+    while (m > top) m -= 12;
+    return m;
+  });
+  const { path } = bestPath(playable, playable.map((m) => candidates(m, 'auto')));
+  return path.map((c) => ({ string: 3 - c.string, fret: c.fret, finger: c.finger }));
 }
 
 // La tonique grave est jouée à vide si c'est possible (Mi, La, Ré), sinon avec le doigt de référence (rootFinger).

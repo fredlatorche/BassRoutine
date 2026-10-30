@@ -1296,6 +1296,16 @@ function setEveryAccidental(on) {
 $('everyAcc').addEventListener('change', (e) => setEveryAccidental(e.target.checked));
 try { if (localStorage.getItem(EVERY_ACC_KEY) === '1') setEveryAccidental(true); } catch { /* stockage indisponible */ }
 
+// Doigtés sur tous les exercices (les gammes les affichent toujours) : choix retenu sur l'appareil.
+const FINGERS_KEY = 'bassroutine-fingers';
+function setFingersVisible(on) {
+  $('showFingers').checked = on;
+  tab.setFingers(on);
+  try { localStorage.setItem(FINGERS_KEY, on ? '1' : '0'); } catch { /* stockage indisponible */ }
+}
+$('showFingers').addEventListener('change', (e) => setFingersVisible(e.target.checked));
+try { if (localStorage.getItem(FINGERS_KEY) === '1') setFingersVisible(true); } catch { /* stockage indisponible */ }
+
 // Noms des notes : français ou américain (choix retenu sur l'appareil).
 const NOTATION_KEY = 'bassroutine-notation';
 function applyNotation(n) {
