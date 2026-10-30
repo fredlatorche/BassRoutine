@@ -25,7 +25,10 @@
   <header>
     <div class="header-left">
       <h1 class="brand"><img class="logo logo-on-dark" src="icons/bass-light.png" alt="" width="106" height="30"><img class="logo logo-on-light" src="icons/bass.png" alt="" width="106" height="30"><span class="brand-name">Bass Routine</span></h1>
-      <button id="play" class="play">▶ Play</button>
+      <div class="transport">
+        <button id="rewind" class="round rewind" aria-label="Revenir au début" title="Revenir au début (mesure 1)"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="6" width="2.5" height="12" rx="1"/><path d="M19 6v12L9 12z"/></svg></button>
+        <button id="play" class="round play" aria-label="Play" title="Play (barre d'espace)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></button>
+      </div>
     </div>
     <div class="header-right">
       <div id="position" title="Mesure / temps">– / –</div>
@@ -295,8 +298,8 @@
     </div>
   </main>
 
-  <p class="hint">Touche la tablature (ou une mesure de la grille) pour choisir d'où repartir ; touche la mesure 1 pour revenir au début.
-    Pour travailler quelques mesures en boucle : choisis « Fin ◀ » sur la tab puis touche la dernière mesure (✕ efface la sélection). En haut à droite : mesure / temps.<br>
+  <p class="hint">Pour partir d'une autre mesure : arrête la lecture, touche la mesure sur la tab (ou dans la grille), puis Play. Stop garde la mesure jouée ; le petit bouton à gauche de Play revient à la mesure 1. Sur ordinateur, la barre d'espace fait Play / Stop.
+    Pour travailler quelques mesures en boucle : touche « ▶ Début » puis la première mesure, « Fin ◀ » puis la dernière (✕ efface la boucle). En haut à droite : mesure / temps.<br>
     Gammes (et tous les exercices si l'option ⚙️ « Doigtés » est cochée) : le petit chiffre à côté de la case est le doigt (1 index, 2 majeur, 3 annulaire, 4 auriculaire, 0 corde à vide).<br>
     Sur iPhone : si tu n'entends rien, vérifie le bouton silencieux et le volume.</p>
   <p class="copyright">© 2026 FredLatorche · v4.0 · <a href="https://github.com/fredlatorche/BassRoutine#readme" target="_blank" rel="noopener">à propos de Bass Routine</a></p>
@@ -310,11 +313,11 @@
 
   <footer id="tabPanel">
     <div id="waitStatus" class="wait-status" hidden aria-live="polite"></div>
-    <!-- Toucher la tab place le début ou la fin des mesures à travailler en boucle. -->
-    <div class="tab-tools" role="group" aria-label="Toucher la tablature pour placer">
-      <button data-touch="start" class="on" aria-pressed="true" title="Toucher la tab place le début">▶ Début</button>
-      <button data-touch="end" aria-pressed="false" title="Toucher la tab place la fin : la sélection tourne en boucle">Fin ◀</button>
-      <button id="clearRange" hidden title="Effacer la sélection">✕</button>
+    <!-- Début / Fin, puis toucher une mesure : place le début ou la fin de la boucle. -->
+    <div class="tab-tools" role="group" aria-label="Boucle sur quelques mesures">
+      <button data-touch="start" aria-pressed="false" title="Puis toucher une mesure : début de la boucle">▶ Début</button>
+      <button data-touch="end" aria-pressed="false" title="Puis toucher une mesure : fin de la boucle">Fin ◀</button>
+      <button id="clearRange" hidden title="Effacer la boucle">✕</button>
     </div>
     <div class="tab-labels">
       <span>G</span><span>D</span><span>A</span><span>E</span>

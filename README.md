@@ -178,8 +178,11 @@ mais c'est sur une fretless qu'il prend tout son sens.
 ## Tablature et partition
 
 - Tablature 4 cordes qui défile pendant la lecture, avec le nom des notes.
-- **Travailler un passage** : toucher la tab place le début ; avec « Fin ◀ », on choisit
-  la dernière mesure et la sélection tourne en boucle (✕ pour l'effacer).
+- **Partir d'une autre mesure** : arrêter la lecture, toucher la mesure sur la tab, puis Play.
+  Stop garde la mesure qui était jouée ; le petit bouton ⏮, à gauche de Play, revient à la mesure 1.
+  Sur ordinateur, la barre d'espace fait Play / Stop.
+- **Travailler un passage** : toucher « ▶ Début » puis la première mesure, « Fin ◀ » puis
+  la dernière : ces mesures tournent en boucle (✕ pour l'effacer).
 - **Partition en clé de fa** au-dessus de la tab (option) : armure de la tonalité,
   altérations écrites selon les règles (bémols en Mi♭, dièses en Sol…), croches ligaturées,
   triolets. Un **mode novice** répète l'altération sur chaque note.

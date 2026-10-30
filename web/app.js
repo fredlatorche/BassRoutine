@@ -282,12 +282,13 @@ function buildSongProgram() {
   });
 }
 
-// Point de départ de la lecture (en temps, toujours au début d'une mesure).
+// Point de départ de la lecture (en temps, toujours au début d'une mesure) : on le place en touchant la tab.
 let cue = 0;
-// Fin de la sélection (en temps, fin de mesure) : null = pas de sélection. Avec une fin,
-// la lecture tourne en boucle de cue à rangeEnd pour travailler ces mesures.
-let rangeEnd = null;
-let touchMode = 'start';   // ce que place un toucher sur la tab : 'start' (début) ou 'end' (fin)
+// Boucle sur quelques mesures (en temps, début et fin de mesure) : null = pas de boucle.
+// Elle se place avec les boutons Début / Fin ; arrivée à rangeEnd, la lecture repart de rangeStart.
+let rangeStart = null, rangeEnd = null;
+// Ce que place le prochain toucher sur la tab : null (point de départ), 'start' ou 'end' (boucle).
+let touchMode = null;
 
 const scaleState = {
   type: 'major',
@@ -352,41 +353,51 @@ const isLooping = () => (mode === 'loop' && $('loop').checked) || (mode === 'sca
 function refresh() {
   prog = mode === 'loop' ? buildLoopProgram() : mode === 'song' ? buildSongProgram() : buildScaleProgram();
   if (cue >= prog.totalBeats) cue = 0;
-  if (rangeEnd != null && (rangeEnd > prog.totalBeats || rangeEnd <= cue)) rangeEnd = null;
+  if (rangeEnd != null && rangeEnd > prog.totalBeats) rangeStart = rangeEnd = null;
   // En boucle, la tab montre la suite (le début de la séquence suivante) après un double trait
   // (pas pendant le travail d'une sélection, qui revient simplement à son début).
   tab.render(prog.bassEvents, prog.totalBeats, prog.bpb, { loopLen: isLooping() && rangeEnd == null ? prog.totalBeats : 0 });
-  tab.setRange(rangeEnd != null ? { start: cue, end: rangeEnd } : null);
-  tab.setCue(cue);
-  $('clearRange').hidden = rangeEnd == null;
+  showRange();
   tab.setKey(prog.barSig[cue / prog.bpb] ?? 0);
   updateInfo();
   if (waiting) resetWaiting();   // exercice modifié pendant l'attente : on repart de son début
 }
 
-// Se placer au début d'une mesure ; pendant la lecture, on y saute tout de suite.
+function showRange() {
+  tab.setRange(rangeEnd != null ? { start: rangeStart, end: rangeEnd } : null);
+  tab.setCue(cue);
+  $('clearRange').hidden = rangeEnd == null;
+}
+
+// Toucher une mesure : point de départ de la lecture, ou (après Début / Fin) début ou fin de la boucle.
+// Pendant la lecture, on y saute tout de suite.
 function seek(bar) {
   const bars = prog.totalBeats / prog.bpb;
   bar = Math.min(Math.max(0, bar), bars - 1);
   const hadRange = rangeEnd != null;
-  if (touchMode === 'end') {
-    // Fin de la sélection = fin de la mesure touchée (si elle est avant le début, on inverse).
-    const startBar = cue / prog.bpb;
-    if (bar >= startBar) rangeEnd = (bar + 1) * prog.bpb;
-    else { rangeEnd = (startBar + 1) * prog.bpb; cue = bar * prog.bpb; }
+  const placing = touchMode;
+  if (placing === 'start') {
+    // Début de la boucle (sans fin encore : boucle d'une mesure, à agrandir avec Fin).
+    rangeStart = bar * prog.bpb;
+    if (rangeEnd == null || rangeEnd <= rangeStart) rangeEnd = rangeStart + prog.bpb;
+    cue = rangeStart;
+  } else if (placing === 'end') {
+    // Fin de la boucle = fin de la mesure touchée (si elle est avant le début, on inverse).
+    const start = rangeStart ?? cue;
+    if (bar * prog.bpb >= start) [rangeStart, rangeEnd] = [start, (bar + 1) * prog.bpb];
+    else [rangeStart, rangeEnd] = [bar * prog.bpb, start + prog.bpb];
+    if (cue < rangeStart || cue >= rangeEnd) cue = rangeStart;
   } else {
     cue = bar * prog.bpb;
-    if (rangeEnd != null && cue >= rangeEnd) rangeEnd = null;
   }
+  if (placing) setTouchMode(null);   // Début / Fin ne servent qu'au toucher suivant
   if (hadRange !== (rangeEnd != null)) refresh();   // la tab change d'affichage (copies de boucle)
-  tab.setRange(rangeEnd != null ? { start: cue, end: rangeEnd } : null);
-  tab.setCue(cue);
-  $('clearRange').hidden = rangeEnd == null;
+  showRange();
   if (waiting) {
     resetWaiting();   // mode attente : on attend la première note de la nouvelle position
   } else if (playing) {
-    // Pendant la lecture : on saute au début (ou on y revient si on est sorti de la sélection).
-    if (touchMode === 'end' && step >= cue && step < rangeEnd) return;
+    // Boucle placée pendant la lecture : on continue si on est dedans, sinon on va à son début.
+    if (placing && step >= rangeStart && step < rangeEnd) return;
     step = cue;
     bass.triggerRelease();
     pad.releaseAll();
@@ -403,7 +414,8 @@ function showCue() {
   const bar = cue / prog.bpb;
   $('position').textContent = cue === 0 && rangeEnd == null ? '– / –' : `${bar + 1} / 1`;
   $('position').title = rangeEnd != null
-    ? `Boucle sur les mesures ${bar + 1} à ${rangeEnd / prog.bpb}`
+    ? (rangeEnd - rangeStart === prog.bpb ? `Boucle sur la mesure ${rangeEnd / prog.bpb}`
+      : `Boucle sur les mesures ${rangeStart / prog.bpb + 1} à ${rangeEnd / prog.bpb}`)
     : cue === 0 ? 'Mesure / temps' : `Départ : ${prog.labels[bar]}`;
 }
 
@@ -529,7 +541,7 @@ function useMidi(m, id, track) {
   songState.track = track != null && track < m.tracks.length ? track : guessBassTrack(m.tracks);
   songState.songId = `midi:${id}`;
   cue = 0;
-  rangeEnd = null;
+  rangeStart = rangeEnd = null;
   const trackSel = $('track');
   trackSel.innerHTML = '';
   m.tracks.forEach((t, i) => trackSel.append(option(i, `${t.name}${t.percussion ? ' (batterie)' : ''}`, i === songState.track)));
@@ -556,7 +568,7 @@ function setMode(m) {
   if (m !== 'song') setRecorderOpen(false);
   mode = m;
   cue = 0;
-  rangeEnd = null;
+  rangeStart = rangeEnd = null;
   $('loopControls').hidden = mode !== 'loop';
   $('songControls').hidden = mode !== 'song';
   $('scaleControls').hidden = mode !== 'scale';
@@ -811,7 +823,7 @@ const makePad = (kind) => (PAD_SOUNDS[kind] ?? PAD_SOUNDS.epiano)(reverb);
 
 // Appelé à chaque temps : joue tous les événements qui tombent dans ce temps.
 function tick(time) {
-  if (rangeEnd != null && step >= rangeEnd) step = cue;   // sélection : retour à son début
+  if (rangeEnd != null && step === rangeEnd) step = rangeStart;   // boucle : retour à son début
   if (step >= prog.totalBeats) {
     if (!isLooping()) {
       Tone.Transport.stop(time);
@@ -938,7 +950,7 @@ function begin() {
   beatClock = null;
   Tone.Transport.start('+0.05');
   playing = true;
-  $('play').textContent = '■ Stop';
+  setPlayButton(true);
   requestAnimationFrame(frame);
 }
 
@@ -969,10 +981,12 @@ const register = (m) => (m >= LOW_E + 24 ? ' suraigu' : m >= LOW_E + 12 ? ' aigu
 const expectedLabel = (e) => noteLabel(e.name ?? pitchName(expectedMidi(e), e.sig ?? 0)) + register(expectedMidi(e));
 const heardLabel = (m, sig) => noteLabel((sig < 0 ? FLAT_NAMES : SHARP_NAMES)[m % 12]) + register(m);
 
-function waitingNotes() {
-  const end = rangeEnd ?? prog.totalBeats;
-  return prog.bassEvents.filter((e) => e.midi != null && e.t >= cue && e.t < end);
+// Notes à jouer à partir de from : jusqu'à la fin de la boucle si on part d'avant elle.
+function waitingNotes(from = cue) {
+  const end = rangeEnd != null && from < rangeEnd ? rangeEnd : prog.totalBeats;
+  return prog.bassEvents.filter((e) => e.midi != null && e.t >= from && e.t < end);
 }
+const inRange = (t) => rangeEnd != null && t < rangeEnd;   // la lecture arrivera à la fin de la boucle
 
 async function startWaiting() {
   if (!pitch.inputSupported()) {
@@ -997,7 +1011,7 @@ async function startWaiting() {
   renderInputPanel();   // les noms des entrées sont visibles maintenant que l'accès est donné
   waiting = { notes, i: 0, cycle: 0, listening: false };
   playing = true;
-  $('play').textContent = '■ Stop';
+  setPlayButton(true);
   $('waitStatus').hidden = false;
   showWaiting();
 }
@@ -1061,12 +1075,17 @@ function nextWaitingNote() {
   waiting.listening = false;   // la note suivante devra être attaquée
   waiting.i++;
   if (waiting.i >= waiting.notes.length) {
-    if (!isLooping() && rangeEnd == null) {
+    if (inRange(waiting.notes[0].t)) {
+      waiting.notes = waitingNotes(rangeStart);   // boucle : on reprend à son début
+    } else if (!isLooping()) {
       stop();
       showMessage('Bravo, tout est joué !');
       return;
+    } else {
+      waiting.notes = waitingNotes(0);   // exercice en boucle : on recommence au début
     }
-    waiting.i = 0;   // boucle ou sélection : on recommence
+    if (!waiting.notes.length) { stop(); return; }
+    waiting.i = 0;
     waiting.cycle++;
   }
   showWaiting();
@@ -1142,10 +1161,19 @@ function renderInputPanel() {
 renderInputPanel();
 $('waitMode').addEventListener('change', () => { if (playing) stop(); });
 
+// Bouton rond : ▶ à l'arrêt, ■ pendant la lecture.
+const PLAY_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
+const STOP_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="1.5"/></svg>';
+function setPlayButton(on) {
+  $('play').innerHTML = on ? STOP_ICON : PLAY_ICON;
+  $('play').setAttribute('aria-label', on ? 'Stop' : 'Play');
+  $('play').title = on ? 'Stop (barre d\'espace)' : 'Play (barre d\'espace)';
+}
+
 function stopUI() {
   playing = false;
   beatClock = null;
-  $('play').textContent = '▶ Play';
+  setPlayButton(false);
   showBeat(null);
   tab.follow(null);
 }
@@ -1170,7 +1198,22 @@ document.addEventListener('visibilitychange', () => {
 
 // ---------- Contrôles ----------
 
-$('play').addEventListener('click', () => (playing ? stop() : start()));
+// Stop : le prochain Play repart du début de la mesure qui était jouée.
+function togglePlay() {
+  if (!playing) { start(); return; }
+  const at = waiting ? waiting.notes[waiting.i]?.t : beatClock?.s;
+  if (at != null) {
+    cue = Math.floor(at / prog.bpb) * prog.bpb;
+    showRange();
+  }
+  stop();
+}
+$('play').addEventListener('click', togglePlay);
+// Retour à la mesure 1 (la boucle éventuelle reste en place).
+$('rewind').addEventListener('click', () => {
+  setTouchMode(null);
+  seek(0);
+});
 
 // Barre d'outils de la tab : un toucher place le début ou la fin de la sélection.
 function setTouchMode(m) {
@@ -1181,9 +1224,10 @@ function setTouchMode(m) {
     b.setAttribute('aria-pressed', on);
   });
 }
-document.querySelectorAll('[data-touch]').forEach((b) => b.addEventListener('click', () => setTouchMode(b.dataset.touch)));
+document.querySelectorAll('[data-touch]').forEach((b) => b.addEventListener('click', () =>
+  setTouchMode(touchMode === b.dataset.touch ? null : b.dataset.touch)));   // second appui : on annule
 $('clearRange').addEventListener('click', () => {
-  rangeEnd = null;
+  rangeStart = rangeEnd = null;
   refresh();
   showCue();
 });
@@ -1474,7 +1518,7 @@ const scaleControl = (id, field, parse = (v) => v) => $(id).addEventListener('ch
   scaleState[field] = parse(e.target.value);
   if (field === 'type' || field === 'fingering') updateKeySelect();   // noms de tonalités, boxes, menus visibles
   cue = 0;
-  rangeEnd = null;
+  rangeStart = rangeEnd = null;
   renderScales();
 });
 scaleControl('scaleType', 'type');
@@ -1509,7 +1553,7 @@ $('song').addEventListener('change', async (e) => {
   }
   songState.songId = e.target.value;
   cue = 0;
-  rangeEnd = null;
+  rangeStart = rangeEnd = null;
   setTempo(usingMidi() ? songState.midi.bpm : currentSong().bpm);
   renderSong();
 });
@@ -1552,7 +1596,7 @@ $('forgetMidi').addEventListener('click', async () => {
   songState.midi = null;
   songState.songId = SONGS[0].id;
   cue = 0;
-  rangeEnd = null;
+  rangeStart = rangeEnd = null;
   await refreshLibrary();
   setTempo(currentSong().bpm);
   renderSong();
@@ -1564,12 +1608,14 @@ $('track').addEventListener('change', (e) => {
   renderSong();
 });
 
-// Barre d'espace = Play/Stop (sur ordinateur).
+// Barre d'espace = Play/Stop (sur ordinateur), même après un clic sur un bouton ou un menu ;
+// seuls les champs de saisie gardent l'espace.
+const typing = (el) => el.isContentEditable || el.tagName === 'TEXTAREA'
+  || (el.tagName === 'INPUT' && !['checkbox', 'radio', 'range', 'button', 'file'].includes(el.type));
 document.addEventListener('keydown', (e) => {
-  if (e.code === 'Space' && !['SELECT', 'BUTTON', 'INPUT'].includes(e.target.tagName)) {
-    e.preventDefault();
-    playing ? stop() : start();
-  }
+  if (e.code !== 'Space' || e.repeat || e.metaKey || e.ctrlKey || e.altKey || typing(e.target)) return;
+  e.preventDefault();   // sinon l'espace « clique » aussi le bouton ou la case qui a le focus
+  togglePlay();
 });
 
 // ---------- Mémoire des réglages d'une session à l'autre ----------
