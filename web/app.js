@@ -1495,9 +1495,12 @@ function setTempo(bpm) {
   bpm = Math.min(240, Math.max(30, bpm));
   $('tempo').value = bpm;
   $('tempoVal').textContent = `${bpm} BPM`;
+  $('tempoHead').value = bpm;
+  $('tempoHeadVal').textContent = bpm;
   if (bass) Tone.Transport.bpm.rampTo(bpm, 0.1);
 }
 $('tempo').addEventListener('input', (e) => setTempo(Number(e.target.value)));
+$('tempoHead').addEventListener('input', (e) => setTempo(Number(e.target.value)));
 document.querySelectorAll('[data-bpm]').forEach((btn) =>
   btn.addEventListener('click', () => setTempo(Number($('tempo').value) + Number(btn.dataset.bpm))));
 

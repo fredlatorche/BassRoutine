@@ -192,6 +192,14 @@ button.rewind svg { width: 18px; height: 18px; }
   h1 { font-size: 1.1rem; }
 }
 
+/* Tempo dans l'en-tête : téléphone en paysage seulement (peu de hauteur, de la place en largeur). */
+.head-tempo { display: none; }
+@media (orientation: landscape) and (max-height: 500px) {
+  .head-tempo { display: flex; align-items: center; gap: 8px; flex: 1; max-width: 320px; min-width: 0; }
+  .head-tempo input { flex: 1; min-width: 0; accent-color: var(--accent); }
+  .head-tempo output { min-width: 2.2em; font-size: 0.9rem; font-variant-numeric: tabular-nums; color: var(--accent); font-weight: 700; }
+}
+
 #grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));

@@ -30,6 +30,11 @@
         <button id="play" class="round play" aria-label="Play" title="Play (barre d'espace)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></button>
       </div>
     </div>
+    <!-- Tempo dans l'en-tête : seulement sur téléphone en paysage (style.css), où il y a la place. -->
+    <div class="head-tempo">
+      <input id="tempoHead" type="range" min="30" max="240" value="100" aria-label="Tempo">
+      <output id="tempoHeadVal">100</output>
+    </div>
     <div class="header-right">
       <div id="position" title="Mesure / temps">– / –</div>
       <button id="tunerBtn" class="gear" aria-label="Accordeur" aria-expanded="false" title="Accordeur"><svg class="fork" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2v8a4 4 0 0 0 8 0V2"/><path d="M12 14v8"/></svg></button>
