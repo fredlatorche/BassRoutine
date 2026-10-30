@@ -8,19 +8,19 @@ change, l'empreinte change complètement. Associée à une date certaine (histor
 archive Software Heritage, horodatage OpenTimestamps ou enveloppe e-Soleau de l'INPI),
 cette liste prouve que ce code existait, sous cette forme, à cette date.
 
-**Empreinte globale de la version** : `1ed34dc0c4556f24c321fef50348bc4f40711e7f6e9dfc81817a8bd941809c9b`
+**Empreinte globale de la version** : `d35998a898cd4b4d829159ef861a97a4aa89f45b7312504ff4bcae5cbd934e8b`
 
 | Fichier | SHA-256 |
 |---|---|
 | `.gitignore` | `53f0c100a33a56ebada040287b3d0f5dbab21c6ec6b66209fec5515c508f1144` |
 | `LICENSE` | `1b29c7bf379ebc18668e0c8756402deab86025a63f224d61f456d2aeb200f01b` |
-| `README.md` | `169218aa5eeabe852025ff09f6af2ffe9e5947dbd664c83e538d71d978188eda` |
+| `README.md` | `587638e0b8d8d624a006372dfca1f03928a9d0f02c8ae22317bb29598adaf5e0` |
 | `basse.swift` | `17ed483f5773f1f1507c5343da4dd967d044c771c5c75dbeef321852f08af382` |
 | `empreintes.py` | `b0f4f69f1d693389844d372a3501c17ea26cd7b2ea8d6d2ce187a5f4db010fe3` |
 | `exemples/test-basse.mid` | `6d8d8bf96c9feef098a1506d0101205c9af11ad231ac5ab573d436024def12fd` |
 | `index.html` | `1ab097b356ee429bd11c4b5c9dda8ec51514fac8086eca5cfde409baffa23637` |
 | `serve.py` | `b373da570e5234602b7997b9ea74c617e95abb4ef18a51561163112b362fe3fe` |
-| `web/app.js` | `38754ce5a70a1328b65dd4e7f28de2ac1bde3a95c44441270fa447b079cb4c21` |
+| `web/app.js` | `113a69599a8ba77b426ef5ec26f3a6bd6853c39f7ffab11804c8a30c1f305b7b` |
 | `web/drums.js` | `657f9447a569dd26b8cfbd0336fba9324eacbcc19fd39a51a71e80513da46765` |
 | `web/icons/bass-light.png` | `fce175402346141974327847b0b0f55dcb97de967542bfeee025af9db37a724a` |
 | `web/icons/bass.png` | `467c80ce6204ee2cf73cc3cdbe56020d02655a0bccd9b8fe0a0d360da090ecf6` |
@@ -37,13 +37,13 @@ cette liste prouve que ce code existait, sous cette forme, à cette date.
 | `web/notation.js` | `bfd8f70dfdf8d0f1722ed8e42b4fad5b98f2aaaeccd7da6943a9a47ada3b9738` |
 | `web/pitch.js` | `4cedae4202740aeda65170474f11eb701a07ed524f255b0ae41fd0d3c1ce48e1` |
 | `web/random-loop.js` | `a40398e19063eeeb9253fa1734c0d05423bd2c34e2b7d0b45a84852eb61ef163` |
-| `web/recorder.js` | `76b9a52dd70bfb17ae4b06197f825c4bb0ee3193843ca2d07fa61427b619e61f` |
+| `web/recorder.js` | `b8e39e6b30a75946c501e9ddca6423315497d284ce6befaa1cfbf8f97de1afb1` |
 | `web/scales.js` | `f1a2112a6451a16b59bc2372f2c6e5e2a4de83b1be0553eb4400e765eb5cd1a1` |
 | `web/songs.js` | `4b8c21fa68a18eb12ff052e998aed7fee5a4a1b8fd17e2edb3928fa3fabbbf4c` |
 | `web/spelling.js` | `f3732cf60dec2d0eedd214305edcffba8cf09f399669a92d8e1173283915015d` |
 | `web/staff.js` | `d1707001612b447221e7e74a3d0b0b2564c9dccab231a91d25c2769200859200` |
-| `web/style.css` | `cb42f3d12524491ac0345656b987c43e125841eea2122de3ceffb62307b31f88` |
-| `web/sw.js` | `ef5d579ed1f961faf54f2134f6cc8c61353c4618c8fa166f7beb735c3f1a2446` |
+| `web/style.css` | `7c9464d10968ce78406bdaeaa9a181fc1617ac643bff5eb99e620fa1ef34405a` |
+| `web/sw.js` | `afe9fda4e2c4883946e7e197fbe40608d62d4d91c790b91ac04a115d651a26f6` |
 | `web/tab.js` | `483382f288411fb3ba091c4188f0390a41569a3fb53643f1c14581fd5a5b1002` |
 | `web/theory.js` | `5bbb596047c749c3f4a592ba41a441db2988a8a3507e0ce5b1a05a01d845406e` |
 | `web/tuner.js` | `3b05d19aa2a8a7ae6b87332e1a723eccee4f320edb2d0e200c305e52d15f9f51` |
