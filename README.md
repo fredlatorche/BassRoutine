@@ -9,16 +9,20 @@ et s'installe comme une application.
 En résumé : un groupe entier qui joue avec vous, ne se plaint jamais du tempo,
 ne rate aucune répétition et ne vous demande pas de porter l'ampli.
 
-**Version 2.0** : l'app peut désormais faire jouer l'accompagnement par vos propres instruments
+**Version 3.0** : les nouveautés.
+
+- 🎸 **Accordeur** : en mode automatique (il reconnaît la corde jouée) ou corde par corde,
+  avec le diapason réglable : voir [Accordeur](#accordeur).
+- 💾 **Sauvegarde des fichiers MIDI** : les morceaux importés sont gardés sur l'appareil et restent
+  dans le menu Morceau, avec leur piste basse. Plus besoin de les réimporter à chaque séance.
+
+Depuis la version 2.0, l'app peut aussi faire jouer l'accompagnement par vos propres instruments
 MIDI (synthés, boîte à rythmes, Ableton Live, GarageBand) : voir [Jouer avec ses instruments MIDI](#jouer-avec-ses-instruments-midi).
 
 🎯 **Fretless : l'app vous écoute et vous dit si vous jouez juste.** Branchez la basse, et le curseur
 n'avance que sur la bonne note, jouée assez juste : à ± 50, 25, 12 ou 6 cents selon le niveau choisi,
 avec l'écart affiché en direct (« +14 c, trop haut »). De quoi affiner sa justesse note après note,
 sans frettes pour tricher : voir [Affiner sa justesse sur une fretless](#affiner-sa-justesse-sur-une-fretless).
-
-🎸 **Accordeur intégré** : un pictogramme diapason dans l'en-tête, en mode automatique ou corde par corde :
-voir [Accordeur](#accordeur).
 
 ## Ouvrir l'app
 
@@ -54,6 +58,9 @@ Une fois installée, l'app fonctionne aussi hors connexion. Même au fond d'une 
   two-feel, bossa, croches pop/rock. « Nouvelle ligne » en propose une autre.
 - **Import MIDI** : jouer et lire en tab la ligne de basse d'un fichier `.mid`
   (choix de la piste, autres pistes et batterie du fichier).
+- **Mes fichiers MIDI** : chaque fichier importé est gardé sur l'appareil et reste dans le menu
+  Morceau, avec la piste basse choisie. Plus besoin de le réimporter. « 🗑 Retirer de la liste »
+  l'enlève.
 
 Les lignes des morceaux sont générées sur les grilles d'accords : ce ne sont pas
 des transcriptions d'enregistrements.
@@ -155,8 +162,9 @@ mais c'est sur une fretless qu'il prend tout son sens.
 - **Entrée audio** (accordeur et mode attente) : choix de l'entrée (interface audio, micro…),
   justesse demandée, seuil de niveau et vumètre.
 
-Tous les choix (mode, tempo, sons, gammes, boucle inventée, réglages de l'accordeur…) sont retenus
-d'une visite à l'autre sur chaque appareil.
+Tous les choix (mode, tempo, sons, gammes, boucle inventée, réglages de l'accordeur, dernier
+morceau MIDI ouvert…) sont retenus d'une visite à l'autre sur chaque appareil. Rien n'est envoyé :
+tout reste dans le navigateur.
 
 ## Jouer avec ses instruments MIDI
 
@@ -226,6 +234,7 @@ et régler le canal sur celui que l'instrument écoute (souvent 1 par défaut). 
 | `web/tab.js` | Tablature |
 | `web/staff.js` | Partition en clé de fa |
 | `web/midi-import.js` | Lecture des fichiers MIDI |
+| `web/library.js` | Fichiers MIDI gardés sur l'appareil (« Mes fichiers MIDI ») |
 | `web/sw.js`, `web/manifest.json` | Installation et mode hors ligne |
 | `serve.py` | Serveur local pour le développement |
 | `basse.swift` | Premier prototype (macOS, ligne de commande) |

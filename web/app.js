@@ -6,6 +6,7 @@ import { LOW_E, parseChord, bassRoot, padVoicing } from './theory.js';
 import { SONGS, expandSong } from './songs.js';
 import { bassLine, STYLES } from './walking.js';
 import { readMidiFile, guessBassTrack } from './midi-import.js';
+import * as library from './library.js';
 import { createTab } from './tab.js';
 import { createKit, patternHits, gmDrumEvents, DRUM_STYLES, WALKING_DRUMS } from './drums.js';
 import { SCALE_TYPES, FINGERINGS, ZONES, keyOptions, boxOptions, buildScaleExercise } from './scales.js';
@@ -239,7 +240,9 @@ function buildLoopProgram() {
 }
 
 const currentSong = () => SONGS.find((s) => s.id === songState.songId);
-const usingMidi = () => songState.songId === 'midi' && songState.midi;
+// Morceau MIDI : songId = « midi:<n° dans la bibliothèque> » (library.js).
+const libraryId = (songId) => (String(songId).startsWith('midi:') ? Number(songId.slice(5)) : null);
+const usingMidi = () => libraryId(songState.songId) != null && songState.midi;
 
 function buildSongProgram() {
   if (usingMidi()) {
@@ -496,13 +499,55 @@ function renderSong() {
   $('styleCtl').hidden = midi;
   $('regenCtl').hidden = midi;
   $('midiCtl').hidden = !midi;
+  $('forgetMidi').parentElement.hidden = !(midi && libraryId(songState.songId));   // 0 : pas gardé
 }
 
 function updateSongSelect() {
   const sel = $('song');
   sel.innerHTML = '';
   for (const s of SONGS) sel.append(option(s.id, s.title, s.id === songState.songId));
-  if (songState.midi) sel.append(option('midi', `MIDI : ${songState.midi.title}`, songState.songId === 'midi'));
+  if (myMidi.length) {
+    const group = document.createElement('optgroup');
+    group.label = 'Mes fichiers MIDI';
+    for (const x of myMidi) group.append(option(`midi:${x.id}`, x.title, `midi:${x.id}` === songState.songId));
+    sel.append(group);
+  }
+}
+
+// Fichiers MIDI gardés dans la bibliothèque (titres seulement), pour le menu Morceau.
+let myMidi = [];
+async function refreshLibrary() {
+  try { myMidi = await library.listSongs(); } catch { myMidi = []; }
+  updateSongSelect();
+}
+
+// Ouvre un morceau MIDI lu par readMidiFile (id : son n° dans la bibliothèque).
+function useMidi(m, id, track) {
+  if (playing) stop();
+  songState.midi = m;
+  songState.track = track != null && track < m.tracks.length ? track : guessBassTrack(m.tracks);
+  songState.songId = `midi:${id}`;
+  cue = 0;
+  rangeEnd = null;
+  const trackSel = $('track');
+  trackSel.innerHTML = '';
+  m.tracks.forEach((t, i) => trackSel.append(option(i, `${t.name}${t.percussion ? ' (batterie)' : ''}`, i === songState.track)));
+  updateSongSelect();
+  setTempo(m.bpm);
+  renderSong();
+  saveSoon();   // la lecture du fichier peut finir après la sauvegarde déclenchée par le menu
+}
+
+// Rouvre un morceau de la bibliothèque. Renvoie faux s'il n'existe plus ou ne se lit pas.
+async function openLibrarySong(id) {
+  try {
+    const x = await library.getSong(id);
+    if (!x) return false;
+    useMidi(await readMidiFile(x.file), id, x.track);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function setMode(m) {
@@ -1387,8 +1432,16 @@ for (const [value, label] of KEY_CHOICES) $('randKey').append(option(value, labe
 $('invent').addEventListener('click', invent);
 $('preset').addEventListener('change', (e) => applyPreset(e.target.value));
 
-$('song').addEventListener('change', (e) => {
+$('song').addEventListener('change', async (e) => {
   if (playing) stop();
+  const id = libraryId(e.target.value);
+  if (id != null) {
+    if (!(await openLibrarySong(id))) {
+      $('songInfo').textContent = 'Impossible de rouvrir ce fichier MIDI : réimportez-le.';
+      await refreshLibrary();
+    }
+    return;
+  }
   songState.songId = e.target.value;
   cue = 0;
   rangeEnd = null;
@@ -1415,25 +1468,34 @@ $('midiFile').addEventListener('change', async (e) => {
   try {
     const m = await readMidiFile(file);
     if (!m.tracks.length) throw new Error('aucune note dans ce fichier');
-    if (playing) stop();
-    songState.midi = m;
-    songState.track = guessBassTrack(m.tracks);
-    songState.songId = 'midi';
-    cue = 0;
-    rangeEnd = null;
-    const trackSel = $('track');
-    trackSel.innerHTML = '';
-    m.tracks.forEach((t, i) => trackSel.append(option(i, `${t.name}${t.percussion ? ' (batterie)' : ''}`, i === songState.track)));
-    updateSongSelect();
-    setTempo(m.bpm);
-    renderSong();
+    // Gardé dans la bibliothèque pour le resélectionner plus tard (sinon : morceau de cette session seulement).
+    let id = 0;
+    try { id = await library.addSong(file, m.title, guessBassTrack(m.tracks)); } catch { /* stockage indisponible */ }
+    if (id) myMidi = await library.listSongs().catch(() => myMidi);
+    useMidi(m, id);
   } catch (err) {
     $('songInfo').textContent = `Impossible de lire ce fichier MIDI : ${err.message}`;
   }
   e.target.value = '';
 });
+$('forgetMidi').addEventListener('click', async () => {
+  const id = libraryId(songState.songId);
+  const title = songState.midi?.title ?? '';
+  if (!id || !confirm(`Retirer « ${title} » de vos fichiers MIDI ?`)) return;
+  if (playing) stop();
+  await library.removeSong(id).catch(() => {});
+  songState.midi = null;
+  songState.songId = SONGS[0].id;
+  cue = 0;
+  rangeEnd = null;
+  await refreshLibrary();
+  setTempo(currentSong().bpm);
+  renderSong();
+});
 $('track').addEventListener('change', (e) => {
   songState.track = Number(e.target.value);
+  const id = libraryId(songState.songId);
+  if (id) library.setSongTrack(id, songState.track).catch(() => {});
   renderSong();
 });
 
@@ -1448,7 +1510,7 @@ document.addEventListener('keydown', (e) => {
 // ---------- Mémoire des réglages d'une session à l'autre ----------
 // Tout est gardé dans le stockage local du navigateur (sur l'appareil, rien n'est envoyé) :
 // mode, tempo, cases cochées, menus, ligne de la boucle (même inventée ou modifiée), gammes, morceau.
-// Le fichier MIDI importé n'est pas gardé (il faut le réimporter).
+// Les fichiers MIDI importés sont gardés à part, dans la bibliothèque (library.js).
 
 const SETTINGS_KEY = 'bassroutine-settings';
 const TOGGLES = ['synth', 'drums', 'fills', 'metro', 'others', 'loop', 'scaleLoop', 'waitMode'];
@@ -1468,7 +1530,7 @@ function snapshot() {
     loop: { ...loopState },
     loopInfo: inventedLabel,
     song: {
-      songId: songState.songId === 'midi' ? SONGS[0].id : songState.songId,
+      songId: libraryId(songState.songId) ? songState.songId : usingMidi() ? SONGS[0].id : songState.songId,
       choruses: songState.choruses, seed: songState.seed, style: songState.style,
     },
     scale: { ...scaleState },
@@ -1489,7 +1551,12 @@ function restoreSettings() {
   for (const [id, on] of Object.entries(saved.toggles ?? {})) if ($(id)) $(id).checked = on;
   for (const [id, value] of Object.entries(saved.selects ?? {})) if ($(id)) setSelect(id, value);
 
-  if (saved.song && SONGS.some((x) => x.id === saved.song.songId)) Object.assign(songState, saved.song);
+  if (saved.song) {
+    const { songId, ...rest } = saved.song;
+    Object.assign(songState, rest);
+    if (SONGS.some((x) => x.id === songId)) songState.songId = songId;
+    else if (libraryId(songId)) reopenMidi = { id: libraryId(songId), tempo: saved.tempo };
+  }
   setSelect('choruses', songState.choruses);
   setSelect('style', songState.style);
   updateSongSelect();
@@ -1518,8 +1585,15 @@ function restoreSettings() {
   return true;
 }
 
+// Dernier morceau MIDI ouvert, rouvert une fois la bibliothèque lue (avec le tempo choisi).
+let reopenMidi = null;
 updateSongSelect();
 if (!restoreSettings()) applyPreset('mi');
+refreshLibrary().then(async () => {
+  if (reopenMidi && myMidi.some((x) => x.id === reopenMidi.id) && (await openLibrarySong(reopenMidi.id)) && reopenMidi.tempo) {
+    setTempo(reopenMidi.tempo);
+  }
+});
 try { if (localStorage.getItem(STAFF_KEY) === '1') setStaffVisible(true); } catch { /* stockage indisponible */ }
 
 // Sauvegarde peu après chaque action (menus, cases, curseurs, boutons, grille).
