@@ -31,7 +31,7 @@ sans frettes pour tricher : voir [Affiner sa justesse sur une fretless](#affiner
 
 ## Ouvrir l'app
 
-👉 **https://fredlatorche.github.io/BassRoutine/**
+👉 **[fredlatorche.github.io/BassRoutine](https://fredlatorche.github.io/BassRoutine/)**
 
 Pour l'installer :
 
