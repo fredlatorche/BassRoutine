@@ -1309,7 +1309,7 @@ function renderMidi() {
 renderMidi();
 midiOut.restoreMidi(renderMidi);
 
-// Portée en clé de fa au-dessus de la tab : désactivée par défaut, choix retenu sur l'appareil.
+// Portée en clé de fa au-dessus de la tab : affichée par défaut, choix retenu sur l'appareil.
 const STAFF_KEY = 'bassroutine-staff';
 function setStaffVisible(on) {
   $('showStaff').checked = on;
@@ -1705,7 +1705,9 @@ refreshLibrary().then(async () => {
     setTempo(reopenMidi.tempo);
   }
 });
-try { if (localStorage.getItem(STAFF_KEY) === '1') setStaffVisible(true); } catch { /* stockage indisponible */ }
+let staffOn = true;
+try { staffOn = localStorage.getItem(STAFF_KEY) !== '0'; } catch { /* stockage indisponible */ }
+setStaffVisible(staffOn);
 
 // Sauvegarde peu après chaque action (menus, cases, curseurs, boutons, grille).
 let saveTimer;

@@ -183,7 +183,7 @@ mais c'est sur une fretless qu'il prend tout son sens.
   Sur ordinateur, la barre d'espace fait Play / Stop.
 - **Travailler un passage** : toucher « ▶ Début » puis la première mesure, « Fin ◀ » puis
   la dernière : ces mesures tournent en boucle (✕ pour l'effacer).
-- **Partition en clé de fa** au-dessus de la tab (option) : armure de la tonalité,
+- **Partition en clé de fa** au-dessus de la tab (affichée par défaut, à décocher dans ⚙️) : armure de la tonalité,
   altérations écrites selon les règles (bémols en Mi♭, dièses en Sol…), croches ligaturées,
   triolets. Un **mode novice** répète l'altération sur chaque note.
 
