@@ -1,26 +1,26 @@
 # Empreintes de Bass Routine
 
 Auteur : **FredLatorche** — https://github.com/fredlatorche/BassRoutine
-Version : 3.0 — 2026-10-30
+Version : 4.0 — 2026-10-30
 
 Chaque fichier du projet est identifié par son empreinte SHA-256 : si un seul caractère
 change, l'empreinte change complètement. Associée à une date certaine (historique GitHub,
 archive Software Heritage, horodatage OpenTimestamps ou enveloppe e-Soleau de l'INPI),
 cette liste prouve que ce code existait, sous cette forme, à cette date.
 
-**Empreinte globale de la version** : `19e45e2d3249f0903cbf1c563569a27e0bcaf86d2335130a9b8eda68f78d469e`
+**Empreinte globale de la version** : `1ed34dc0c4556f24c321fef50348bc4f40711e7f6e9dfc81817a8bd941809c9b`
 
 | Fichier | SHA-256 |
 |---|---|
 | `.gitignore` | `53f0c100a33a56ebada040287b3d0f5dbab21c6ec6b66209fec5515c508f1144` |
 | `LICENSE` | `1b29c7bf379ebc18668e0c8756402deab86025a63f224d61f456d2aeb200f01b` |
-| `README.md` | `3d97d57bc47330b111bd9366611bd62789e4701b4478a0214f2e0332db95f500` |
+| `README.md` | `169218aa5eeabe852025ff09f6af2ffe9e5947dbd664c83e538d71d978188eda` |
 | `basse.swift` | `17ed483f5773f1f1507c5343da4dd967d044c771c5c75dbeef321852f08af382` |
-| `empreintes.py` | `667e13f273d643f2d99582fca013179a5ca27c063454f588147947bbd2ee31b1` |
+| `empreintes.py` | `b0f4f69f1d693389844d372a3501c17ea26cd7b2ea8d6d2ce187a5f4db010fe3` |
 | `exemples/test-basse.mid` | `6d8d8bf96c9feef098a1506d0101205c9af11ad231ac5ab573d436024def12fd` |
 | `index.html` | `1ab097b356ee429bd11c4b5c9dda8ec51514fac8086eca5cfde409baffa23637` |
 | `serve.py` | `b373da570e5234602b7997b9ea74c617e95abb4ef18a51561163112b362fe3fe` |
-| `web/app.js` | `36b8ba90ca33f567d14a5923138bcf740e47c64b7f1c83fefbc953018034de29` |
+| `web/app.js` | `38754ce5a70a1328b65dd4e7f28de2ac1bde3a95c44441270fa447b079cb4c21` |
 | `web/drums.js` | `657f9447a569dd26b8cfbd0336fba9324eacbcc19fd39a51a71e80513da46765` |
 | `web/icons/bass-light.png` | `fce175402346141974327847b0b0f55dcb97de967542bfeee025af9db37a724a` |
 | `web/icons/bass.png` | `467c80ce6204ee2cf73cc3cdbe56020d02655a0bccd9b8fe0a0d360da090ecf6` |
@@ -29,20 +29,21 @@ cette liste prouve que ce code existait, sous cette forme, à cette date.
 | `web/icons/icon-192.png` | `15e9f11c238327479d9e87003d3e9dbe0f7122cc8f7ab0765995a8e20d345548` |
 | `web/icons/icon-512.png` | `2872fb0a7026dc2f93b28f26dc56f3afb2275d07df589caa3eea72d4ea77d13e` |
 | `web/icons/icon-maskable-512.png` | `961a7a9145f42016cb675bdc3e88158755b06f78973f50270c8101e8e12db203` |
-| `web/index.html` | `c83083c7d619791a6beea893bb923dee74c528e14567c3b0a9b90647f4a8b564` |
+| `web/index.html` | `9afb78c05631cf50c0bd991e4d710bc416432dc7ea79c9b40d6cb0ba17dfa146` |
 | `web/library.js` | `1d0dcae5793087de25771e3097834baf2b945e0344018cb165bab4c021be4fb5` |
 | `web/manifest.json` | `2edfe4616e669b98a53e64aafc95a9cf5e41a30bbbe0d7959629a0a2e70cb962` |
 | `web/midi-import.js` | `2bd342ee783cf674f007c75262900928d38253c3fda1db9f05e9e79b610aafff` |
-| `web/midi-out.js` | `1ddaa7ddc7651ecc6247837332d242ffeb1a91f554573cae80887ad8cee874e8` |
+| `web/midi-out.js` | `5e400b1bfee9454a907aa98b5b1b790d974c77b5fe73f4c077f9bd5d77b22308` |
 | `web/notation.js` | `bfd8f70dfdf8d0f1722ed8e42b4fad5b98f2aaaeccd7da6943a9a47ada3b9738` |
 | `web/pitch.js` | `4cedae4202740aeda65170474f11eb701a07ed524f255b0ae41fd0d3c1ce48e1` |
 | `web/random-loop.js` | `a40398e19063eeeb9253fa1734c0d05423bd2c34e2b7d0b45a84852eb61ef163` |
+| `web/recorder.js` | `76b9a52dd70bfb17ae4b06197f825c4bb0ee3193843ca2d07fa61427b619e61f` |
 | `web/scales.js` | `f1a2112a6451a16b59bc2372f2c6e5e2a4de83b1be0553eb4400e765eb5cd1a1` |
 | `web/songs.js` | `4b8c21fa68a18eb12ff052e998aed7fee5a4a1b8fd17e2edb3928fa3fabbbf4c` |
 | `web/spelling.js` | `f3732cf60dec2d0eedd214305edcffba8cf09f399669a92d8e1173283915015d` |
 | `web/staff.js` | `d1707001612b447221e7e74a3d0b0b2564c9dccab231a91d25c2769200859200` |
-| `web/style.css` | `dc9086b00163ab1053f88eb9040d8ad7e90757c1818c943afaed2dcf3f091308` |
-| `web/sw.js` | `d468196814df76c6d252caf775fb808f2ec4289b448741eaaa435cd0440a7402` |
+| `web/style.css` | `cb42f3d12524491ac0345656b987c43e125841eea2122de3ceffb62307b31f88` |
+| `web/sw.js` | `ef5d579ed1f961faf54f2134f6cc8c61353c4618c8fa166f7beb735c3f1a2446` |
 | `web/tab.js` | `483382f288411fb3ba091c4188f0390a41569a3fb53643f1c14581fd5a5b1002` |
 | `web/theory.js` | `5bbb596047c749c3f4a592ba41a441db2988a8a3507e0ce5b1a05a01d845406e` |
 | `web/tuner.js` | `3b05d19aa2a8a7ae6b87332e1a723eccee4f320edb2d0e200c305e52d15f9f51` |
