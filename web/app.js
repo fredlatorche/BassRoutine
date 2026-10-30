@@ -16,6 +16,7 @@ import { setNotation, noteLabel } from './notation.js';
 import * as midiOut from './midi-out.js';
 import * as pitch from './pitch.js';
 import { createTuner } from './tuner.js';
+import { createRecorder } from './recorder.js';
 
 const BEATS = 4;
 const $ = (id) => document.getElementById(id);
@@ -552,6 +553,7 @@ async function openLibrarySong(id) {
 
 function setMode(m) {
   if (playing) stop();
+  if (m !== 'song') setRecorderOpen(false);
   mode = m;
   cue = 0;
   rangeEnd = null;
@@ -898,12 +900,20 @@ async function wakeAudio(record = false) {
   return raw.state === 'running';
 }
 
+// Audio réveillé et sons créés (hors lecture : saisie au clavier MIDI).
+async function audioReady() {
+  const ok = await wakeAudio();
+  if (ok && !bass) initAudio();
+  return ok;
+}
+
 let starting = false;   // évite deux démarrages si on touche Play deux fois très vite
 async function start() {
   if (starting) return;
   starting = true;
   try {
     setTunerOpen(false);   // l'accordeur libère l'entrée audio
+    recorder.stopLive();   // une prise en temps réel en cours est abandonnée
     if ($('waitMode').checked) {
       await startWaiting();
       return;
@@ -913,7 +923,7 @@ async function start() {
       showMessage('Le son est bloqué par l\'iPhone : touche Play à nouveau.');
       return;
     }
-    if (!bass) initAudio();
+    if (!bass) initAudio();   // (voir aussi audioReady)
     if (Tone.Transport.state !== 'stopped') Tone.Transport.stop();   // transport resté en route : on repart propre
     begin();
   } finally {
@@ -1375,6 +1385,50 @@ $('mixerReset').addEventListener('click', () => {
     slider.dispatchEvent(new Event('input'));
   });
 });
+
+// Saisie d'une ligne de basse au clavier MIDI (mode Morceau), gardée dans « Mes fichiers MIDI ».
+// Heure du son de la touche : Tone refuse deux événements au même instant (accord, touches très rapides).
+let lastPreview = 0;
+const previewTime = () => (lastPreview = Math.max(Tone.now(), lastPreview + 0.002));
+const recorder = createRecorder($('recorder'), {
+  enable: () => midiOut.enableMidi(renderMidi),
+  ports: () => (midiOut.midiReady() ? midiOut.inputs() : null),
+  listen: midiOut.listenInputs,
+  prepare: audioReady,
+  noteOn: async (m) => {
+    if (playing || !(await audioReady())) return;
+    bass.triggerAttack(Tone.Frequency(m, 'midi'), previewTime(), 0.8);
+  },
+  noteOff: () => bass?.triggerRelease(previewTime()),
+  click: (time, strong) => click.triggerAttackRelease(strong ? 'C6' : 'G5', '32n', time, strong ? 0.8 : 0.45),
+  ctx: () => Tone.getContext().rawContext,
+  tempo: () => Number($('tempo').value),
+  name: (m) => noteLabel(pitchName(m, 0)) + String(Math.floor(m / 12) - 1).replace(/\d/g, (d) => '₀₁₂₃₄₅₆₇₈₉'[d]),
+  onSave: async (file, title) => {
+    try {
+      const id = await library.addSong(file, title, 0);
+      myMidi = await library.listSongs();
+      useMidi(await readMidiFile(file), id, 0);
+      setRecorderOpen(false);
+    } catch (err) {
+      showMessage(`Impossible d'enregistrer la ligne : ${err.message}`);
+    }
+  },
+  onClose: () => setRecorderOpen(false),
+});
+function setRecorderOpen(open) {
+  const panel = $('recorder');
+  if (open === !panel.hidden) return;
+  panel.hidden = !open;
+  $('recordBtn').classList.toggle('on', open);
+  if (open) {
+    if (playing) stop();
+    recorder.open();
+  } else {
+    recorder.close();
+  }
+}
+$('recordBtn').addEventListener('click', () => setRecorderOpen($('recorder').hidden));
 
 // Cliquer une mesure de la grille d'accords = repartir de là (premier chorus).
 $('chart').addEventListener('click', (e) => {

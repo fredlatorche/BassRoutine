@@ -3,6 +3,7 @@
 // Chaque piste (basse, accords, batterie, autres) peut jouer sur un instrument MIDI au lieu
 // du son interne : un synthé branché en USB, ou Ableton / GarageBand via le bus IAC du Mac.
 // Les notes partent avec un horodatage calé sur l'horloge audio, donc en rythme avec le reste.
+// Entrée : les claviers MIDI branchés servent à saisir une ligne de basse (recorder.js).
 
 export const MIDI_TRACKS = {
   bass: 'Basse',
@@ -58,9 +59,32 @@ export async function enableMidi(changed) {
   } catch (err) {
     return err?.message || err?.name || String(err);
   }
-  access.onstatechange = () => onChange();   // instrument branché ou débranché
+  access.onstatechange = () => { bindInputs(); onChange(); inputsChanged(); };   // instrument branché ou débranché
+  bindInputs();
   onChange();
   return '';
+}
+
+// ---------- Entrée : claviers MIDI (saisie d'une ligne de basse) ----------
+
+export const inputs = () => (access ? [...access.inputs.values()] : []);
+let onInputNote = null, inputsChanged = () => {};
+function bindInputs() {
+  for (const port of inputs()) {
+    port.onmidimessage = onInputNote && ((e) => {
+      const [status, note, vel] = e.data;
+      const type = status & 0xf0;
+      if (type === 0x90 && vel > 0) onInputNote(note, true, e.timeStamp);
+      else if (type === 0x80 || type === 0x90) onInputNote(note, false, e.timeStamp);
+    });
+  }
+}
+// Écoute tous les claviers : onNote(note, appuyée, heure performance.now), changed() quand on en branche un.
+// listenInputs(null) arrête l'écoute.
+export function listenInputs(onNote, changed) {
+  onInputNote = onNote;
+  inputsChanged = changed ?? (() => {});
+  bindInputs();
 }
 
 // Déjà autorisé lors d'une visite précédente et une piste routée : on se reconnecte sans rien demander.

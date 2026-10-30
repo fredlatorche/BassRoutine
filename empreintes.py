@@ -2,7 +2,7 @@
 # Recalcule EMPREINTES.md (SHA-256 de chaque fichier) : python3 empreintes.py
 # Génère EMPREINTES.md : SHA-256 de chaque fichier suivi par git (sauf EMPREINTES.md lui-même).
 import hashlib, subprocess, sys, datetime, os
-VERSION = '3.0'   # à changer à chaque version publiée
+VERSION = '4.0'   # à changer à chaque version publiée
 root = sys.argv[1] if len(sys.argv) > 1 else os.path.dirname(os.path.abspath(__file__))
 files = [f for f in subprocess.check_output(['git', '-C', root, 'ls-files'], text=True).split('\n') if f and f != 'EMPREINTES.md']
 files += [f for f in subprocess.check_output(['git', '-C', root, 'ls-files', '--others', '--exclude-standard'], text=True).split('\n') if f and f != 'EMPREINTES.md']

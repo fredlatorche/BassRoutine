@@ -559,3 +559,27 @@ body.with-staff .bass-duo { margin-bottom: 310px; }
   font-weight: 600;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
 }
+
+/* ---------- Saisie au clavier MIDI (mode Morceau) ---------- */
+
+.recorder { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin-bottom: 14px; }
+.recorder .mixer-head { gap: 10px; flex-wrap: wrap; }
+.recorder .mixer-head strong { margin-right: auto; }
+.rec-ports { color: var(--muted); font-size: 0.85rem; margin: 0 0 10px; }
+.rec-ports button { margin-left: 6px; }
+.rec-fields, .rec-step, .rec-live, .rec-actions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 10px; }
+.rec-fields input { flex: 1 1 12em; min-height: 36px; padding: 0 10px; font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
+.rec-step button { min-width: 42px; font-size: 1.05rem; }
+.rec-step button.on, .rec-btn.on, #recordBtn.on { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.rec-btn.on { background: #e5534b; border-color: #e5534b; color: #fff; }
+.rec-count { font-variant-numeric: tabular-nums; color: var(--muted); min-width: 7em; }
+.rec-line { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; min-height: 44px; padding: 6px; border: 1px dashed var(--line); border-radius: 8px; }
+.rec-note { display: inline-flex; align-items: baseline; gap: 3px; padding: 3px 7px; border-radius: 6px; background: var(--bg); border: 1px solid var(--line); font-size: 0.9rem; }
+.rec-note small { color: var(--muted); }
+.rec-note.rest { color: var(--muted); }
+.rec-bar { width: 2px; align-self: stretch; background: var(--muted); margin: 0 3px; border-radius: 1px; }
+.rec-empty { color: var(--muted); font-size: 0.85rem; }
+.rec-summary { color: var(--muted); font-size: 0.85rem; margin: 6px 0 10px; min-height: 1em; }
+.rec-actions { justify-content: flex-end; margin-bottom: 0; }
+.rec-actions .primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.rec-actions .primary:disabled { opacity: 0.5; cursor: default; }

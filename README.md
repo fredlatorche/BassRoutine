@@ -9,7 +9,12 @@ et s'installe comme une application.
 En résumé : un groupe entier qui joue avec vous, ne se plaint jamais du tempo,
 ne rate aucune répétition et ne vous demande pas de porter l'ampli.
 
-**Version 3.0** : les nouveautés.
+**Version 4.0** : 🎹 **saisissez vos lignes de basse au clavier MIDI.** Branchez un clavier à l'ordinateur,
+jouez votre ligne note par note ou en temps réel sur le métronome : elle devient un fichier MIDI,
+rangé dans « Mes fichiers MIDI » et prêt à travailler aussitôt, en tab et en partition :
+voir [Saisir une ligne au clavier MIDI](#saisir-une-ligne-au-clavier-midi).
+
+Version 3.0 :
 
 - 🎸 **Accordeur** : en mode automatique (il reconnaît la corde jouée) ou corde par corde,
   avec le diapason réglable : voir [Accordeur](#accordeur).
@@ -61,6 +66,27 @@ Une fois installée, l'app fonctionne aussi hors connexion. Même au fond d'une 
 - **Mes fichiers MIDI** : chaque fichier importé est gardé sur l'appareil et reste dans le menu
   Morceau, avec la piste basse choisie. Plus besoin de le réimporter. « 🗑 Retirer de la liste »
   l'enlève.
+- **🎹 Saisir au clavier** : une petite ligne de basse jouée sur un clavier MIDI branché à l'ordinateur
+  devient un fichier MIDI, rangé avec les autres dans « Mes fichiers MIDI » (voir ci-dessous).
+
+### Saisir une ligne au clavier MIDI
+
+Branchez un clavier MIDI (USB) à l'ordinateur, passez en mode **Morceau** et touchez
+**🎹 Saisir au clavier**. Le navigateur demande l'accès au MIDI la première fois.
+Fonctionne dans Chrome, Edge et Firefox sur ordinateur (pas sur iPhone, faute de Web MIDI dans Safari).
+
+- **Pas à pas** : choisissez une durée (blanche, noire pointée, noire, croche, double croche,
+  triolet), puis jouez les notes une à une : chacune prend cette durée, sans contrainte de tempo.
+  « Silence » ajoute un silence, ⌫ (ou la touche Retour arrière) efface la dernière note.
+- **Temps réel** : touchez « Enregistrer », une mesure de décompte au métronome (au tempo de l'app),
+  puis jouez. Les notes sont calées sur la grille choisie (croche, double croche ou triolet).
+  « Arrêter » termine la prise.
+- **Octave** : un petit clavier joue souvent trop haut pour la basse ; « −1 octave » ou « −2 octaves »
+  décale les notes (Mi₁ = corde de Mi à vide).
+- Chaque touche fait entendre la note au son de basse de l'app. Les notes saisies s'affichent
+  au fur et à mesure, avec les barres de mesure.
+- Donnez un titre (sinon : « Ligne du … »), puis **💾 Ajouter à mes fichiers MIDI** : la ligne s'ouvre
+  aussitôt, en tab et en partition, au tempo de la saisie, et reste dans le menu Morceau.
 
 Les lignes des morceaux sont générées sur les grilles d'accords : ce ne sont pas
 des transcriptions d'enregistrements.
@@ -228,13 +254,14 @@ et régler le canal sur celui que l'instrument écoute (souvent 1 par défaut). 
 | `web/random-loop.js` | Mode 🎲 Inventer |
 | `web/scales.js` | Gammes et doigtés |
 | `web/drums.js` | Batterie et rythmes |
-| `web/midi-out.js` | Sortie vers les instruments MIDI |
+| `web/midi-out.js` | Sortie vers les instruments MIDI, entrée des claviers MIDI |
 | `web/pitch.js` | Entrée audio et reconnaissance des notes jouées |
 | `web/tuner.js` | Accordeur |
 | `web/tab.js` | Tablature |
 | `web/staff.js` | Partition en clé de fa |
 | `web/midi-import.js` | Lecture des fichiers MIDI |
 | `web/library.js` | Fichiers MIDI gardés sur l'appareil (« Mes fichiers MIDI ») |
+| `web/recorder.js` | Saisie d'une ligne de basse au clavier MIDI |
 | `web/sw.js`, `web/manifest.json` | Installation et mode hors ligne |
 | `serve.py` | Serveur local pour le développement |
 | `basse.swift` | Premier prototype (macOS, ligne de commande) |
