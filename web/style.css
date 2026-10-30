@@ -195,7 +195,8 @@ button.rewind svg { width: 18px; height: 18px; }
 /* Tempo dans l'en-tête : téléphone en paysage seulement (peu de hauteur, de la place en largeur). */
 .head-tempo { display: none; }
 @media (orientation: landscape) and (max-height: 500px) {
-  .head-tempo { display: flex; align-items: center; gap: 8px; flex: 1; max-width: 320px; min-width: 0; }
+  .head-tempo { display: flex; align-items: center; gap: 8px; flex: 1; max-width: 320px; min-width: 0; margin-left: 10px; }
+  .head-tempo .metronome { width: 22px; height: 22px; flex-shrink: 0; fill: none; stroke: var(--text); stroke-width: 1.2; stroke-linejoin: round; stroke-linecap: round; }
   .head-tempo input { flex: 1; min-width: 0; accent-color: var(--accent); }
   .head-tempo output { min-width: 2.2em; font-size: 0.9rem; font-variant-numeric: tabular-nums; color: var(--accent); font-weight: 700; }
   /* Rien que l'en-tête et la tab (avec la portée) : les réglages restent en portrait. */
