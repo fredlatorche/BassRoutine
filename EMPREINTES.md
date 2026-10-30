@@ -8,7 +8,7 @@ change, l'empreinte change complètement. Associée à une date certaine (histor
 archive Software Heritage, horodatage OpenTimestamps ou enveloppe e-Soleau de l'INPI),
 cette liste prouve que ce code existait, sous cette forme, à cette date.
 
-**Empreinte globale de la version** : `5db6349a34a7977bd28c903a5939fcbb5011ac50ff5a5fd0ba15c0e046196d01`
+**Empreinte globale de la version** : `19e45e2d3249f0903cbf1c563569a27e0bcaf86d2335130a9b8eda68f78d469e`
 
 | Fichier | SHA-256 |
 |---|---|
@@ -24,13 +24,14 @@ cette liste prouve que ce code existait, sous cette forme, à cette date.
 | `web/drums.js` | `657f9447a569dd26b8cfbd0336fba9324eacbcc19fd39a51a71e80513da46765` |
 | `web/icons/bass-light.png` | `fce175402346141974327847b0b0f55dcb97de967542bfeee025af9db37a724a` |
 | `web/icons/bass.png` | `467c80ce6204ee2cf73cc3cdbe56020d02655a0bccd9b8fe0a0d360da090ecf6` |
-| `web/icons/favicon-32.png` | `083e91ecfe6e8227feb2ca4c27faad336ba74826f0a087b2115a5841ca6a89c9` |
+| `web/icons/favicon-32.png` | `d1cbc3157f6584df9235db2f51a19ba33b97a140bb16556872c15a9b4ec8fa78` |
 | `web/icons/icon-180.png` | `814dca66c80bbc07f1e4d11db8c61bee8e98823268152ceba906638dc41d21bb` |
-| `web/icons/icon-192.png` | `5155206be7b6563cb8e8055e784b9c7b152951e43c3ebb7ec79cf65d9e8731af` |
-| `web/icons/icon-512.png` | `b210cd410bdf4a649e11dadc94d2b469c49c5e68e711ee767a2d98b66b2164bc` |
+| `web/icons/icon-192.png` | `15e9f11c238327479d9e87003d3e9dbe0f7122cc8f7ab0765995a8e20d345548` |
+| `web/icons/icon-512.png` | `2872fb0a7026dc2f93b28f26dc56f3afb2275d07df589caa3eea72d4ea77d13e` |
+| `web/icons/icon-maskable-512.png` | `961a7a9145f42016cb675bdc3e88158755b06f78973f50270c8101e8e12db203` |
 | `web/index.html` | `c83083c7d619791a6beea893bb923dee74c528e14567c3b0a9b90647f4a8b564` |
 | `web/library.js` | `1d0dcae5793087de25771e3097834baf2b945e0344018cb165bab4c021be4fb5` |
-| `web/manifest.json` | `1bc934ddc101bfe26457da5b60ac5c1790e89d6394675d7fec00cb56b9892e86` |
+| `web/manifest.json` | `2edfe4616e669b98a53e64aafc95a9cf5e41a30bbbe0d7959629a0a2e70cb962` |
 | `web/midi-import.js` | `2bd342ee783cf674f007c75262900928d38253c3fda1db9f05e9e79b610aafff` |
 | `web/midi-out.js` | `1ddaa7ddc7651ecc6247837332d242ffeb1a91f554573cae80887ad8cee874e8` |
 | `web/notation.js` | `bfd8f70dfdf8d0f1722ed8e42b4fad5b98f2aaaeccd7da6943a9a47ada3b9738` |
@@ -41,7 +42,7 @@ cette liste prouve que ce code existait, sous cette forme, à cette date.
 | `web/spelling.js` | `f3732cf60dec2d0eedd214305edcffba8cf09f399669a92d8e1173283915015d` |
 | `web/staff.js` | `d1707001612b447221e7e74a3d0b0b2564c9dccab231a91d25c2769200859200` |
 | `web/style.css` | `dc9086b00163ab1053f88eb9040d8ad7e90757c1818c943afaed2dcf3f091308` |
-| `web/sw.js` | `933f873ca2324250657404a98e2c243cdec2bc3e306c00a8ff7f21f9d400e6ca` |
+| `web/sw.js` | `d468196814df76c6d252caf775fb808f2ec4289b448741eaaa435cd0440a7402` |
 | `web/tab.js` | `483382f288411fb3ba091c4188f0390a41569a3fb53643f1c14581fd5a5b1002` |
 | `web/theory.js` | `5bbb596047c749c3f4a592ba41a441db2988a8a3507e0ce5b1a05a01d845406e` |
 | `web/tuner.js` | `3b05d19aa2a8a7ae6b87332e1a723eccee4f320edb2d0e200c305e52d15f9f51` |
