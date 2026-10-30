@@ -111,6 +111,11 @@ des transcriptions d'enregistrements.
 ## Accompagnement
 
 - **Accords** : piano électrique, nappe, vibraphone, cordes, cuivres, flûtes, orgue, guitare jazz.
+  Chaque accord s'enchaîne au précédent en bougeant le moins possible, comme le ferait un pianiste.
+  Piano, vibraphone et guitare jouent un rythme d'accompagnement qui suit le style de la batterie :
+  comping swing (avec des anticipations), bossa, funk, skank reggae, guitare « 4 temps » en swing…
+  La nappe, les cordes, les cuivres, les flûtes et l'orgue tiennent les accords ; la case **tenus**
+  fait de même pour les autres sons.
 - **Batterie** : 10 rythmes (swing, balais, two-feel, shuffle, bossa nova, rock, pop/disco,
   funk, half-time, reggae), réglage automatique selon le style, et petits breaks toutes les 4 mesures.
   Un batteur qui reste en place : c'est déjà la moitié du travail du bassiste.

@@ -140,6 +140,7 @@ h1 { margin: 0; font-size: 1.3rem; white-space: nowrap; }
 .field select, .field > button, .field .file-btn { width: 100%; min-height: 36px; }
 .field.check { justify-content: flex-end; }
 .field .toggle { min-height: 22px; }
+.toggle-line { display: flex; gap: 14px; }
 .field.check .toggle { min-height: 36px; }
 
 .fields {

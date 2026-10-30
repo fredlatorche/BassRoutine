@@ -1,9 +1,9 @@
 // Bass Routine — © 2026 FredLatorche (https://github.com/fredlatorche/BassRoutine). Tous droits réservés.
 // Garde l'app en cache pour qu'elle marche hors ligne.
 // Réseau d'abord (pour voir tout de suite les modifications), cache en secours.
-const CACHE = 'basse-tools-v58';
+const CACHE = 'basse-tools-v59';
 const ASSETS = [
-  './', 'index.html', 'style.css', 'app.js', 'theory.js', 'songs.js', 'walking.js', 'midi-import.js', 'tab.js', 'drums.js', 'scales.js', 'random-loop.js', 'staff.js', 'spelling.js', 'notation.js', 'midi-out.js', 'library.js', 'pitch.js', 'tuner.js', 'recorder.js',
+  './', 'index.html', 'style.css', 'app.js', 'theory.js', 'songs.js', 'walking.js', 'midi-import.js', 'tab.js', 'drums.js', 'scales.js', 'random-loop.js', 'staff.js', 'spelling.js', 'notation.js', 'midi-out.js', 'library.js', 'pitch.js', 'tuner.js', 'recorder.js', 'comping.js',
   'manifest.json', 'vendor/Tone.js', 'vendor/Midi.js',
   'icons/favicon-32.png', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/bass.png', 'icons/bass-light.png',
 ];

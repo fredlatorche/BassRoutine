@@ -2,7 +2,8 @@
 // Bass Routine : mode Boucle (grille éditable) et mode Morceau (walking générée ou MIDI importé),
 // avec accords de synthé, métronome et tablature qui défile.
 
-import { LOW_E, parseChord, bassRoot, padVoicing } from './theory.js';
+import { LOW_E, parseChord, bassRoot } from './theory.js';
+import { HELD_SOUNDS, voiceLead, compBar } from './comping.js';
 import { SONGS, expandSong } from './songs.js';
 import { bassLine, STYLES } from './walking.js';
 import { readMidiFile, guessBassTrack } from './midi-import.js';
@@ -205,6 +206,12 @@ function makeProgram({ events, others = [], drums = null, drumStyle = 'eighths',
     const len = bpb / chords.length;
     chords.forEach((symbol, i) => { chordStarts[b * bpb + i * len] = { symbol, beats: len }; });
   });
+  // Accord qui sonne à chaque temps, avec le temps où il a commencé.
+  const chordAt = [];
+  for (let t = 0, cur = null; t < totalBeats; t++) {
+    if (chordStarts[t]) cur = { symbol: chordStarts[t].symbol, start: t };
+    chordAt[t] = cur;
+  }
   return {
     totalBeats,
     bpb,
@@ -215,6 +222,7 @@ function makeProgram({ events, others = [], drums = null, drumStyle = 'eighths',
     drumByBeat: drums?.length ? byBeat(drums, totalBeats) : null,
     drumStyle,
     chordStarts,
+    chordAt,
     barSig,
   };
 }
@@ -851,17 +859,7 @@ function tick(time) {
       else other.triggerAttackRelease(Tone.Frequency(e.midi, 'midi'), e.dur * beatDur, at(e), e.vel ?? 0.6);
     }
   }
-  const chord = prog.chordStarts[s];
-  if ($('synth').checked && chord && toMidi('pad')) {
-    midiOut.playNotes('pad', padVoicing(parseChord(chord.symbol)), chord.beats * beatDur * 0.95, time, 0.6, ctx);
-  } else if ($('synth').checked && chord) {
-    const notes = padVoicing(parseChord(chord.symbol)).map((m) => Tone.Frequency(m + (pad.transpose ?? 0), 'midi'));
-    if (pad.strum) {
-      notes.forEach((n, i) => pad.triggerAttackRelease(n, chord.beats * beatDur * 0.95 - i * pad.strum, time + i * pad.strum, 0.5));
-    } else {
-      pad.triggerAttackRelease(notes, chord.beats * beatDur * 0.95, time, 0.5);
-    }
-  }
+  if ($('synth').checked) playChords(s, time, beatDur, ctx);
   if ($('drums').checked) {
     // « Auto » : rythme du style (ou batterie du fichier MIDI) ; sinon le rythme choisi dans le menu.
     const choice = $('drumStyle').value;
@@ -882,6 +880,66 @@ function tick(time) {
     beatClock = { s, time, cycle: c };
     showBeat(s);
   }, time);
+}
+
+// Temps joué après s (fin de la boucle de mesures, fin de l'exercice) ; -1 = arrêt.
+function stepAfter(s) {
+  let n = s + 1;
+  if (rangeEnd != null && n === rangeEnd) n = rangeStart;
+  if (n >= prog.totalBeats) n = isLooping() ? 0 : -1;
+  return n;
+}
+
+// Accompagnement en cours : voicing joué (pour enchaîner le suivant), coups de la mesure, anticipation.
+const comp = { next: -1, bar: -1, hits: [], pushed: false, voicing: null, start: null };
+
+// Voicing de l'accord qui sonne au temps beat, enchaîné depuis le précédent (calculé une fois par accord).
+function chordVoicing(beat) {
+  const c = prog.chordAt[beat];
+  if (!c) return null;
+  if (comp.start !== c.start) {
+    comp.voicing = voiceLead(parseChord(c.symbol), comp.voicing);
+    comp.start = c.start;
+  }
+  return comp.voicing;
+}
+
+// Accords du temps s : tenus (nappe, cordes… ou case « tenus »), sinon rythme selon le style de batterie.
+function playChords(s, time, beatDur, ctx) {
+  const toMidi = midiOut.routedToMidi('pad');
+  const play = (notes, at, dur, vel) => {
+    if (toMidi) return midiOut.playNotes('pad', notes, dur, at, Math.min(1, vel + 0.1), ctx);
+    const freqs = notes.map((m) => Tone.Frequency(m + (pad.transpose ?? 0), 'midi'));
+    if (pad.strum) freqs.forEach((f, i) => pad.triggerAttackRelease(f, dur - i * pad.strum, at + i * pad.strum, vel));
+    else pad.triggerAttackRelease(freqs, dur, at, vel);
+  };
+  if (s !== comp.next) { comp.bar = -1; comp.pushed = false; }   // départ ou saut : on repart sur une mesure neuve
+  comp.next = stepAfter(s);
+
+  if ($('padHeld').checked || HELD_SOUNDS.has($('padSound').value)) {
+    const chord = prog.chordStarts[s];
+    if (chord) play(chordVoicing(s), time, chord.beats * beatDur * 0.95, 0.5);
+    return;
+  }
+  const bpb = prog.bpb, bar = Math.floor(s / bpb), beat = s % bpb;
+  if (bar !== comp.bar) {
+    const choice = $('drumStyle').value;
+    const style = choice === 'auto' ? prog.drumStyle : choice;
+    comp.hits = compBar(style, bar, bpb, { guitar: $('padSound').value === 'guitar', pushed: comp.pushed });
+    comp.bar = bar;
+    comp.pushed = false;
+  }
+  for (const h of comp.hits) {
+    if (Math.floor(h.t) !== beat) continue;
+    let target = s;
+    if (h.push) {
+      // Anticipation : l'accord de la mesure suivante, joué juste avant elle.
+      const n = stepAfter(bar * bpb + bpb - 1);
+      if (n >= 0 && prog.chordAt[n]) { target = n; comp.pushed = true; }
+    }
+    const notes = chordVoicing(target);
+    if (notes) play(notes, time + (h.t - beat) * beatDur, h.dur * beatDur, h.vel);
+  }
 }
 
 function frame() {
@@ -1627,7 +1685,7 @@ document.addEventListener('keydown', (e) => {
 // Les fichiers MIDI importés sont gardés à part, dans la bibliothèque (library.js).
 
 const SETTINGS_KEY = 'bassroutine-settings';
-const TOGGLES = ['synth', 'drums', 'fills', 'metro', 'others', 'loop', 'scaleLoop', 'waitMode'];
+const TOGGLES = ['synth', 'padHeld', 'drums', 'fills', 'metro', 'others', 'loop', 'scaleLoop', 'waitMode'];
 const SELECTS = ['padSound', 'drumStyle', 'randKey', 'randMode', 'randRegister', 'preset', 'bars'];
 const SCALE_SELECTS = {
   scaleType: 'type', scaleKey: 'key', scaleRange: 'range', scaleDir: 'direction',

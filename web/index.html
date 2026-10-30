@@ -260,7 +260,10 @@
     <!-- Accompagnement (tous les modes) -->
     <div class="fields">
       <div class="field">
-        <label class="toggle"><input id="synth" type="checkbox" checked> Accords</label>
+        <div class="toggle-line">
+          <label class="toggle"><input id="synth" type="checkbox" checked> Accords</label>
+          <label class="toggle" title="Accords tenus d'un bout à l'autre, sans rythme (piano, vibraphone, guitare)"><input id="padHeld" type="checkbox"> tenus</label>
+        </div>
         <select id="padSound" aria-label="Son des accords">
           <option value="epiano">Piano électrique</option>
           <option value="pad" selected>Nappe</option>
