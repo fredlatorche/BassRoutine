@@ -583,3 +583,6 @@ body.with-staff .bass-duo { margin-bottom: 310px; }
 .rec-actions { justify-content: flex-end; margin-bottom: 0; }
 .rec-actions .primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
 .rec-actions .primary:disabled { opacity: 0.5; cursor: default; }
+.rec-latency { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; font-size: 0.85rem; color: var(--muted); }
+.rec-latency input[type="range"] { flex: 1 1 8em; accent-color: var(--accent); }
+.rec-offset { min-width: 4.5em; font-variant-numeric: tabular-nums; }

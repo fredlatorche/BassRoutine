@@ -18,7 +18,9 @@ const DURATIONS = [   // [temps, symbole, nom]
 const GRIDS = { 0.5: 'Croche', 0.25: 'Double croche', [1 / 3]: 'Triolet de croches' };
 const OCTAVES = [[1, '+1 octave'], [0, 'Telle quelle'], [-1, '−1 octave'], [-2, '−2 octaves']];
 
-const settings = { mode: 'step', dur: 1, grid: 0.5, octave: 0 };
+// offset : retard (ms) entre le clic entendu et la touche reçue (son, clavier, réflexe), retiré des notes jouées.
+const settings = { mode: 'step', dur: 1, grid: 0.5, octave: 0, offset: 0 };
+const CALIBRATION_BEATS = 8;   // temps joués pour mesurer le retard
 try { Object.assign(settings, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch { /* stockage indisponible */ }
 const save = () => {
   try { localStorage.setItem(KEY, JSON.stringify(settings)); } catch { /* stockage indisponible */ }
@@ -136,6 +138,21 @@ export function createRecorder(container, app) {
   const count = el('span', 'rec-count');
   liveRow.append(grid, rec, count);
 
+  // Compensation du retard : réglage à la main, ou mesuré en jouant sur les clics.
+  const latencyRow = el('div', 'rec-latency');
+  const offset = el('input');
+  offset.type = 'range';
+  offset.min = -100;
+  offset.max = 250;
+  offset.step = 5;
+  offset.setAttribute('aria-label', 'Compensation du retard');
+  const offsetText = el('span', 'rec-offset');
+  offset.addEventListener('input', () => { settings.offset = Number(offset.value); save(); render(); });
+  const calibrate = el('button', null, 'Mesurer');
+  calibrate.title = `Joue une note sur chacun des ${CALIBRATION_BEATS} clics après le décompte`;
+  calibrate.addEventListener('click', () => (live ? stopLive() : startLive(true)));
+  latencyRow.append(el('span', 'rec-latency-label', 'Retard'), offset, offsetText, calibrate);
+
   const line = el('div', 'rec-line');
   const summary = el('p', 'rec-summary');
   const actions = el('div', 'rec-actions');
@@ -153,7 +170,7 @@ export function createRecorder(container, app) {
   });
   actions.append(clear, store);
 
-  container.append(head, ports, fields, step, liveRow, line, summary, actions);
+  container.append(head, ports, fields, step, liveRow, latencyRow, line, summary, actions);
 
   function defaultTitle() {
     const d = new Date();
@@ -182,7 +199,8 @@ export function createRecorder(container, app) {
     }
   }
 
-  async function startLive() {
+  // calibration : on ne garde pas de notes, on mesure l'écart moyen avec les clics.
+  async function startLive(calibration = false) {
     if (!(await app.prepare())) return;
     const ctx = app.ctx();
     const beat = 60 / app.tempo();
@@ -194,8 +212,10 @@ export function createRecorder(container, app) {
     live = {
       held: new Map(),
       played: [],
-      pos: (ms) => (ms - perfAtDownbeat) / 1000 / beat,
+      pos: (ms) => (ms - perfAtDownbeat - settings.offset) / 1000 / beat,
       next: 0,   // prochain clic à programmer (0 = premier temps du décompte)
+      calibration,
+      beat,
     };
     live.timer = setInterval(() => {
       while (start + live.next * beat < ctx.currentTime + 0.12) {
@@ -203,17 +223,39 @@ export function createRecorder(container, app) {
         live.next++;
       }
       const now = (ctx.currentTime - downbeat) / beat;
+      if (calibration) {
+        if (now >= CALIBRATION_BEATS) return finishCalibration();
+        count.textContent = now < 0 ? `${Math.ceil(-now)}…` : `Joue sur chaque clic (${CALIBRATION_BEATS - Math.floor(now)})`;
+        return;
+      }
       count.textContent = now < 0 ? `${Math.ceil(-now)}…` : `● Mesure ${Math.floor(now / BEATS) + 1}`;
     }, 25);
-    items = [];
+    if (!calibration) items = [];
     render();
+  }
+
+  // Retard = écart médian entre les notes et le clic le plus proche, ajouté à la compensation actuelle.
+  function finishCalibration() {
+    const { beat } = live;
+    const starts = [...live.played.map((n) => n.t), ...live.held.values()];
+    const gaps = starts.filter((t) => t > -0.5).map((t) => t - Math.round(t)).sort((a, b) => a - b);
+    stopLive();
+    if (gaps.length < CALIBRATION_BEATS / 2) {
+      count.textContent = 'Pas assez de notes : recommence en jouant sur chaque clic.';
+      return;
+    }
+    const median = gaps[gaps.length >> 1];
+    settings.offset = Math.max(-100, Math.min(250, Math.round((settings.offset + median * beat * 1000) / 5) * 5));
+    save();
+    render();
+    count.textContent = `Retard mesuré : ${settings.offset} ms`;
   }
 
   // keep : garder ce qui a été joué (sinon on abandonne la prise).
   function stopLive(keep = false) {
     if (!live) return;
     clearInterval(live.timer);
-    if (keep) {
+    if (keep && !live.calibration) {
       const end = live.pos(performance.now());
       for (const [midi, t] of live.held) live.played.push({ midi, t, end });
       items = quantize(live.played.filter((n) => n.end > -0.25), settings.grid);
@@ -226,7 +268,12 @@ export function createRecorder(container, app) {
   function render() {
     for (const [m, b] of Object.entries(modeBtns)) b.classList.toggle('on', settings.mode === m);
     step.hidden = settings.mode !== 'step';
-    liveRow.hidden = settings.mode !== 'live';
+    liveRow.hidden = latencyRow.hidden = settings.mode !== 'live';
+    offset.value = settings.offset;
+    offsetText.textContent = `${settings.offset} ms`;
+    calibrate.textContent = live?.calibration ? '■ Arrêter' : 'Mesurer';
+    rec.disabled = !!live?.calibration;
+    calibrate.disabled = !!live && !live.calibration;
     for (const [v, b] of durBtns) b.classList.toggle('on', Math.abs(v - settings.dur) < 1e-6);
     octave.value = String(settings.octave);
     grid.value = String(settings.grid);

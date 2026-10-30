@@ -81,6 +81,10 @@ Fonctionne dans Chrome, Edge et Firefox sur ordinateur (pas sur iPhone, faute de
 - **Temps réel** : touchez « Enregistrer », une mesure de décompte au métronome (au tempo de l'app),
   puis jouez. Les notes sont calées sur la grille choisie (croche, double croche ou triolet).
   « Arrêter » termine la prise.
+- **Retard** (temps réel) : entre le clic entendu et la note reçue, il y a toujours un petit délai
+  (carte son, clavier, réflexe), qui ferait tomber les notes un peu tard. **Mesurer** : après le décompte,
+  jouez une note sur chacun des 8 clics, l'app mesure ce retard et le retire des notes enregistrées.
+  Le curseur permet aussi de l'ajuster à la main. Le réglage est retenu.
 - **Octave** : un petit clavier joue souvent trop haut pour la basse ; « −1 octave » ou « −2 octaves »
   décale les notes (Mi₁ = corde de Mi à vide).
 - Chaque touche fait entendre la note au son de basse de l'app. Les notes saisies s'affichent

@@ -1387,9 +1387,10 @@ $('mixerReset').addEventListener('click', () => {
 });
 
 // Saisie d'une ligne de basse au clavier MIDI (mode Morceau), gardée dans « Mes fichiers MIDI ».
-// Heure du son de la touche : Tone refuse deux événements au même instant (accord, touches très rapides).
+// Heure du son de la touche : tout de suite (Tone.now() ajoute 0,1 s d'avance, perceptible au clavier),
+// et jamais deux événements au même instant (Tone les refuse : accord, touches très rapides).
 let lastPreview = 0;
-const previewTime = () => (lastPreview = Math.max(Tone.now(), lastPreview + 0.002));
+const previewTime = () => (lastPreview = Math.max(Tone.immediate(), lastPreview + 0.002));
 const recorder = createRecorder($('recorder'), {
   enable: () => midiOut.enableMidi(renderMidi),
   ports: () => (midiOut.midiReady() ? midiOut.inputs() : null),
