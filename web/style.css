@@ -198,6 +198,14 @@ button.rewind svg { width: 18px; height: 18px; }
   .head-tempo { display: flex; align-items: center; gap: 8px; flex: 1; max-width: 320px; min-width: 0; }
   .head-tempo input { flex: 1; min-width: 0; accent-color: var(--accent); }
   .head-tempo output { min-width: 2.2em; font-size: 0.9rem; font-variant-numeric: tabular-nums; color: var(--accent); font-weight: 700; }
+  /* Rien que l'en-tête et la tab (avec la portée) : les réglages restent en portrait. */
+  body > :not(header, #tuner, #mixer, #message, #tabPanel) { display: none !important; }
+  /* La tab occupe tout l'écran sous l'en-tête (plus de bande vide entre les deux). */
+  body { display: flex; flex-direction: column; height: 100dvh; padding-bottom: 0; box-sizing: border-box; overflow: hidden; }
+  header { margin-bottom: 0; }
+  body > #tabPanel { position: relative; flex: 1; align-items: flex-start; margin-inline: -16px; }
+  /* Réglages et accordeur passent au-dessus de la tab, sur toute la hauteur disponible. */
+  #mixer, #tuner { max-height: calc(100dvh - 80px); }
 }
 
 #grid {
