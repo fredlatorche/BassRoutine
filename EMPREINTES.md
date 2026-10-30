@@ -8,7 +8,7 @@ change, l'empreinte change complètement. Associée à une date certaine (histor
 archive Software Heritage, horodatage OpenTimestamps ou enveloppe e-Soleau de l'INPI),
 cette liste prouve que ce code existait, sous cette forme, à cette date.
 
-**Empreinte globale de la version** : `7faae584cf5ba0558aad84b97b4df8d482f902d9cdac079a282f4b4bad87d9d4`
+**Empreinte globale de la version** : `5db6349a34a7977bd28c903a5939fcbb5011ac50ff5a5fd0ba15c0e046196d01`
 
 | Fichier | SHA-256 |
 |---|---|
@@ -24,10 +24,10 @@ cette liste prouve que ce code existait, sous cette forme, à cette date.
 | `web/drums.js` | `657f9447a569dd26b8cfbd0336fba9324eacbcc19fd39a51a71e80513da46765` |
 | `web/icons/bass-light.png` | `fce175402346141974327847b0b0f55dcb97de967542bfeee025af9db37a724a` |
 | `web/icons/bass.png` | `467c80ce6204ee2cf73cc3cdbe56020d02655a0bccd9b8fe0a0d360da090ecf6` |
-| `web/icons/favicon-32.png` | `ac039349d9b98d20e44b8b02781c9c986d8ad3134bfcfe60efce1918844e7164` |
-| `web/icons/icon-180.png` | `29ad3cb1a44a03a28abc1b9dd2bb30b1c3053167fd8834c8723e970c6b470a28` |
-| `web/icons/icon-192.png` | `05c7dd791644083ce6da87de16eec05b27ec9b423d12c419270f3a4e876a2ad1` |
-| `web/icons/icon-512.png` | `903fa717eb47212f8e81471a1e81edb349781e7c85a70be40a43cdec316d2e58` |
+| `web/icons/favicon-32.png` | `083e91ecfe6e8227feb2ca4c27faad336ba74826f0a087b2115a5841ca6a89c9` |
+| `web/icons/icon-180.png` | `814dca66c80bbc07f1e4d11db8c61bee8e98823268152ceba906638dc41d21bb` |
+| `web/icons/icon-192.png` | `5155206be7b6563cb8e8055e784b9c7b152951e43c3ebb7ec79cf65d9e8731af` |
+| `web/icons/icon-512.png` | `b210cd410bdf4a649e11dadc94d2b469c49c5e68e711ee767a2d98b66b2164bc` |
 | `web/index.html` | `c83083c7d619791a6beea893bb923dee74c528e14567c3b0a9b90647f4a8b564` |
 | `web/library.js` | `1d0dcae5793087de25771e3097834baf2b945e0344018cb165bab4c021be4fb5` |
 | `web/manifest.json` | `1bc934ddc101bfe26457da5b60ac5c1790e89d6394675d7fec00cb56b9892e86` |
@@ -41,7 +41,7 @@ cette liste prouve que ce code existait, sous cette forme, à cette date.
 | `web/spelling.js` | `f3732cf60dec2d0eedd214305edcffba8cf09f399669a92d8e1173283915015d` |
 | `web/staff.js` | `d1707001612b447221e7e74a3d0b0b2564c9dccab231a91d25c2769200859200` |
 | `web/style.css` | `dc9086b00163ab1053f88eb9040d8ad7e90757c1818c943afaed2dcf3f091308` |
-| `web/sw.js` | `87fd8bc0003a4e5637de67a814555d419a5a444e4dfba9c481944749427ee705` |
+| `web/sw.js` | `933f873ca2324250657404a98e2c243cdec2bc3e306c00a8ff7f21f9d400e6ca` |
 | `web/tab.js` | `483382f288411fb3ba091c4188f0390a41569a3fb53643f1c14581fd5a5b1002` |
 | `web/theory.js` | `5bbb596047c749c3f4a592ba41a441db2988a8a3507e0ce5b1a05a01d845406e` |
 | `web/tuner.js` | `3b05d19aa2a8a7ae6b87332e1a723eccee4f320edb2d0e200c305e52d15f9f51` |
