@@ -10,6 +10,8 @@
   --on-accent: #1a1a1a;     /* texte posé sur l'accent */
   --accent-deep: #b86a00;   /* accent foncé (contours sur la portée) */
   --strong-line: #5a6082;
+  /* Chevron des menus déroulants (clair sur les thèmes sombres). */
+  --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 11 7'%3E%3Cpath d='M1 1l4.5 4.5L10 1' fill='none' stroke='%23d6d8e2' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   color-scheme: dark;
 }
 
@@ -38,6 +40,7 @@
 :root[data-theme="clair"] {
   --bg: #eef0f4; --card: #fff; --line: #d3d7e0; --text: #1e2130; --muted: #646a80;
   --accent: #e07a00; --on-accent: #fff; --accent-deep: #a35800; --strong-line: #9aa1b5;
+  --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 11 7'%3E%3Cpath d='M1 1l4.5 4.5L10 1' fill='none' stroke='%231e2130' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   color-scheme: light;
 }
 
@@ -169,6 +172,17 @@ button, select {
   padding: 6px 10px;
 }
 
+/* Menus : chevron dessiné (couleur du thème), un peu plus éloigné du bord droit que le natif. */
+select {
+  -webkit-appearance: none;
+  appearance: none;
+  padding-right: 26px;
+  background-image: var(--chevron);
+  background-position: right 8px center;
+  background-size: 11px 7px;
+  background-repeat: no-repeat;
+}
+
 button { cursor: pointer; }
 button.small { width: 34px; padding: 6px 0; }
 
@@ -250,6 +264,10 @@ button.rewind svg { width: 18px; height: 18px; }
   width: 100%;
   padding: 8px 2px;
   text-align: center;
+  /* Cases étroites de la grille : flèche native, sans place réservée. */
+  -webkit-appearance: menulist;
+  appearance: auto;
+  background-image: none;
 }
 
 .steps select:first-child { border-color: var(--strong-line); }
@@ -783,3 +801,35 @@ body.with-staff .bass-duo { margin-bottom: 310px; }
 }
 .finger-actions .primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent); font-weight: 700; }
 .finger-slow { margin: 0 0 8px; font-size: 14px; line-height: 1.4; color: var(--accent); }
+
+/* ---------- Réglages : onglets (contrôle segmenté, collé en haut du panneau) ---------- */
+#mixer { padding-top: 0; }
+.settings-tabs {
+  position: sticky; top: 0; z-index: 1;
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px;
+  margin: 0 -14px 14px; padding: 12px 14px 10px;
+  background: var(--card);
+  border-bottom: 1px solid var(--line);
+}
+.settings-tabs button {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  min-width: 0; padding: 6px 2px 5px;
+  font-size: 0.78rem; font-weight: 600; line-height: 1.1; color: var(--muted);
+  background: transparent; border: 1px solid transparent; border-radius: 10px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  transition: background 0.15s, color 0.15s;
+}
+.settings-tabs button span { font-size: 1.15rem; line-height: 1.2; filter: grayscale(0.6); opacity: 0.75; transition: filter 0.15s, opacity 0.15s; }
+.settings-tabs button:hover { color: var(--text); background: var(--bg); }
+.settings-tabs button[aria-selected="true"] {
+  color: var(--accent); background: var(--bg); border-color: var(--accent);
+}
+.settings-tabs button[aria-selected="true"] span { filter: none; opacity: 1; }
+.settings-page { animation: settings-in 0.18s ease-out; }
+@keyframes settings-in { from { opacity: 0; transform: translateY(4px); } }
+.settings-sub {
+  margin: 4px 0 10px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--muted);
+}
+.settings-sub.mixer-head { margin-top: 18px; }
+@media (prefers-reduced-motion: reduce) { .settings-page { animation: none; } }

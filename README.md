@@ -315,6 +315,9 @@ Le navigateur ne donne accès au micro qu'aux pages sécurisées : l'app en lign
 
 ## Réglages (roue ⚙️)
 
+Les réglages sont rangés en cinq onglets : 🎨 **Affichage**, 🔊 **Son** (décompte et volumes),
+🎹 **MIDI**, 🎤 **Entrée** (audio) et 🎯 **Jeu**. Le dernier onglet ouvert est retenu.
+
 - 7 thèmes de couleurs (Nuit, Noir, Bois, Océan, Forêt, Violet, Clair).
 - Noms des notes en français (Do, Ré, Mi) ou en notation américaine (C, D, E), jusque dans
   le nom des cordes à gauche de la tab.

@@ -47,62 +47,68 @@
 
   <section id="tuner" class="mixer tuner" hidden aria-label="Accordeur"></section>
 
-  <section id="mixer" class="mixer" hidden>
-    <div class="mixer-head">
-      <strong>Affichage</strong>
+  <section id="mixer" class="mixer" hidden aria-label="Réglages">
+    <nav class="settings-tabs" role="tablist" aria-label="Rubriques des réglages">
+      <button role="tab" data-tab="display" aria-selected="true"><span aria-hidden="true">🎨</span>Affichage</button>
+      <button role="tab" data-tab="sound" aria-selected="false"><span aria-hidden="true">🔊</span>Son</button>
+      <button role="tab" data-tab="midi" aria-selected="false"><span aria-hidden="true">🎹</span>MIDI</button>
+      <button role="tab" data-tab="input" aria-selected="false"><span aria-hidden="true">🎤</span>Entrée</button>
+      <button role="tab" data-tab="game" aria-selected="false"><span aria-hidden="true">🎯</span>Jeu</button>
+    </nav>
+    <div class="settings-page" data-page="display" role="tabpanel">
+      <div class="control mixer-option">
+        <label for="theme">Couleurs</label>
+        <select id="theme">
+          <option value="">Nuit (bleu nuit)</option>
+          <option value="noir">Noir</option>
+          <option value="bois">Bois (brun chaud)</option>
+          <option value="ocean">Océan (bleu-vert)</option>
+          <option value="foret">Forêt (vert)</option>
+          <option value="violet">Violet</option>
+          <option value="clair">Clair</option>
+        </select>
+      </div>
+      <div class="control mixer-option">
+        <label for="notation">Noms des notes</label>
+        <select id="notation">
+          <option value="fr">Do, Ré, Mi… (français)</option>
+          <option value="en">C, D, E… (américain)</option>
+        </select>
+      </div>
+      <label class="toggle mixer-option"><input id="showStaff" type="checkbox"> Notes sur la portée (clé de fa) au-dessus de la tablature</label>
+      <label class="toggle mixer-option"><input id="showFingers" type="checkbox"> Doigtés sur la tablature pour tous les exercices (1 index … 4 auriculaire, 0 corde à vide)</label>
+      <label class="toggle mixer-option"><input id="everyAcc" type="checkbox"> Mode novice : altérations (♯ ♭ ♮) sur chaque note, en plus de l'armure</label>
     </div>
-    <div class="control mixer-option">
-      <label for="theme">Couleurs</label>
-      <select id="theme">
-        <option value="">Nuit (bleu nuit)</option>
-        <option value="noir">Noir</option>
-        <option value="bois">Bois (brun chaud)</option>
-        <option value="ocean">Océan (bleu-vert)</option>
-        <option value="foret">Forêt (vert)</option>
-        <option value="violet">Violet</option>
-        <option value="clair">Clair</option>
-      </select>
+    <div class="settings-page" data-page="sound" role="tabpanel" hidden>
+      <div class="settings-sub">Lecture</div>
+      <div class="control mixer-option">
+        <label for="countIn">Décompte avant le départ</label>
+        <select id="countIn" title="Clics avant le départ, à chaque Play, au tempo choisi (en 6/8 et 12/8, un temps = une noire pointée)">
+          <option value="0">Aucun</option>
+          <option value="1">1 temps</option>
+          <option value="2">2 temps</option>
+          <option value="3">3 temps</option>
+          <option value="4" selected>4 temps</option>
+        </select>
+      </div>
+      <div class="mixer-head settings-sub">
+        <span>Volumes</span>
+        <button id="mixerReset">Réinitialiser</button>
+      </div>
+      <div id="mixerChannels"></div>
     </div>
-    <div class="control mixer-option">
-      <label for="notation">Noms des notes</label>
-      <select id="notation">
-        <option value="fr">Do, Ré, Mi… (français)</option>
-        <option value="en">C, D, E… (américain)</option>
-      </select>
+    <div class="settings-page" data-page="midi" role="tabpanel" hidden>
+      <div class="settings-sub">Instruments MIDI</div>
+      <div id="midiPanel"></div>
     </div>
-    <label class="toggle mixer-option"><input id="showStaff" type="checkbox"> Notes sur la portée (clé de fa) au-dessus de la tablature</label>
-    <label class="toggle mixer-option"><input id="showFingers" type="checkbox"> Doigtés sur la tablature pour tous les exercices (1 index … 4 auriculaire, 0 corde à vide)</label>
-    <label class="toggle mixer-option"><input id="everyAcc" type="checkbox"> Mode novice : altérations (♯ ♭ ♮) sur chaque note, en plus de l'armure</label>
-    <div class="mixer-head">
-      <strong>Lecture</strong>
+    <div class="settings-page" data-page="input" role="tabpanel" hidden>
+      <div class="settings-sub">Entrée audio (⏸ Attendre ma note, 🎯 Jeu, accordeur)</div>
+      <div id="inputPanel"></div>
     </div>
-    <div class="control mixer-option">
-      <label for="countIn">Décompte avant le départ</label>
-      <select id="countIn" title="Clics avant le départ, à chaque Play, au tempo choisi (en 6/8 et 12/8, un temps = une noire pointée)">
-        <option value="0">Aucun</option>
-        <option value="1">1 temps</option>
-        <option value="2">2 temps</option>
-        <option value="3">3 temps</option>
-        <option value="4" selected>4 temps</option>
-      </select>
+    <div class="settings-page" data-page="game" role="tabpanel" hidden>
+      <div class="settings-sub">🎯 Jeu</div>
+      <div id="gamePanel"></div>
     </div>
-    <div class="mixer-head">
-      <strong>Volumes</strong>
-      <button id="mixerReset">Réinitialiser</button>
-    </div>
-    <div id="mixerChannels"></div>
-    <div class="mixer-head midi-head">
-      <strong>Instruments MIDI</strong>
-    </div>
-    <div id="midiPanel"></div>
-    <div class="mixer-head midi-head">
-      <strong>Entrée audio (⏸ Attendre ma note, 🎯 Jeu)</strong>
-    </div>
-    <div id="inputPanel"></div>
-    <div class="mixer-head midi-head">
-      <strong>🎯 Jeu</strong>
-    </div>
-    <div id="gamePanel"></div>
   </section>
 
   <section class="controls">

@@ -1413,7 +1413,7 @@ function renderGamePanel() {
     panel.append(p);
   };
   note('Coche « 🎯 Jeu » puis Play : la basse de l\'app se tait, c\'est toi qui joues la ligne. Chaque note est notée '
-    + 'sur la justesse et le rythme, et la partie reçoit une note sur 10. Entrée audio : celle réglée juste au-dessus. '
+    + 'sur la justesse et le rythme, et la partie reçoit une note sur 10. Entrée audio : celle de l\'onglet 🎤 Entrée. '
     + 'Avec un casque, le micro n\'entend pas l\'accompagnement : la note est plus fiable.');
   const row = (label, ...inputs) => {
     const line = document.createElement('label');
@@ -1947,6 +1947,33 @@ function setSettingsOpen(open) {
   panel.hidden = !open;
   $('mixerBtn').setAttribute('aria-expanded', open);
 }
+// Onglets des réglages ; le dernier ouvert est retenu.
+const SETTINGS_TAB_KEY = 'bassroutine-settings-tab';
+const settingsTabs = [...document.querySelectorAll('.settings-tabs [role="tab"]')];
+function showSettingsTab(name) {
+  if (!settingsTabs.some((t) => t.dataset.tab === name)) name = 'display';
+  for (const t of settingsTabs) {
+    const on = t.dataset.tab === name;
+    t.setAttribute('aria-selected', on);
+    t.tabIndex = on ? 0 : -1;
+  }
+  document.querySelectorAll('.settings-page').forEach((page) => { page.hidden = page.dataset.page !== name; });
+  $('mixer').scrollTop = 0;
+  try { localStorage.setItem(SETTINGS_TAB_KEY, name); } catch { /* stockage indisponible */ }
+}
+settingsTabs.forEach((t, i) => {
+  t.addEventListener('click', () => showSettingsTab(t.dataset.tab));
+  // Flèches gauche / droite : onglet voisin (accessibilité des onglets).
+  t.addEventListener('keydown', (e) => {
+    const k = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+    if (!k) return;
+    const next = settingsTabs[(i + k + settingsTabs.length) % settingsTabs.length];
+    showSettingsTab(next.dataset.tab);
+    next.focus();
+  });
+});
+try { showSettingsTab(localStorage.getItem(SETTINGS_TAB_KEY) ?? 'display'); } catch { showSettingsTab('display'); }
+
 $('mixerBtn').addEventListener('click', (e) => {
   e.stopPropagation();
   setSettingsOpen($('mixer').hidden);
