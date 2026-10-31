@@ -21,6 +21,7 @@ import * as pitch from './pitch.js';
 import { createTuner } from './tuner.js';
 import { createRecorder } from './recorder.js';
 import * as game from './game.js';
+import * as goals from './goals.js';
 
 const BEATS = 4;
 // Mesures du mode Boucle : temps par mesure (une note de la grille par temps) et durée d'un temps
@@ -1218,6 +1219,7 @@ function begin() {
   }
   Tone.Transport.start(t0 + beats * beatDur);
   playing = true;
+  playedSince = Date.now();
   setPlayButton(true);
   requestAnimationFrame(frame);
 }
@@ -1503,6 +1505,7 @@ async function startWaiting() {
   renderInputPanel();   // les noms des entrées sont visibles maintenant que l'accès est donné
   waiting = { notes, i: 0, cycle: 0, listening: false };
   playing = true;
+  playedSince = Date.now();
   setPlayButton(true);
   $('waitStatus').hidden = false;
   showWaiting();
@@ -1686,12 +1689,53 @@ function setPlayButton(on) {
 
 function stopUI() {
   if (match && !match.ending) endGame();
+  if (playing) countPractice();
   playing = false;
   beatClock = null;
   setPlayButton(false);
   showBeat(null);
   tab.follow(null);
 }
+
+// ---------- Objectifs et trophées ----------
+// Le temps de lecture est compté à chaque Stop ; le bilan s'affiche une fois les autres fenêtres
+// (note du 🎯 Jeu, notice du Déliateur) refermées, et pas si la musique a été relancée entre-temps.
+let playedSince = null;
+function countPractice() {
+  const seconds = playedSince ? (Date.now() - playedSince) / 1000 : 0;
+  playedSince = null;
+  if (!goals.goalSettings().on) return;
+  const result = goals.addPractice(seconds);
+  renderGoals();
+  const show = (tries) => {
+    if (playing) return;
+    if (match || document.querySelector('.game-result, .finger-tip')) {
+      if (tries) setTimeout(() => show(tries - 1), 500);
+      return;
+    }
+    goals.showSessionResult(result, showMessage);
+  };
+  setTimeout(() => show(240), 300);
+}
+function renderGoals() {
+  const s = goals.goalSettings();
+  $('goalsOn').checked = s.on;
+  $('goalDaily').value = String(s.daily);
+  $('goalWeekly').value = String(s.weekly);
+  goals.renderGoalStats($('goalStats'));
+}
+for (const [id, choices] of [['goalDaily', goals.DAILY_CHOICES], ['goalWeekly', goals.WEEKLY_CHOICES]]) {
+  for (const [v, label] of Object.entries(choices)) $(id).append(new Option(label, v));
+}
+$('goalsOn').addEventListener('change', (e) => { goals.setGoals({ on: e.target.checked }); renderGoals(); });
+$('goalDaily').addEventListener('change', (e) => { goals.setGoals({ daily: Number(e.target.value) }); renderGoals(); });
+$('goalWeekly').addEventListener('change', (e) => { goals.setGoals({ weekly: Number(e.target.value) }); renderGoals(); });
+$('goalReset').addEventListener('click', () => {
+  if (!confirm('Effacer tout le temps de jeu compté et les trophées ?')) return;
+  goals.resetPractice();
+  renderGoals();
+});
+renderGoals();
 
 // ---------- Messages à l'écran ----------
 // Affiche un message quelques secondes (utile sur iPhone, où on ne voit pas la console).
@@ -1944,6 +1988,7 @@ function setSettingsOpen(open) {
   if (open) setTunerOpen(false);
   const panel = $('mixer');
   if (open) panel.style.top = `${document.querySelector('header').getBoundingClientRect().bottom + 6}px`;
+  if (open) renderGoals();   // le bilan du jour à jour (minuit a pu passer)
   panel.hidden = !open;
   $('mixerBtn').setAttribute('aria-expanded', open);
 }

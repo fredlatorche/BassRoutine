@@ -49,11 +49,12 @@
 
   <section id="mixer" class="mixer" hidden aria-label="Réglages">
     <nav class="settings-tabs" role="tablist" aria-label="Rubriques des réglages">
-      <button role="tab" data-tab="display" aria-selected="true"><span aria-hidden="true">🎨</span>Affichage</button>
+      <button role="tab" data-tab="display" aria-selected="true"><span aria-hidden="true">🎨</span>Écran</button>
       <button role="tab" data-tab="sound" aria-selected="false"><span aria-hidden="true">🔊</span>Son</button>
       <button role="tab" data-tab="midi" aria-selected="false"><span aria-hidden="true">🎹</span>MIDI</button>
       <button role="tab" data-tab="input" aria-selected="false"><span aria-hidden="true">🎤</span>Entrée</button>
       <button role="tab" data-tab="game" aria-selected="false"><span aria-hidden="true">🎯</span>Jeu</button>
+      <button role="tab" data-tab="goals" aria-selected="false"><span aria-hidden="true">🏆</span>Trophées</button>
     </nav>
     <div class="settings-page" data-page="display" role="tabpanel">
       <div class="control mixer-option">
@@ -108,6 +109,21 @@
     <div class="settings-page" data-page="game" role="tabpanel" hidden>
       <div class="settings-sub">🎯 Jeu</div>
       <div id="gamePanel"></div>
+    </div>
+    <div class="settings-page" data-page="goals" role="tabpanel" hidden>
+      <div class="settings-sub">🏆 Objectifs et trophées</div>
+      <label class="toggle mixer-option"><input id="goalsOn" type="checkbox"> Compter mon temps de jeu : bilan à chaque arrêt de la musique, confettis quand l'objectif est atteint</label>
+      <div class="control mixer-option">
+        <label for="goalDaily">Objectif du jour</label>
+        <select id="goalDaily"></select>
+      </div>
+      <div class="control mixer-option">
+        <label for="goalWeekly">Objectif de la semaine</label>
+        <select id="goalWeekly"></select>
+      </div>
+      <div id="goalStats"></div>
+      <p class="midi-note">Seul le temps en lecture (Play) compte. Tout reste sur cet appareil : pas de compte, rien n'est envoyé.</p>
+      <button id="goalReset">Remettre à zéro</button>
     </div>
   </section>
 

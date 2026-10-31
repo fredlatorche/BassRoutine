@@ -224,7 +224,7 @@ button.rewind svg { width: 18px; height: 18px; }
   .head-tempo input { flex: 1; min-width: 0; accent-color: var(--accent); }
   .head-tempo output { min-width: 2.2em; font-size: 0.9rem; font-variant-numeric: tabular-nums; color: var(--accent); font-weight: 700; }
   /* Rien que l'en-tête et la tab (avec la portée) : les réglages restent en portrait. */
-  body > :not(header, #tuner, #mixer, #message, #tabPanel, .game-result, .finger-tip) { display: none !important; }
+  body > :not(header, #tuner, #mixer, #message, #tabPanel, .game-result, .finger-tip, .confetti-canvas) { display: none !important; }
   /* La tab occupe tout l'écran sous l'en-tête (plus de bande vide entre les deux). */
   body { display: flex; flex-direction: column; height: 100dvh; padding-bottom: 0; box-sizing: border-box; overflow: hidden; }
   header { margin-bottom: 0; }
@@ -806,15 +806,15 @@ body.with-staff .bass-duo { margin-bottom: 310px; }
 #mixer { padding-top: 0; }
 .settings-tabs {
   position: sticky; top: 0; z-index: 1;
-  display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px;
-  margin: 0 -14px 14px; padding: 12px 14px 10px;
+  display: grid; grid-template-columns: repeat(6, 1fr); gap: 3px;
+  margin: 0 -14px 14px; padding: 12px 10px 10px;
   background: var(--card);
   border-bottom: 1px solid var(--line);
 }
 .settings-tabs button {
   display: flex; flex-direction: column; align-items: center; gap: 2px;
   min-width: 0; padding: 6px 2px 5px;
-  font-size: 0.78rem; font-weight: 600; line-height: 1.1; color: var(--muted);
+  font-size: 0.74rem; font-weight: 600; line-height: 1.1; letter-spacing: -0.01em; color: var(--muted);
   background: transparent; border: 1px solid transparent; border-radius: 10px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   transition: background 0.15s, color 0.15s;
@@ -833,3 +833,18 @@ body.with-staff .bass-duo { margin-bottom: 310px; }
 }
 .settings-sub.mixer-head { margin-top: 18px; }
 @media (prefers-reduced-motion: reduce) { .settings-page { animation: none; } }
+
+/* ---------- Objectifs et trophées ---------- */
+.goal-progress { margin: 0 0 10px; }
+.goal-progress-head { display: flex; justify-content: space-between; gap: 8px; font-size: 0.85rem; color: var(--muted); margin-bottom: 4px; font-variant-numeric: tabular-nums; }
+.goal-bar { height: 8px; border-radius: 4px; background: var(--bg); border: 1px solid var(--line); overflow: hidden; }
+.goal-bar > div { height: 100%; background: var(--accent); border-radius: 4px; transition: width 0.6s ease-out; }
+.goal-bar > div.done { background: #3fb950; }
+.trophy-grid { list-style: none; margin: 4px 0 12px; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 6px; }
+.trophy-grid li { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 8px; background: var(--bg); font-size: 0.8rem; line-height: 1.25; color: var(--muted); opacity: 0.6; }
+.trophy-grid li.won { opacity: 1; color: var(--text); border: 1px solid var(--accent); }
+.trophy-icon { font-size: 1.3rem; }
+.goal-title { margin: 8px 0 0; font-size: 26px; font-weight: 800; color: var(--accent); line-height: 1.15; }
+.goal-result .game-side { text-align: left; }
+.goal-result .game-actions { margin-top: 10px; }
+.confetti-canvas { position: fixed; inset: 0; width: 100vw; height: 100dvh; z-index: 60; pointer-events: none; }
