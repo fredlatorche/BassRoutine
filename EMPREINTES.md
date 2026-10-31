@@ -1,26 +1,26 @@
 # Empreintes de Bass Routine
 
 Auteur : **FredLatorche** — https://github.com/fredlatorche/BassRoutine
-Version : 4.0 — 2026-10-30
+Version : 5.0 — 2026-10-31
 
 Chaque fichier du projet est identifié par son empreinte SHA-256 : si un seul caractère
 change, l'empreinte change complètement. Associée à une date certaine (historique GitHub,
 archive Software Heritage, horodatage OpenTimestamps ou enveloppe e-Soleau de l'INPI),
 cette liste prouve que ce code existait, sous cette forme, à cette date.
 
-**Empreinte globale de la version** : `d35998a898cd4b4d829159ef861a97a4aa89f45b7312504ff4bcae5cbd934e8b`
+**Empreinte globale de la version** : `c7cbbec84152a162ac1895f95eba70a58d5c7dcf317f346ea05d592a5613f835`
 
 | Fichier | SHA-256 |
 |---|---|
 | `.gitignore` | `53f0c100a33a56ebada040287b3d0f5dbab21c6ec6b66209fec5515c508f1144` |
 | `LICENSE` | `1b29c7bf379ebc18668e0c8756402deab86025a63f224d61f456d2aeb200f01b` |
-| `README.md` | `587638e0b8d8d624a006372dfca1f03928a9d0f02c8ae22317bb29598adaf5e0` |
-| `basse.swift` | `17ed483f5773f1f1507c5343da4dd967d044c771c5c75dbeef321852f08af382` |
-| `empreintes.py` | `b0f4f69f1d693389844d372a3501c17ea26cd7b2ea8d6d2ce187a5f4db010fe3` |
+| `README.md` | `df866e9d0a925620b45c1395385c1fdb8e39f76e3411ca6d5ad57af720224a2c` |
+| `empreintes.py` | `afdc17d3ab4dd48a5a9d69081e4507c15e715cf4dc4eab5e5b89c056b292c20e` |
 | `exemples/test-basse.mid` | `6d8d8bf96c9feef098a1506d0101205c9af11ad231ac5ab573d436024def12fd` |
 | `index.html` | `1ab097b356ee429bd11c4b5c9dda8ec51514fac8086eca5cfde409baffa23637` |
 | `serve.py` | `b373da570e5234602b7997b9ea74c617e95abb4ef18a51561163112b362fe3fe` |
-| `web/app.js` | `113a69599a8ba77b426ef5ec26f3a6bd6853c39f7ffab11804c8a30c1f305b7b` |
+| `web/app.js` | `710e2da24b77f561fd64bc91d123aa19d371da842101bf1a4f362fdcf645a1db` |
+| `web/comping.js` | `5965e445cb16e9d66d1c179a03f18d6a7ea8109b30b0c21010de0d0ad4c9974b` |
 | `web/drums.js` | `657f9447a569dd26b8cfbd0336fba9324eacbcc19fd39a51a71e80513da46765` |
 | `web/icons/bass-light.png` | `fce175402346141974327847b0b0f55dcb97de967542bfeee025af9db37a724a` |
 | `web/icons/bass.png` | `467c80ce6204ee2cf73cc3cdbe56020d02655a0bccd9b8fe0a0d360da090ecf6` |
@@ -29,7 +29,7 @@ cette liste prouve que ce code existait, sous cette forme, à cette date.
 | `web/icons/icon-192.png` | `15e9f11c238327479d9e87003d3e9dbe0f7122cc8f7ab0765995a8e20d345548` |
 | `web/icons/icon-512.png` | `2872fb0a7026dc2f93b28f26dc56f3afb2275d07df589caa3eea72d4ea77d13e` |
 | `web/icons/icon-maskable-512.png` | `961a7a9145f42016cb675bdc3e88158755b06f78973f50270c8101e8e12db203` |
-| `web/index.html` | `9afb78c05631cf50c0bd991e4d710bc416432dc7ea79c9b40d6cb0ba17dfa146` |
+| `web/index.html` | `a10b9a770d58cf11642f9e055cc222a63e97c6e7c05ebc508863d63a59d02955` |
 | `web/library.js` | `1d0dcae5793087de25771e3097834baf2b945e0344018cb165bab4c021be4fb5` |
 | `web/manifest.json` | `2edfe4616e669b98a53e64aafc95a9cf5e41a30bbbe0d7959629a0a2e70cb962` |
 | `web/midi-import.js` | `2bd342ee783cf674f007c75262900928d38253c3fda1db9f05e9e79b610aafff` |
@@ -38,13 +38,13 @@ cette liste prouve que ce code existait, sous cette forme, à cette date.
 | `web/pitch.js` | `4cedae4202740aeda65170474f11eb701a07ed524f255b0ae41fd0d3c1ce48e1` |
 | `web/random-loop.js` | `a40398e19063eeeb9253fa1734c0d05423bd2c34e2b7d0b45a84852eb61ef163` |
 | `web/recorder.js` | `b8e39e6b30a75946c501e9ddca6423315497d284ce6befaa1cfbf8f97de1afb1` |
-| `web/scales.js` | `f1a2112a6451a16b59bc2372f2c6e5e2a4de83b1be0553eb4400e765eb5cd1a1` |
+| `web/scales.js` | `cf0e27bf38f75bf9b714d16179ddf0f51c490da8265381af8154484c837c09e1` |
 | `web/songs.js` | `4b8c21fa68a18eb12ff052e998aed7fee5a4a1b8fd17e2edb3928fa3fabbbf4c` |
 | `web/spelling.js` | `f3732cf60dec2d0eedd214305edcffba8cf09f399669a92d8e1173283915015d` |
 | `web/staff.js` | `d1707001612b447221e7e74a3d0b0b2564c9dccab231a91d25c2769200859200` |
-| `web/style.css` | `7c9464d10968ce78406bdaeaa9a181fc1617ac643bff5eb99e620fa1ef34405a` |
-| `web/sw.js` | `afe9fda4e2c4883946e7e197fbe40608d62d4d91c790b91ac04a115d651a26f6` |
-| `web/tab.js` | `483382f288411fb3ba091c4188f0390a41569a3fb53643f1c14581fd5a5b1002` |
+| `web/style.css` | `e506ff3ba9c7981d89f3147cc3a6e71ef5ad3f98401a6eb67fa7344debe35790` |
+| `web/sw.js` | `24128287342866c351341c32ad008e441c3e637bc30b490e84eb5ca0c6c9994a` |
+| `web/tab.js` | `bb233f04828bea147639a8ef5a9647d887b31d7536da097bd2858da671dd7ad8` |
 | `web/theory.js` | `5bbb596047c749c3f4a592ba41a441db2988a8a3507e0ce5b1a05a01d845406e` |
 | `web/tuner.js` | `3b05d19aa2a8a7ae6b87332e1a723eccee4f320edb2d0e200c305e52d15f9f51` |
 | `web/vendor/Midi.LICENSE.md` | `6debbf1ddd278dcf5d8e7b6c42c7a827cb944943401fc37ee017e172bbccbaea` |
