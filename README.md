@@ -9,7 +9,7 @@ et s'installe comme une application.
 En résumé : un groupe entier qui joue avec vous, ne se plaint jamais du tempo,
 ne rate aucune répétition et ne vous demande pas de porter l'ampli.
 
-**Nouveau** :
+**Version 6.0** :
 
 - 🖐 **Déliateur** : 12 exercices d'indépendance des doigts (chromatique, araignée, permutations,
   doigt fixe, trilles, écarts…), du plus facile au plus dur, chacun avec sa fiche : où poser
