@@ -110,7 +110,8 @@ function flagPath(sx, sy, up) {
 // xAt(t) : abscisse du centre de la note, fournie par la tab (même placement des deux côtés).
 // pulse : durée d'un temps en noires (1, ou 1,5 en 6/8 et 12/8 : croches ligaturées par 3).
 // final : barre de fin (trait fin + trait épais) après la dernière mesure, la portée s'arrête là.
-export function renderStaff(events, totalBeats, bpb, beatW, doubles = [], everyNote = false, xAt = (t) => t * beatW + 20, pulse = 1, final = false) {
+// repeat : boucle, signes de reprise (début « ‖: » puis « :‖: » à chaque retour) au lieu des doubles barres.
+export function renderStaff(events, totalBeats, bpb, beatW, doubles = [], everyNote = false, xAt = (t) => t * beatW + 20, pulse = 1, final = false, repeat = false) {
   const width = totalBeats * beatW + 8;
   const svg = el('svg', { width, height: STAFF_H, class: 'staff' });
   el('rect', { width, height: STAFF_H, class: 'staff-bg' }, svg);
@@ -121,6 +122,24 @@ export function renderStaff(events, totalBeats, bpb, beatW, doubles = [], everyN
     if (final && b * bpb >= totalBeats) {
       el('line', { x1: x - 4, x2: x - 4, y1: BOTTOM - 8 * STEP, y2: BOTTOM, class: 'staff-bar' }, svg);
       el('rect', { x: x - 1, y: BOTTOM - 8 * STEP, width: 4, height: 8 * STEP, class: 'staff-ink' }, svg);
+      continue;
+    }
+    const top = BOTTOM - 8 * STEP;
+    const thin = (xx) => el('line', { x1: xx, x2: xx, y1: top, y2: BOTTOM, class: 'staff-bar strong' }, svg);
+    const thick = (xx) => el('rect', { x: xx, y: top, width: 4, height: 8 * STEP, class: 'staff-ink' }, svg);
+    const dots = (xx) => [12, 20].forEach((dy) => el('circle', { cx: xx, cy: BOTTOM - dy, r: 1.9, class: 'staff-ink' }, svg));
+    if (repeat && b === 0) {   // début de reprise : trait épais, trait fin, deux points
+      thick(x);
+      thin(x + 7.25);
+      dots(x + 11.5);
+      continue;
+    }
+    if (repeat && doubles.includes(b * bpb)) {   // fin de reprise et reprise suivante : « :‖: »
+      dots(x - 9.5);
+      thin(x - 5.25);
+      thick(x - 2);
+      thin(x + 5.25);
+      dots(x + 9.5);
       continue;
     }
     // Calées sur les barres de la tab : trait de 2 px à partir de x ; double barre = traits à x et x + 4.

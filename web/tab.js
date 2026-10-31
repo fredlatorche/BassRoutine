@@ -130,7 +130,7 @@ export function createTab(container, { onSeek, labels } = {}) {
     track.style.width = `${totalBeats * bw + 8}px`;
     track.style.height = `${140 + off}px`;
 
-    const staff = showStaff ? renderStaff(events, totalBeats, beatsPerBar, bw, doubles, everyAccidental, xAt, pulse, final) : null;
+    const staff = showStaff ? renderStaff(events, totalBeats, beatsPerBar, bw, doubles, everyAccidental, xAt, pulse, final, !!loopLen) : null;
     if (staff) track.append(staff.svg);
 
     for (let s = 0; s < STRINGS.length; s++) {
@@ -154,7 +154,24 @@ export function createTab(container, { onSeek, labels } = {}) {
       bar.style.top = `${4 + off}px`;
       // Numéros repartis à 1 à chaque passage (ou partie enchaînée).
       bar.textContent = (b * beatsPerBar - (starts.findLast((x) => x <= b * beatsPerBar) ?? 0)) / beatsPerBar + 1;
-      if (doubles.includes(b * beatsPerBar)) bar.classList.add('double');
+      const x = b * beatsPerBar * bw;
+      if (loopLen && (b === 0 || doubles.includes(b * beatsPerBar))) {
+        // Boucle : signes de reprise, comme sur la portée (début « ‖: », puis « :‖: » à chaque retour).
+        bar.classList.add('repeat');
+        const sign = document.createElement('div');
+        sign.className = b === 0 ? 'tab-repeat start' : 'tab-repeat';
+        sign.style.left = `${b === 0 ? x : x - 6}px`;
+        sign.style.top = `${4 + off}px`;
+        for (const dx of b === 0 ? [11.5] : [-10, 9.5]) {
+          for (const y of [42, 90]) {
+            const dot = document.createElement('i');
+            dot.style.left = `${(b === 0 ? 0 : 6) + dx - 2}px`;
+            dot.style.top = `${y - 4 - 2}px`;
+            sign.append(dot);
+          }
+        }
+        track.append(sign);
+      } else if (doubles.includes(b * beatsPerBar)) bar.classList.add('double');
       track.append(bar);
     }
 
