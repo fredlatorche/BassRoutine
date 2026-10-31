@@ -533,6 +533,10 @@ body.with-staff .bass-duo { margin-bottom: 310px; }
 
 /* Double trait : fin d'un passage de la boucle et début du suivant. */
 .tab-bar.double { border-left: 6px double var(--accent); }
+.tab-bar.final {   /* barre de fin : trait fin, espace, trait épais (calée sur celle de la portée) */
+  width: 8px; padding: 0; border-left: 0;
+  background: linear-gradient(to right, var(--muted) 0 1.5px, transparent 1.5px 4px, var(--muted) 4px 8px);
+}   /* barre de fin */
 
 /* Bouton pour afficher / masquer le détail des mesures. */
 .detail-toggle {

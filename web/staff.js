@@ -109,13 +109,20 @@ function flagPath(sx, sy, up) {
 // everyNote : mode novice, l'altération est écrite sur chaque note altérée (même si l'armure l'indique déjà).
 // xAt(t) : abscisse du centre de la note, fournie par la tab (même placement des deux côtés).
 // pulse : durée d'un temps en noires (1, ou 1,5 en 6/8 et 12/8 : croches ligaturées par 3).
-export function renderStaff(events, totalBeats, bpb, beatW, doubles = [], everyNote = false, xAt = (t) => t * beatW + 20, pulse = 1) {
+// final : barre de fin (trait fin + trait épais) après la dernière mesure, la portée s'arrête là.
+export function renderStaff(events, totalBeats, bpb, beatW, doubles = [], everyNote = false, xAt = (t) => t * beatW + 20, pulse = 1, final = false) {
   const width = totalBeats * beatW + 8;
   const svg = el('svg', { width, height: STAFF_H, class: 'staff' });
   el('rect', { width, height: STAFF_H, class: 'staff-bg' }, svg);
-  staffLines(svg, width);
+  const end = totalBeats * beatW;
+  staffLines(svg, final ? end + 3 : width);
   for (let b = 0; b * bpb <= totalBeats; b++) {
     const x = b * bpb * beatW;
+    if (final && b * bpb >= totalBeats) {
+      el('line', { x1: x - 4, x2: x - 4, y1: BOTTOM - 8 * STEP, y2: BOTTOM, class: 'staff-bar' }, svg);
+      el('rect', { x: x - 1, y: BOTTOM - 8 * STEP, width: 4, height: 8 * STEP, class: 'staff-ink' }, svg);
+      continue;
+    }
     // Calées sur les barres de la tab : trait de 2 px à partir de x ; double barre = traits à x et x + 4.
     if (doubles.includes(b * bpb)) {
       for (const dx of [1, 5]) el('line', { x1: x + dx, x2: x + dx, y1: BOTTOM - 8 * STEP, y2: BOTTOM, class: 'staff-bar double' }, svg);

@@ -82,9 +82,11 @@ export function createTab(container, { onSeek, labels } = {}) {
   // parts : séquences différentes [{ events, beats }] à mettre bout à bout à la place des copies
   // (improvisations ou gammes enchaînées), la dernière coupée comme la 3e copie.
   // pulse : durée d'un temps en noires (1,5 en 6/8 et 12/8), pour l'écriture sur la portée ;
-  // timeSig : chiffrage de la mesure affiché après la clé (« 4/4 », « 6/8 »…).
-  function render(evts, totalBeats, beatsPerBar, { loopLen = 0, parts = null, pulse = 1, timeSig = '4/4' } = {}) {
-    lastArgs = [evts, totalBeats, beatsPerBar, { loopLen, parts, pulse, timeSig }];
+  // timeSig : chiffrage de la mesure affiché après la clé (« 4/4 », « 6/8 »…) ;
+  // final : barre de fin (trait fin + trait épais) après la dernière mesure, quand l'exercice ne boucle pas.
+  function render(evts, totalBeats, beatsPerBar, { loopLen = 0, parts = null, pulse = 1, timeSig = '4/4', final = false } = {}) {
+    lastArgs = [evts, totalBeats, beatsPerBar, { loopLen, parts, pulse, timeSig, final }];
+    final = final && !loopLen && !parts;
     if (timeSig !== meter) {
       meter = timeSig;
       drawClef();
@@ -128,7 +130,7 @@ export function createTab(container, { onSeek, labels } = {}) {
     track.style.width = `${totalBeats * bw + 8}px`;
     track.style.height = `${140 + off}px`;
 
-    const staff = showStaff ? renderStaff(events, totalBeats, beatsPerBar, bw, doubles, everyAccidental, xAt, pulse) : null;
+    const staff = showStaff ? renderStaff(events, totalBeats, beatsPerBar, bw, doubles, everyAccidental, xAt, pulse, final) : null;
     if (staff) track.append(staff.svg);
 
     for (let s = 0; s < STRINGS.length; s++) {
@@ -138,6 +140,13 @@ export function createTab(container, { onSeek, labels } = {}) {
       track.append(line);
     }
 
+    if (final) {
+      const end = document.createElement('div');
+      end.className = 'tab-bar final';
+      end.style.left = `${totalBeats * bw - 5}px`;
+      end.style.top = `${4 + off}px`;
+      track.append(end);
+    }
     for (let b = 0; b * beatsPerBar < totalBeats; b++) {
       const bar = document.createElement('div');
       bar.className = 'tab-bar';

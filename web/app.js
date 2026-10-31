@@ -458,7 +458,9 @@ function renderTab() {
     chainPrev = upcoming = null;
     // En boucle, la tab montre la suite (le début de la séquence suivante) après un double trait
     // (pas pendant le travail d'une sélection, qui revient simplement à son début).
-    tab.render(prog.bassEvents, T, prog.bpb, { loopLen: isLooping() && rangeEnd == null ? T : 0, pulse: prog.pulse, timeSig: timeSig() });
+    tab.render(prog.bassEvents, T, prog.bpb, {
+      loopLen: isLooping() && rangeEnd == null ? T : 0, pulse: prog.pulse, timeSig: timeSig(), final: !isLooping(),
+    });
     return;
   }
   const parts = [chainPrev, { events: prog.bassEvents, beats: T }, upcomingPart()].filter(Boolean);
