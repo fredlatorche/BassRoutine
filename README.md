@@ -9,7 +9,27 @@ et s'installe comme une application.
 En résumé : un groupe entier qui joue avec vous, ne se plaint jamais du tempo,
 ne rate aucune répétition et ne vous demande pas de porter l'ampli.
 
-**Version 4.0** : 🎹 **saisissez vos lignes de basse au clavier MIDI.** Branchez un clavier à l'ordinateur,
+**Version 5.0** :
+
+- 🎲 **Improvisation** (anciennement « ligne inventée ») : le bouton **Improviser** invente une grille
+  et sa walking ; avec **Enchaîner**, une nouvelle improvisation de la même durée prend la suite à
+  chaque tour, sans arrêter la lecture : voir [Boucle](#boucle).
+- 🔁 **Gammes enchaînées** : **Enchaîner (quartes)** reprend la gamme une quarte plus haut à chaque
+  tour (Do, Fa, Si♭…). Dans les deux cas, la tablature montre déjà la suite et défile sans à-coup :
+  voir [Gammes](#gammes).
+- 🎹 **Accompagnement plus musical** : les accords s'enchaînent comme sous les doigts d'un pianiste
+  (chaque accord pris dans la position la plus proche du précédent) et suivent le rythme du style
+  (comping swing, bossa, funk, reggae…), ou restent tenus avec la case **tenus** :
+  voir [Accompagnement](#accompagnement).
+- ▶️ **Nouvelle lecture** : boutons ronds ⏮ et ▶, Stop garde la mesure jouée, toucher une mesure
+  pour partir de là, boucle sur quelques mesures avec « ▶ Début » et « Fin ◀ », barre d'espace
+  pour Play / Stop sur ordinateur : voir [Tablature et partition](#tablature-et-partition).
+- 📱 **Téléphone en paysage** : rien que l'en-tête et la tablature, agrandie sur toute la hauteur,
+  le tempo dans l'en-tête et l'accord en cours avec l'exercice joué au-dessus de la tab.
+- ✋ **Doigtés pour tous les exercices** (option dans ⚙️), et partition en clé de fa affichée par défaut.
+- 🎹 **Saisie au clavier MIDI** : son immédiat et compensation du retard en temps réel.
+
+Version 4.0 : 🎹 **saisissez vos lignes de basse au clavier MIDI.** Branchez un clavier à l'ordinateur,
 jouez votre ligne note par note ou en temps réel sur le métronome : elle devient un fichier MIDI,
 rangé dans « Mes fichiers MIDI » et prêt à travailler aussitôt, en tab et en partition :
 voir [Saisir une ligne au clavier MIDI](#saisir-une-ligne-au-clavier-midi).
@@ -47,11 +67,14 @@ Une fois installée, l'app fonctionne aussi hors connexion. Même au fond d'une 
 
 - Lignes prêtes à l'emploi : Mi par temps, fondamentale-quinte, walking simple,
   walking blues en Mi, walking ii-V-I en Sol, et une walking dans l'aigu pensée pour la fretless.
-- 🎲 **Inventer** : une grille d'accords typique (I–vi–ii–V, ii–V–I, i–iv–ii°–V…) et une
+- 🎲 **Improviser** : une grille d'accords typique (I–vi–ii–V, ii–V–I, i–iv–ii°–V…) et une
   walking bass qui tourne en boucle dessus, dans une tonalité au choix ou au hasard,
   en majeur ou en mineur, en grave, en aigu ou sur tout le manche (la ligne monte
   vers le milieu de la boucle puis redescend). Chaque clic propose une nouvelle ligne,
   même pendant la lecture.
+  Avec **Boucle** cochée, la case **Enchaîner** fait suivre chaque improvisation d'une nouvelle,
+  de la même durée et sur la même batterie, sans arrêter la lecture. La tablature montre déjà
+  la suivante après la double barre et défile sans à-coup, comme en boucle.
 - Boucles de 4, 8, 16 ou 32 mesures, notes et accords modifiables dans la grille.
   (32 mesures de Mi par temps : idéal pour vérifier sa patience.)
 - En boucle, la tablature montre déjà le début du tour suivant après un double trait.
@@ -99,6 +122,9 @@ des transcriptions d'enregistrements.
 
 - Majeure, mineure naturelle, mineure harmonique, pentatoniques majeure et mineure,
   dans les 12 tonalités ou enchaînées par le cycle des quartes.
+- Avec **Boucle** cochée, **Enchaîner (quartes)** reprend la gamme une quarte plus haut à chaque
+  tour (Do, Fa, Si♭, Mi♭…), sans fin et sans arrêter la lecture ; la tablature montre déjà la
+  tonalité suivante après la double barre.
 - Sur 1 ou 2 octaves ou tout le manche, en montant, en descendant ou aller-retour,
   en noires, croches ou triolets.
 - Trois doigtés : **3 notes par corde**, **en position** (le moins de déplacements de main),
@@ -172,7 +198,7 @@ ni complaisance.
   note tenue. *Très précis* (± 6), la précision d'un accordeur, pour les notes longues, les positions
   hautes et l'unisson avec un piano.
 - **Les exercices s'y prêtent** : les gammes en position (le doigt de chaque note est indiqué),
-  la walking aiguë pensée pour la fretless, ou la ligne inventée sur **tout le manche** pour
+  la walking aiguë pensée pour la fretless, ou l'improvisation sur **tout le manche** pour
   travailler la justesse dans les positions hautes, là où les repères manquent.
 - **Au-delà des repères** : les points sur le côté de la touche aident à se placer, pas à jouer juste.
   L'app, elle, juge ce qui sonne vraiment.
@@ -191,6 +217,9 @@ mais c'est sur une fretless qu'il prend tout son sens.
 - **Partition en clé de fa** au-dessus de la tab (affichée par défaut, à décocher dans ⚙️) : armure de la tonalité,
   altérations écrites selon les règles (bémols en Mi♭, dièses en Sol…), croches ligaturées,
   triolets. Un **mode novice** répète l'altération sur chaque note.
+- **Téléphone en paysage** : l'écran ne garde que l'en-tête (avec le tempo) et la tablature, agrandie
+  sur toute la hauteur, avec au-dessus l'accord en cours et l'exercice joué. Les réglages restent
+  accessibles en portrait.
 
 ## Réglages (roue ⚙️)
 
@@ -202,7 +231,7 @@ mais c'est sur une fretless qu'il prend tout son sens.
 - **Entrée audio** (accordeur et mode attente) : choix de l'entrée (interface audio, micro…),
   justesse demandée, seuil de niveau et vumètre.
 
-Tous les choix (mode, tempo, sons, gammes, boucle inventée, réglages de l'accordeur, dernier
+Tous les choix (mode, tempo, sons, gammes, improvisation, réglages de l'accordeur, dernier
 morceau MIDI ouvert…) sont retenus d'une visite à l'autre sur chaque appareil. Rien n'est envoyé :
 tout reste dans le navigateur.
 
@@ -253,32 +282,6 @@ S'il reste éteint, c'est l'étape 1 ou 2 ; s'il clignote, c'est le réglage de 
 Brancher l'instrument en USB (ou via une interface MIDI), recharger la page, le choisir comme sortie
 et régler le canal sur celui que l'instrument écoute (souvent 1 par défaut). Un synthé monophonique
 (Moog Subsequent 37…) est fait pour la basse, un orgue ou un clavier (Hammond SK1…) pour les accords.
-
-## Organisation du code
-
-| Fichier | Rôle |
-|---|---|
-| `web/index.html`, `web/style.css` | Interface et thèmes |
-| `web/app.js` | Lecteur, sons, réglages et mémoire des choix |
-| `web/theory.js` | Notes, accords, gammes associées |
-| `web/spelling.js` | Orthographe des notes et armures |
-| `web/notation.js` | Noms des notes (français / américain) |
-| `web/songs.js` | Grilles des morceaux |
-| `web/walking.js` | Générateur de lignes de basse |
-| `web/random-loop.js` | Mode 🎲 Inventer |
-| `web/scales.js` | Gammes et doigtés |
-| `web/drums.js` | Batterie et rythmes |
-| `web/midi-out.js` | Sortie vers les instruments MIDI, entrée des claviers MIDI |
-| `web/pitch.js` | Entrée audio et reconnaissance des notes jouées |
-| `web/tuner.js` | Accordeur |
-| `web/tab.js` | Tablature |
-| `web/staff.js` | Partition en clé de fa |
-| `web/midi-import.js` | Lecture des fichiers MIDI |
-| `web/library.js` | Fichiers MIDI gardés sur l'appareil (« Mes fichiers MIDI ») |
-| `web/recorder.js` | Saisie d'une ligne de basse au clavier MIDI |
-| `web/sw.js`, `web/manifest.json` | Installation et mode hors ligne |
-| `serve.py` | Serveur local pour le développement |
-| `basse.swift` | Premier prototype (macOS, ligne de commande) |
 
 ## Bibliothèques
 

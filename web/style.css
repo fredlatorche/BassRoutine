@@ -538,6 +538,18 @@ body.with-staff .bass-duo { margin-bottom: 310px; }
   gap: 4px;
   font: 600 12px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
+.now-playing { display: none; }
+@media (orientation: landscape) and (max-height: 500px) {
+  .now-playing {
+    position: absolute; top: 4px; left: 16px; right: 170px; z-index: 5;
+    display: flex; align-items: center; gap: 8px;
+    font: 600 12px/22px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: var(--accent); white-space: nowrap;
+  }
+  .now-playing span { overflow: hidden; text-overflow: ellipsis; }
+  .now-playing b { flex-shrink: 0; padding: 0 8px; border-radius: 6px; background: var(--accent); color: var(--on-accent); font-size: 13px; }
+  .wait-status:not([hidden]) ~ .now-playing { display: none; }   /* la note attendue prend la place */
+}
 .tab-tools button { padding: 4px 8px; font-size: 12px; border-radius: 6px; background: var(--bg); color: var(--muted); }
 /* Mode « Attendre ma note » : note attendue et note entendue, au-dessus de la tab. */
 .wait-status {

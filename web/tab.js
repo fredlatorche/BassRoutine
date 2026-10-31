@@ -64,43 +64,54 @@ export function createTab(container, { onSeek, labels } = {}) {
   // Abscisse du centre d'une note : espacement régulier dans la mesure, très légèrement resserré
   // si besoin pour laisser de l'air avant la barre de mesure suivante (notes rapides).
   let xAt = (t) => t * bw + NOTE_X;
-  let showStaff = false, everyAccidental = false, showFingers = false, lastArgs = null, loop = 0, fifths = 0;
+  let showStaff = false, everyAccidental = false, showFingers = false, lastArgs = null, starts = [], fifths = 0;
 
   // Un clic (ou un tap, pas un glissé) choisit le point de départ.
   container.addEventListener('click', (e) => {
-    const x = e.clientX - container.getBoundingClientRect().left + container.scrollLeft;
+    const box = container.getBoundingClientRect();
+    const zoom = box.width / container.offsetWidth || 1;   // tab agrandie (téléphone en paysage)
+    const x = (e.clientX - box.left) / zoom + container.scrollLeft;
     const beat = Math.max(0, x / bw);
-    onSeek?.(loop ? beat % loop : beat);   // un clic dans une copie de la boucle vise la même mesure
+    // Un clic dans une copie de la boucle (ou une autre partie enchaînée) vise la même place dans sa partie.
+    const start = starts.findLast((b) => b <= beat) ?? 0;
+    onSeek?.(beat - start);
   });
 
   // loopLen : longueur de la boucle en temps (0 = pas de boucle). En boucle, on affiche la séquence
   // deux fois puis le début d'une troisième, séparées par des doubles traits, pour voir la suite.
-  function render(evts, totalBeats, beatsPerBar, { loopLen = 0 } = {}) {
-    lastArgs = [evts, totalBeats, beatsPerBar, { loopLen }];
-    bw = beatWidth(evts);
+  // parts : séquences différentes [{ events, beats }] à mettre bout à bout à la place des copies
+  // (improvisations ou gammes enchaînées), la dernière coupée comme la 3e copie.
+  function render(evts, totalBeats, beatsPerBar, { loopLen = 0, parts = null } = {}) {
+    lastArgs = [evts, totalBeats, beatsPerBar, { loopLen, parts }];
+    bw = beatWidth(parts ? parts.flatMap((p) => p.events) : evts);
     const last = beatsPerBar - minGap(evts);   // position de la dernière note possible dans une mesure
     const squeeze = Math.min(1, (beatsPerBar * bw - BAR_GAP - NOTE_X) / (last * bw || 1));
     xAt = (t) => {
       const b = Math.floor((t + 1e-6) / beatsPerBar);
       return b * beatsPerBar * bw + NOTE_X + (t - b * beatsPerBar) * bw * squeeze;
     };
-    loop = loopLen;
-    const basePos = fingerings(evts, showFingers);   // même doigté pour toutes les copies
-    let pos = basePos, doubles = [];
-    if (loopLen) {
-      const head = Math.min(loopLen, Math.ceil(container.clientWidth / bw) + beatsPerBar);
+    let pos = fingerings(evts, showFingers), doubles = [];
+    starts = [];
+    if (loopLen) parts = [0, 1, 2].map(() => ({ events: evts, beats: loopLen, pos }));   // même doigté pour toutes les copies
+    if (parts) {
       const shown = [];
+      let start = 0;
       pos = [];
-      for (let k = 0; k < 3; k++) {
-        evts.forEach((e, i) => {
-          if (k === 2 && e.t >= head) return;
-          shown.push({ ...e, t: e.t + k * loopLen });
-          pos.push(basePos[i]);
+      parts.forEach((part, k) => {
+        const last = k === 2;
+        const end = last ? Math.min(part.beats, Math.ceil(container.clientWidth / bw) + beatsPerBar) : part.beats;
+        const partPos = part.pos ?? fingerings(part.events, showFingers);
+        part.events.forEach((e, i) => {
+          if (e.t >= end) return;
+          shown.push({ ...e, t: e.t + start });
+          pos.push(partPos[i]);
         });
-      }
+        starts.push(start);
+        start += end;
+      });
       evts = shown;
-      totalBeats = 2 * loopLen + head;
-      doubles = [loopLen, 2 * loopLen];
+      totalBeats = start;
+      doubles = starts.slice(1);
     }
     events = evts;
     current = -1;
@@ -126,7 +137,8 @@ export function createTab(container, { onSeek, labels } = {}) {
       bar.className = 'tab-bar';
       bar.style.left = `${b * beatsPerBar * bw}px`;
       bar.style.top = `${4 + off}px`;
-      bar.textContent = loopLen ? (b % (loopLen / beatsPerBar)) + 1 : b + 1;   // numéros repartis à 1 à chaque passage
+      // Numéros repartis à 1 à chaque passage (ou partie enchaînée).
+      bar.textContent = (b * beatsPerBar - (starts.findLast((x) => x <= b * beatsPerBar) ?? 0)) / beatsPerBar + 1;
       if (doubles.includes(b * beatsPerBar)) bar.classList.add('double');
       track.append(bar);
     }

@@ -118,7 +118,7 @@
           <option value="walkingBlues">Walking blues (Mi)</option>
           <option value="walking251">Walking ii-V-I (Sol)</option>
           <option value="walkingHigh">Walking aigu – fretless (Ré m)</option>
-          <option value="invented" hidden>🎲 Ligne inventée</option>
+          <option value="invented" hidden>🎲 Improvisation</option>
         </select>
       </div>
       <div class="field">
@@ -133,7 +133,7 @@
       <div class="field check">
         <label class="toggle"><input id="loop" type="checkbox" checked> Boucle</label>
       </div>
-      <div class="fields-title">🎲 Ligne inventée</div>
+      <div class="fields-title">🎲 Improvisation</div>
       <div class="field">
         <label for="randKey">Tonalité</label>
         <select id="randKey"></select>
@@ -156,7 +156,10 @@
       </div>
       <div class="field">
         <span class="label" aria-hidden="true">&nbsp;</span>
-        <button id="invent">🎲 Inventer</button>
+        <button id="invent">🎲 Improviser</button>
+      </div>
+      <div id="chainField" class="field check">
+        <label class="toggle" title="À la fin de la boucle, une nouvelle improvisation de la même durée prend la suite"><input id="chain" type="checkbox"> Enchaîner</label>
       </div>
     </div>
 
@@ -255,6 +258,9 @@
       <div class="field check">
         <label class="toggle"><input id="scaleLoop" type="checkbox" checked> Boucle</label>
       </div>
+      <div id="scaleChainField" class="field check">
+        <label class="toggle" title="À la fin de la boucle, la même gamme reprend une quarte plus haut (Do, Fa, Si♭, Mi♭…)"><input id="scaleChain" type="checkbox"> Enchaîner (quartes)</label>
+      </div>
     </div>
 
     <!-- Accompagnement (tous les modes) -->
@@ -311,7 +317,7 @@
     Pour travailler quelques mesures en boucle : touche « ▶ Début » puis la première mesure, « Fin ◀ » puis la dernière (✕ efface la boucle). En haut à droite : mesure / temps.<br>
     Gammes (et tous les exercices si l'option ⚙️ « Doigtés » est cochée) : le petit chiffre à côté de la case est le doigt (1 index, 2 majeur, 3 annulaire, 4 auriculaire, 0 corde à vide).<br>
     Sur iPhone : si tu n'entends rien, vérifie le bouton silencieux et le volume.</p>
-  <p class="copyright">© 2026 FredLatorche · v4.0 · <a href="https://github.com/fredlatorche/BassRoutine#readme" target="_blank" rel="noopener">à propos de Bass Routine</a></p>
+  <p class="copyright">© 2026 FredLatorche · v5.0 · <a href="https://github.com/fredlatorche/BassRoutine#readme" target="_blank" rel="noopener">à propos de Bass Routine</a></p>
   <!-- Mes deux basses, inclinées, les manches côte à côte. -->
   <div class="bass-duo" aria-hidden="true">
     <img class="bass-noire" src="icons/bass.png" alt="" width="423" height="120">
@@ -322,6 +328,8 @@
 
   <footer id="tabPanel">
     <div id="waitStatus" class="wait-status" hidden aria-live="polite"></div>
+    <!-- Téléphone en paysage : ce qui est joué (accord en cours, exercice), les réglages étant masqués. -->
+    <div class="now-playing"><b id="npChord" hidden></b><span id="npInfo"></span></div>
     <!-- Début / Fin, puis toucher une mesure : place le début ou la fin de la boucle. -->
     <div class="tab-tools" role="group" aria-label="Boucle sur quelques mesures">
       <button data-touch="start" aria-pressed="false" title="Puis toucher une mesure : début de la boucle">▶ Début</button>

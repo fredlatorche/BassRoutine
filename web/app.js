@@ -131,30 +131,45 @@ function applyPreset(name) {
 }
 
 // Mode aléatoire : grille et walking inventées dans la tonalité choisie (ou au hasard).
-function invent() {
+function improvise(drums) {
   const register = $('randRegister').value;
   const r = inventLoop({ key: $('randKey').value, mode: $('randMode').value, register, bars: loopState.bars });
+  return {
+    label: r.label,
+    bars: loopState.bars,
+    state: { chords: r.chords, bass: r.line, frets: r.line.map(() => null), legato: register === 'high', drums, fifths: r.fifths },
+  };
+}
+
+// Improvisations (ou gammes) enchaînées : la suivante est préparée d'avance pour l'afficher dans la tab
+// après celle qui joue, et la précédente reste affichée avant (défilement continu, comme en boucle).
+let upcoming = null;    // improvisation suivante
+let chainPrev = null;   // partie précédente : { events, beats }
+
+// next : improvisation enchaînée en fin de boucle (celle qui était prévue, même batterie, cases
+// laissées comme elles sont) ; l'affichage est mis à jour par showChain().
+function invent({ next = false } = {}) {
   // Batterie en « Auto » : un rythme au hasard parmi ceux qui vont avec une walking.
-  const drums = WALKING_DRUMS[Math.floor(Math.random() * WALKING_DRUMS.length)];
-  Object.assign(loopState, {
-    chords: r.chords,
-    bass: r.line,
-    frets: r.line.map(() => null),
-    legato: register === 'high',
-    drums,
-    fifths: r.fifths,
-  });
+  const drums = next ? loopState.drums : WALKING_DRUMS[Math.floor(Math.random() * WALKING_DRUMS.length)];
+  const imp = next && upcoming?.bars === loopState.bars ? upcoming : improvise(drums);
+  upcoming = null;
+  Object.assign(loopState, imp.state);
   $('preset').value = 'invented';
   const drumLabel = DRUM_STYLES[$('drumStyle').value === 'auto' ? drums : $('drumStyle').value];
-  inventedLabel = `🎲 ${r.label}  ·  batterie : ${drumLabel}`;
+  inventedLabel = `🎲 ${imp.label}  ·  batterie : ${drumLabel}`;
   // C'est avec la nappe et la batterie que ça sonne : on les active.
-  $('synth').checked = true;
-  $('drums').checked = true;
+  if (!next) {
+    $('synth').checked = true;
+    $('drums').checked = true;
+  }
+  if (next) return;
+  chainPrev = null;
   renderLoopGrid();
 }
 
 // Change le nombre de mesures en répétant le contenu existant.
 function setBars(n) {
+  chainPrev = null;
   const oldBars = loopState.bars;
   const chords = [], bass = [], frets = [];
   for (let b = 0; b < n; b++) {
@@ -227,24 +242,24 @@ function makeProgram({ events, others = [], drums = null, drumStyle = 'eighths',
   };
 }
 
-function buildLoopProgram() {
+function buildLoopProgram(state = loopState) {
   const events = [];
-  loopState.bass.forEach((midi, i) => {
+  state.bass.forEach((midi, i) => {
     if (midi == null) return;
-    const pos = loopState.frets[i];
+    const pos = state.frets[i];
     events.push({
-      t: i, dur: loopState.legato ? 0.97 : 0.85, midi, vel: i % BEATS === 0 ? 0.9 : 0.75,
+      t: i, dur: state.legato ? 0.97 : 0.85, midi, vel: i % BEATS === 0 ? 0.9 : 0.75,
       ...(pos && { string: pos[0], fret: pos[1] }),
     });
   });
   return makeProgram({
-    events: spellEvents(events, (t) => loopState.chords[Math.floor(t / BEATS)], loopState.fifths),
-    fifths: loopState.fifths,
-    drumStyle: loopState.drums,
-    chordBars: loopState.chords.map((c) => [c]),
-    bars: loopState.bars,
+    events: spellEvents(events, (t) => state.chords[Math.floor(t / BEATS)], state.fifths),
+    fifths: state.fifths,
+    drumStyle: state.drums,
+    chordBars: state.chords.map((c) => [c]),
+    bars: state.bars,
     bpb: BEATS,
-    labels: loopState.chords.map((_, b) => `Mesure ${b + 1}`),
+    labels: state.chords.map((_, b) => `Mesure ${b + 1}`),
   });
 }
 
@@ -310,9 +325,9 @@ const scaleState = {
 };
 let scaleKeys = [];   // résumé par tonalité, pour l'affichage
 
-function buildScaleProgram() {
-  const ex = buildScaleExercise(scaleState);
-  scaleKeys = ex.keys;
+function buildScaleProgram(state = scaleState) {
+  const ex = buildScaleExercise(state);
+  if (state === scaleState) scaleKeys = ex.keys;
   return makeProgram({
     events: ex.events,
     chordBars: ex.chordBars,
@@ -354,17 +369,80 @@ function updateInfo() {
   }
   $('loopInfo').textContent = text;
   $('loopInfo').hidden = !text;
+  $('npInfo').textContent = text;
 }
 
 const isLooping = () => (mode === 'loop' && $('loop').checked) || (mode === 'scale' && $('scaleLoop').checked);
+// « Enchaîner » : chaque fin de boucle lance une nouvelle improvisation (mode Boucle)
+// ou la même gamme une quarte plus haut (mode Gammes, cycle des quartes).
+const chaining = () => rangeEnd == null && (
+  (mode === 'loop' && $('loop').checked && $('chain').checked && $('preset').value === 'invented')
+  || (mode === 'scale' && $('scaleLoop').checked && $('scaleChain').checked && scaleState.key !== 'all'));
+const nextScaleKey = () => String((Number(scaleState.key) + 5) % 12);
+
+// Décalage de la lecture dans la tab : en boucle, à partir du 2e passage on suit la 2e copie de la
+// séquence ; en enchaînement, la partie qui joue est après la précédente.
+function tabOffset(cycle) {
+  if (rangeEnd != null) return 0;
+  if (chaining()) return chainPrev?.beats ?? 0;
+  return isLooping() && cycle >= 1 ? prog.totalBeats : 0;
+}
+
+// Enchaînement en fin de boucle : la partie suivante devient le programme joué (le son change tout de
+// suite) ; renvoie la partie qui vient de finir, à passer à showChain() (calé sur le son).
+function chainNext() {
+  const prev = { events: prog.bassEvents, beats: prog.totalBeats };
+  if (mode === 'loop') {
+    invent({ next: true });
+    prog = buildLoopProgram();
+  } else {
+    scaleState.key = nextScaleKey();
+    prog = buildScaleProgram();
+  }
+  return prev;
+}
+
+function showChain(prev) {
+  chainPrev = prev;
+  if (mode === 'loop') renderLoopGrid();
+  else {
+    $('scaleKey').value = scaleState.key;
+    renderScales();
+  }
+}
+
+// Partie qui suivra celle qui joue : { events, beats }.
+function upcomingPart() {
+  let p;
+  if (mode === 'loop') {
+    if (upcoming?.bars !== loopState.bars) upcoming = improvise(loopState.drums);
+    p = buildLoopProgram({ ...loopState, ...upcoming.state });
+  } else {
+    p = buildScaleProgram({ ...scaleState, key: nextScaleKey() });
+  }
+  return { events: p.bassEvents, beats: p.totalBeats };
+}
+
+function renderTab() {
+  const T = prog.totalBeats;
+  if (!chaining()) {
+    chainPrev = upcoming = null;
+    // En boucle, la tab montre la suite (le début de la séquence suivante) après un double trait
+    // (pas pendant le travail d'une sélection, qui revient simplement à son début).
+    tab.render(prog.bassEvents, T, prog.bpb, { loopLen: isLooping() && rangeEnd == null ? T : 0 });
+    return;
+  }
+  const parts = [chainPrev, { events: prog.bassEvents, beats: T }, upcomingPart()].filter(Boolean);
+  tab.render(prog.bassEvents, T, prog.bpb, { parts });
+}
 
 function refresh() {
   prog = mode === 'loop' ? buildLoopProgram() : mode === 'song' ? buildSongProgram() : buildScaleProgram();
   if (cue >= prog.totalBeats) cue = 0;
   if (rangeEnd != null && rangeEnd > prog.totalBeats) rangeStart = rangeEnd = null;
-  // En boucle, la tab montre la suite (le début de la séquence suivante) après un double trait
-  // (pas pendant le travail d'une sélection, qui revient simplement à son début).
-  tab.render(prog.bassEvents, prog.totalBeats, prog.bpb, { loopLen: isLooping() && rangeEnd == null ? prog.totalBeats : 0 });
+  renderTab();
+  $('chainField').hidden = !$('loop').checked;
+  $('scaleChainField').hidden = !$('scaleLoop').checked || scaleState.key === 'all';
   showRange();
   tab.setKey(prog.barSig[cue / prog.bpb] ?? 0);
   updateInfo();
@@ -575,6 +653,7 @@ function setMode(m) {
   if (playing) stop();
   if (m !== 'song') setRecorderOpen(false);
   mode = m;
+  chainPrev = null;
   cue = 0;
   rangeStart = rangeEnd = null;
   $('loopControls').hidden = mode !== 'loop';
@@ -641,6 +720,9 @@ let lit = [];
 function showBeat(s) {
   lit.forEach((el) => el.classList.remove('playing'));
   lit = [];
+  const chord = s == null ? null : prog.chordAt[s]?.symbol;
+  $('npChord').textContent = chord ? parseChord(chord).label : '';
+  $('npChord').hidden = !chord;
   if (s == null) {
     showCue();
     return;
@@ -840,6 +922,10 @@ function tick(time) {
     }
     step = 0;
     cycle++;
+    if (chaining()) {
+      const prev = chainNext();
+      Tone.Draw.schedule(() => showChain(prev), time);
+    }
   }
   const s = step++;
   const beat = s % prog.bpb;
@@ -949,7 +1035,8 @@ function frame() {
     const frac = Math.min(1, Math.max(0, (Tone.context.currentTime - beatClock.time) / beatDur));
     // En boucle, à partir du 2e passage on suit la 2e copie de la séquence dans la tab :
     // le retour de la fin de la 2e copie au début de la 2e est invisible (contenu identique).
-    const copy = isLooping() && rangeEnd == null && beatClock.cycle >= 1 ? prog.totalBeats : 0;
+    // Improvisations enchaînées : même principe, la tab est redessinée décalée d'une improvisation.
+    const copy = tabOffset(beatClock.cycle);
     tab.follow(beatClock.s + frac + copy);
   }
   requestAnimationFrame(frame);
@@ -1091,8 +1178,8 @@ function stopWaiting() {
 // feedback : { text, cls } affiché après la note attendue (note fausse, ou justesse à corriger).
 function showWaiting(feedback = null) {
   const e = waiting.notes[waiting.i];
-  // En boucle, la tab affiche la suite après la fin : à partir du 2e passage, on suit cette copie (comme frame()).
-  const copy = isLooping() && rangeEnd == null && waiting.cycle >= 1 ? prog.totalBeats : 0;
+  // En boucle, la tab affiche la suite après la fin : on suit la bonne copie (comme frame()).
+  const copy = tabOffset(waiting.cycle);
   tab.follow(e.t + copy);
   showBeat(Math.floor(e.t));
   const box = $('waitStatus');
@@ -1138,6 +1225,10 @@ function nextWaitingNote() {
     } else if (!isLooping()) {
       stop();
       showMessage('Bravo, tout est joué !');
+      return;
+    } else if (chaining()) {
+      cue = 0;
+      showChain(chainNext());   // refresh() repart du début de la partie suivante
       return;
     } else {
       waiting.notes = waitingNotes(0);   // exercice en boucle : on recommence au début
@@ -1377,6 +1468,26 @@ function setStaffVisible(on) {
 }
 $('showStaff').addEventListener('change', (e) => setStaffVisible(e.target.checked));
 
+// Téléphone en paysage : la tab (et la portée) grandit pour remplir toute la hauteur sous l'en-tête.
+// Agrandie d'un bloc (transform), le défilement et les clics gardent leurs coordonnées d'origine.
+const LANDSCAPE = matchMedia('(orientation: landscape) and (max-height: 500px)');
+function fitTab() {
+  const panel = $('tabPanel'), labels = panel.querySelector('.tab-labels');
+  panel.style.transform = panel.style.width = panel.style.height = panel.style.flex = '';
+  if (!LANDSCAPE.matches) return;
+  const pad = parseFloat(getComputedStyle(panel).paddingTop) + parseFloat(getComputedStyle(panel).paddingBottom);
+  const room = innerHeight - document.querySelector('header').getBoundingClientRect().bottom;
+  const k = Math.min(2.5, Math.max(1, room / (labels.offsetHeight + pad)));
+  if (k <= 1.01) return;
+  Object.assign(panel.style, {
+    flex: 'none', transform: `scale(${k})`, transformOrigin: '0 0',
+    width: `${innerWidth / k}px`, height: `${room / k}px`,
+  });
+}
+LANDSCAPE.addEventListener('change', fitTab);
+addEventListener('resize', fitTab);
+new ResizeObserver(fitTab).observe(document.querySelector('#tabPanel .tab-labels'));
+
 // Détail des mesures (grille de la boucle, grille d'accords, liste des gammes) : masqué par défaut.
 const DETAIL_KEY = 'bassroutine-detail';
 function setDetailVisible(on) {
@@ -1576,6 +1687,7 @@ for (const [id, label] of Object.entries(ZONES)) $('scaleZone').append(option(id
 updateKeySelect();
 const scaleControl = (id, field, parse = (v) => v) => $(id).addEventListener('change', (e) => {
   if (playing) stop();
+  chainPrev = null;
   scaleState[field] = parse(e.target.value);
   if (field === 'type' || field === 'fingering') updateKeySelect();   // noms de tonalités, boxes, menus visibles
   cue = 0;
@@ -1594,6 +1706,11 @@ scaleControl('scaleBox', 'box');
 $('mode').addEventListener('change', (e) => setMode(e.target.value));
 $('bars').addEventListener('change', (e) => setBars(Number(e.target.value)));
 $('loop').addEventListener('change', refresh);
+// Enchaîner, ou réglages de l'improvisation changés : la suivante est préparée à nouveau.
+for (const id of ['chain', 'randKey', 'randMode', 'randRegister']) {
+  $(id).addEventListener('change', () => { upcoming = null; if (mode === 'loop') refresh(); });
+}
+$('scaleChain').addEventListener('change', refresh);
 $('scaleLoop').addEventListener('change', refresh);
 $('drumStyle').append(option('auto', 'Rythme auto', true));
 for (const [id, label] of Object.entries(DRUM_STYLES)) $('drumStyle').append(option(id, label, false));
@@ -1685,7 +1802,7 @@ document.addEventListener('keydown', (e) => {
 // Les fichiers MIDI importés sont gardés à part, dans la bibliothèque (library.js).
 
 const SETTINGS_KEY = 'bassroutine-settings';
-const TOGGLES = ['synth', 'padHeld', 'drums', 'fills', 'metro', 'others', 'loop', 'scaleLoop', 'waitMode'];
+const TOGGLES = ['synth', 'padHeld', 'drums', 'fills', 'metro', 'others', 'loop', 'chain', 'scaleLoop', 'scaleChain', 'waitMode'];
 const SELECTS = ['padSound', 'drumStyle', 'randKey', 'randMode', 'randRegister', 'preset', 'bars'];
 const SCALE_SELECTS = {
   scaleType: 'type', scaleKey: 'key', scaleRange: 'range', scaleDir: 'direction',
