@@ -116,6 +116,7 @@ Une fois installée, l'app fonctionne aussi hors connexion. Même au fond d'une 
   - **Pop, rock, funk** : rock'n'roll (blues en La), cadence andalouse, progression années 50,
     vamp funk dorien.
 - Chaque morceau arrive avec son tempo et son style de ligne (on peut en changer).
+- **Boucle** : à la fin du morceau (ou du fichier MIDI), la lecture repart au début, sans s'arrêter.
 - Ligne de basse **générée** en 4 styles : walking swing (avec croches et triolets),
   two-feel, bossa, croches pop/rock. « Nouvelle ligne » en propose une autre.
 - **Import MIDI** : jouer et lire en tab la ligne de basse d'un fichier `.mid`
@@ -189,6 +190,9 @@ précision. Le doigt à utiliser est écrit au-dessus de chaque note de la tab.
   mais les doigts qui restent appuyés.
 - Case de départ, cordes (les 4 ou une paire), aller ou aller-retour, rythme (noires, croches,
   triolets, doubles croches) et boucle.
+- **Enchaîner les exercices** (avec Boucle) : à la fin de chaque exercice, le suivant de la liste
+  prend la suite sans arrêter la lecture ni ouvrir sa fiche, et ainsi de suite jusqu'au dernier,
+  puis retour au premier. La tab montre déjà le début de l'exercice suivant.
 - Le tempo démarre à 45 : on travaille lentement, chaque note propre, et on n'accélère
   que quand tout est net.
 

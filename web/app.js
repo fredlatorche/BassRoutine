@@ -422,13 +422,20 @@ function updateInfo() {
 }
 
 const isLooping = () => (mode === 'loop' && $('loop').checked) || (mode === 'scale' && $('scaleLoop').checked)
-  || (mode === 'finger' && $('fingerLoop').checked);
+  || (mode === 'finger' && $('fingerLoop').checked) || (mode === 'song' && $('songLoop').checked);
 // « Enchaîner » : chaque fin de boucle lance une nouvelle improvisation (mode Boucle)
 // ou la même gamme une quarte plus haut (mode Gammes, cycle des quartes).
 const chaining = () => rangeEnd == null && (
   (mode === 'loop' && $('loop').checked && $('chain').checked && $('preset').value === 'invented')
-  || (mode === 'scale' && $('scaleLoop').checked && $('scaleChain').checked && scaleState.key !== 'all'));
+  || (mode === 'scale' && $('scaleLoop').checked && $('scaleChain').checked && scaleState.key !== 'all')
+  || (mode === 'finger' && $('fingerLoop').checked && $('fingerChain').checked));
 const nextScaleKey = () => String((Number(scaleState.key) + 5) % 12);
+// Déliateur enchaîné : l'exercice suivant de la liste (puis retour au premier), avec sa variante par défaut.
+function nextFinger() {
+  const ids = Object.keys(EXERCISES);
+  const exercise = ids[(ids.indexOf(fingerState.exercise) + 1) % ids.length];
+  return { ...fingerState, exercise, variant: EXERCISES[exercise].variant ?? '' };
+}
 
 // Décalage de la lecture dans la tab : en boucle, à partir du 2e passage on suit la 2e copie de la
 // séquence ; en enchaînement, la partie qui joue est après la précédente.
@@ -445,6 +452,9 @@ function chainNext() {
   if (mode === 'loop') {
     invent({ next: true });
     prog = buildLoopProgram();
+  } else if (mode === 'finger') {
+    Object.assign(fingerState, nextFinger());
+    prog = buildFingerProgram();
   } else {
     scaleState.key = nextScaleKey();
     prog = buildScaleProgram();
@@ -455,7 +465,11 @@ function chainNext() {
 function showChain(prev) {
   chainPrev = prev;
   if (mode === 'loop') renderLoopGrid();
-  else {
+  else if (mode === 'finger') {
+    $('fingerEx').value = fingerState.exercise;   // sans la fiche : on enchaîne
+    updateFingerSelects();
+    renderScales();
+  } else {
     $('scaleKey').value = scaleState.key;
     renderScales();
   }
@@ -467,6 +481,8 @@ function upcomingPart() {
   if (mode === 'loop') {
     if (upcoming?.bars !== loopState.bars) upcoming = improvise(loopState.drums);
     p = buildLoopProgram({ ...loopState, ...upcoming.state });
+  } else if (mode === 'finger') {
+    p = buildFingerProgram(nextFinger());
   } else {
     p = buildScaleProgram({ ...scaleState, key: nextScaleKey() });
   }
@@ -499,6 +515,7 @@ function refresh() {
   renderTab();
   $('chainField').hidden = !$('loop').checked;
   $('scaleChainField').hidden = !$('scaleLoop').checked || scaleState.key === 'all';
+  $('fingerChainField').hidden = !$('fingerLoop').checked;
   showRange();
   tab.setKey(prog.barSig[cue / prog.bpb] ?? 0);
   updateInfo();
@@ -2127,6 +2144,8 @@ fingerControl('fingerProg', 'progression');
 fingerControl('fingerRhythm', 'rhythm', Number);
 $('fingerInfo').addEventListener('click', fingerTip);
 $('fingerLoop').addEventListener('change', refresh);
+$('songLoop').addEventListener('change', refresh);
+$('fingerChain').addEventListener('change', refresh);
 
 $('mode').addEventListener('change', (e) => {
   setMode(e.target.value);
@@ -2262,7 +2281,7 @@ document.addEventListener('keydown', (e) => {
 
 const SETTINGS_KEY = 'bassroutine-settings';
 const TOGGLES = ['synth', 'padHeld', 'drums', 'fills', 'metro', 'others', 'loop', 'chain', 'scaleLoop', 'scaleChain',
-  'fingerLoop', 'waitMode', 'gameMode'];
+  'fingerLoop', 'fingerChain', 'songLoop', 'waitMode', 'gameMode'];
 const SELECTS = ['padSound', 'drumStyle', 'randKey', 'randMode', 'randRegister', 'preset', 'bars', 'countIn'];
 const SCALE_SELECTS = {
   scaleType: 'type', scaleKey: 'key', scaleRange: 'range', scaleDir: 'direction',
