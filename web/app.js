@@ -945,10 +945,6 @@ const makePad = (kind) => (PAD_SOUNDS[kind] ?? PAD_SOUNDS.epiano)(reverb);
 
 // Appelé à chaque temps : joue tous les événements qui tombent dans ce temps.
 function tick(time) {
-  if (countLeft > 0) {
-    countTick(time);
-    return;
-  }
   if (rangeEnd != null && step === rangeEnd) {   // boucle : retour à son début
     step = rangeStart;
     if (lapDone(time)) return;
@@ -1016,20 +1012,6 @@ function tick(time) {
     beatClock = { s, time, cycle: c };
     showBeat(s);
   }, time);
-}
-
-// Une noire du décompte : un clic par temps de la mesure (noire, ou noire pointée en 6/8 et 12/8),
-// le 1 plus aigu ; le temps compté s'affiche à la place de la position (1, 2, 3, 4…).
-function countTick(time) {
-  const q = countTotal - countLeft--;
-  const beat = q % prog.bpb;
-  const beatDur = 60 / Tone.Transport.bpm.value;
-  for (let p = Math.ceil(beat / prog.pulse - 1e-6) * prog.pulse; p < beat + 1 - 1e-6; p += prog.pulse) {
-    const first = p < 1e-6;
-    click.triggerAttackRelease(first ? 'C6' : 'G5', '32n', time + (p - beat) * beatDur, first ? 0.8 : 0.5);
-    const n = Math.round(p / prog.pulse) + 1;
-    Tone.Draw.schedule(() => { if (playing) $('position').textContent = `${n}…`; }, time + (p - beat) * beatDur);
-  }
 }
 
 // Temps joué après s (fin de la boucle de mesures, fin de l'exercice) ; -1 = arrêt.
@@ -1154,23 +1136,39 @@ async function start() {
   }
 }
 
-// Décompte avant le départ : noires restant à compter (clics seulement, puis l'exercice démarre).
-let countLeft = 0, countTotal = 0;
+// Décompte avant le départ : de 1 à 4 temps (noire, ou noire pointée en 6/8 et 12/8), le premier
+// plus aigu, le temps compté affiché à la place de la position ; puis l'exercice démarre.
+// Chaque clic est déclenché juste avant son heure : Stop pendant le décompte annule les suivants.
+let countTimers = [];
+function cancelCount() {
+  countTimers.forEach(clearTimeout);
+  countTimers = [];
+}
 
 function begin() {
   Tone.Transport.bpm.value = transportBpm();
   step = cue;
   cycle = 0;
   beatClock = null;
-  countTotal = countLeft = Number($('countIn').value) * prog.bpb;
   if (gameOn()) beginGame();
-  Tone.Transport.start('+0.05');
+  const beats = Number($('countIn').value);
+  const beatDur = 60 / Number($('tempo').value);   // le tempo compte les temps de la mesure
+  const t0 = Tone.now() + 0.1;
+  for (let i = 0; i < beats; i++) {
+    const at = t0 + i * beatDur;
+    countTimers.push(setTimeout(() => {
+      click.triggerAttackRelease(i === 0 ? 'C6' : 'G5', '32n', at, i === 0 ? 0.8 : 0.5);
+      $('position').textContent = `${i + 1}…`;
+    }, Math.max(0, (at - Tone.now() - 0.05) * 1000)));
+  }
+  Tone.Transport.start(t0 + beats * beatDur);
   playing = true;
   setPlayButton(true);
   requestAnimationFrame(frame);
 }
 
 function stop() {
+  cancelCount();
   Tone.Transport.stop();
   Tone.Draw.cancel(0);   // affichages déjà programmés (temps suivants) : on les annule
   bass?.triggerRelease();
@@ -2032,6 +2030,8 @@ $('bars').addEventListener('change', (e) => setBars(Number(e.target.value)));
 $('meter').addEventListener('change', (e) => {
   loopState.meter = e.target.value;
   upcoming = chainPrev = null;
+  cue = 0;   // les mesures n'ont plus la même longueur : on repart de la mesure 1
+  rangeStart = rangeEnd = null;
   if ($('preset').value === 'invented') invent();
   else applyPreset($('preset').value);
   if (playing && !waiting) Tone.Transport.bpm.value = transportBpm();
