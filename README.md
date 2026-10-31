@@ -300,10 +300,10 @@ Pour se motiver à travailler un peu chaque jour. À activer dans ⚙️ → �
 
 - On se fixe un **objectif du jour** (5 min à 2 h) et, si on veut, un **objectif de la semaine**.
   Seul le temps passé en lecture (Play) compte, tous modes confondus.
-- À chaque **arrêt de la musique** (après au moins 20 s de jeu), un bilan s'affiche : « Encore 7 min »
-  pour l'objectif du jour, avec la séance, la journée et la semaine en barres de progression.
-- **Objectif atteint** : félicitations et **pluie de confettis** sur tout l'écran. Ensuite, les arrêts
-  suivants de la journée n'affichent plus qu'un petit message discret.
+- À chaque **arrêt de la musique** (après au moins 20 s de jeu), un petit message discret qui
+  s'efface seul : « ⏳ Encore 7 min pour l'objectif du jour (8 min / 15 min) ».
+- **Objectif atteint** (ou nouveau trophée) : une fenêtre de félicitations, avec la séance, la journée
+  et la semaine en barres de progression, et une **pluie de confettis** sur tout l'écran.
 - **Trophées** à débloquer : première séance, premier objectif, séance de 30 min, séries de 3, 7 et
   30 jours d'affilée, objectif de la semaine, 1, 10, 50 et 100 heures de basse.
 - L'onglet montre aussi la série en cours et le temps total. Tout reste sur l'appareil : pas de

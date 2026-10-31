@@ -183,13 +183,16 @@ export function confetti() {
   requestAnimationFrame(tick);
 }
 
-// Popup du bilan à l'arrêt de la musique. Objectif déjà atteint plus tôt dans la journée et rien
-// de neuf : un simple message (say), pour ne pas interrompre à chaque Stop.
+// Bilan à l'arrêt de la musique : la popup (et les confettis) seulement pour fêter un objectif ou
+// un trophée ; sinon un simple message (say) qui s'efface seul, pour ne pas interrompre à chaque Stop.
 export function showSessionResult(r, say) {
   if (!r || r.session < MIN_SESSION) return;
   const left = r.dayGoal - r.today;
-  if (!r.reached && !r.weekReached && !r.won.length && left <= 0) {
-    say(`✅ Aujourd'hui : ${formatDuration(r.today)}, objectif atteint${r.weekGoal ? ` · Semaine : ${formatDuration(r.week)} / ${formatDuration(r.weekGoal)}` : ''}`);
+  if (!r.reached && !r.weekReached && !r.won.length) {
+    const week = r.weekGoal ? ` · Semaine : ${formatDuration(r.week)} / ${formatDuration(r.weekGoal)}` : '';
+    say(left > 0
+      ? `⏳ Encore ${Math.ceil(left / 60)} min pour l'objectif du jour (${formatDuration(r.today)} / ${formatDuration(r.dayGoal)})${week}`
+      : `✅ Aujourd'hui : ${formatDuration(r.today)}, objectif atteint${week}`);
     return;
   }
   document.querySelector('.goal-result')?.remove();
@@ -205,8 +208,8 @@ export function showSessionResult(r, say) {
     [emoji, title] = ['🏆', 'Objectif de la semaine atteint !'];
     text = `${formatDuration(r.week)} de basse cette semaine. Chapeau !`;
   } else if (left > 0) {
-    [emoji, title] = [r.won.length ? '🏅' : '⏳', `Encore ${Math.ceil(left / 60)} min`];
-    text = 'pour ton objectif du jour. Allez, on relance ?';
+    [emoji, title] = ['🏅', 'Nouveau trophée !'];
+    text = `Encore ${Math.ceil(left / 60)} min pour ton objectif du jour. Allez, on relance ?`;
   } else {
     [emoji, title, text] = ['🏅', 'Nouveau trophée !', `${formatDuration(r.today)} de basse aujourd'hui.`];
   }
