@@ -1189,6 +1189,7 @@ function beginGame() {
 
 function showLiveScore() {
   $('gameLive').hidden = !match;
+  document.body.classList.toggle('gaming', !!match);   // téléphone en portrait : la note remplace le compteur
   if (match) $('gameLive').textContent = `🎯 ${match.results.length ? game.formatScore(game.score10(match.results)) : '–'}`;
 }
 

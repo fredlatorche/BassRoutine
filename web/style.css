@@ -199,6 +199,7 @@ button.rewind svg { width: 18px; height: 18px; }
   .logo { height: 20px; }
   .header-right { gap: 4px; }
   #position { min-width: 0; font-size: 1rem; }
+  body.gaming #position { display: none; }   /* partie en cours : la note prend la place du compteur */
 }
 
 /* Tempo dans l'en-tête : téléphone en paysage seulement (peu de hauteur, de la place en largeur). */
