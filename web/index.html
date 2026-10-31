@@ -114,6 +114,7 @@
           <option value="loop">Boucle</option>
           <option value="song">Morceau</option>
           <option value="scale">Gammes</option>
+          <option value="finger">Déliateur</option>
         </select>
       </div>
       <div class="field tempo">
@@ -137,6 +138,24 @@
           <option value="walkingBlues">Walking blues (Mi)</option>
           <option value="walking251">Walking ii-V-I (Sol)</option>
           <option value="walkingHigh">Walking aigu – fretless (Ré m)</option>
+          <optgroup label="Jazz">
+            <option value="minorBlues">Blues mineur – grille de Mr. P.C. (swing)</option>
+            <option value="blueBossa">Blue Bossa – grille (bossa, binaire)</option>
+            <option value="cantaloupe">Cantaloupe Island – grille (binaire)</option>
+            <option value="allBlues">All Blues – grille (6/8 ternaire)</option>
+          </optgroup>
+          <optgroup label="Blues">
+            <option value="slowBlues">Blues lent en La (12/8 ternaire)</option>
+            <option value="boogie">Boogie shuffle en Mi (ternaire)</option>
+          </optgroup>
+          <optgroup label="Pop, rock, folk">
+            <option value="pachelbel">Canon de Pachelbel (binaire)</option>
+            <option value="risingSun">La Maison du soleil levant (6/8)</option>
+            <option value="greensleeves">Greensleeves (valse 3/4)</option>
+            <option value="doowop">Doo-wop années 50 (12/8)</option>
+            <option value="funk">Funk en Mi (binaire)</option>
+            <option value="reggae">Reggae one drop en Sol</option>
+          </optgroup>
           <option value="invented" hidden>🎲 Improvisation</option>
         </select>
       </div>
@@ -154,7 +173,9 @@
         <select id="bars">
           <option>4</option>
           <option selected>8</option>
+          <option>12</option>
           <option>16</option>
+          <option>24</option>
           <option>32</option>
         </select>
       </div>
@@ -288,6 +309,52 @@
       </div>
       <div id="scaleChainField" class="field check">
         <label class="toggle" title="À la fin de la boucle, la même gamme reprend une quarte plus haut (Do, Fa, Si♭, Mi♭…)"><input id="scaleChain" type="checkbox"> Enchaîner (quartes)</label>
+      </div>
+    </div>
+
+    <!-- Réglages du mode Déliateur -->
+    <div id="fingerControls" class="fields" hidden>
+      <div class="field wide">
+        <label for="fingerEx">Exercice</label>
+        <div class="finger-pick">
+          <select id="fingerEx"></select>
+          <button id="fingerInfo" class="small" title="Comment placer les doigts" aria-label="Explications de l'exercice">ⓘ</button>
+        </div>
+      </div>
+      <div id="fingerVariantCtl" class="field" hidden>
+        <label for="fingerVariant">Doigts</label>
+        <select id="fingerVariant"></select>
+      </div>
+      <div class="field">
+        <label for="fingerFret">Case de départ</label>
+        <select id="fingerFret"></select>
+      </div>
+      <div class="field">
+        <label for="fingerStrings">Cordes</label>
+        <select id="fingerStrings"></select>
+      </div>
+      <div id="fingerProgCtl" class="field">
+        <label for="fingerProg" title="La main recule vers la tête du manche, jusqu'à la case 1">Progression</label>
+        <select id="fingerProg"></select>
+      </div>
+      <div id="fingerDirCtl" class="field">
+        <label for="fingerDir">Sens</label>
+        <select id="fingerDir">
+          <option value="down">Sol → Mi</option>
+          <option value="both" selected>Aller-retour</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="fingerRhythm">Rythme</label>
+        <select id="fingerRhythm">
+          <option value="1">Noires</option>
+          <option value="2" selected>Croches</option>
+          <option value="3">Triolets</option>
+          <option value="4">Doubles croches</option>
+        </select>
+      </div>
+      <div class="field check">
+        <label class="toggle"><input id="fingerLoop" type="checkbox" checked> Boucle</label>
       </div>
     </div>
 

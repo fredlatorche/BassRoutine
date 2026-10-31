@@ -9,8 +9,21 @@ et s'installe comme une application.
 En résumé : un groupe entier qui joue avec vous, ne se plaint jamais du tempo,
 ne rate aucune répétition et ne vous demande pas de porter l'ampli.
 
-**Nouveau** : 🎯 **mode Jeu**, l'app note votre justesse et votre rythme sur 10 (voir [Jeu](#-jeu)),
-et le choix du **rythme** (4/4, 3/4, 6/8, 12/8) en mode Boucle.
+**Nouveau** :
+
+- 🖐 **Déliateur** : 12 exercices d'indépendance des doigts (chromatique, araignée, permutations,
+  doigt fixe, trilles, écarts…), du plus facile au plus dur, chacun avec sa fiche : où poser
+  les doigts, lesquels restent appuyés, et les pièges à éviter. Voir [Déliateur](#déliateur).
+- 🎶 **12 nouvelles boucles** (grilles de Blue Bossa, All Blues, Cantaloupe Island, blues mineur,
+  boogie, slow blues 12/8, Pachelbel, la Maison du soleil levant, Greensleeves, doo-wop, funk, reggae)
+  et **10 nouveaux morceaux** (Rhythm changes, Blue Bossa, When the Saints, Jericho, Swing Low,
+  rock'n'roll, cadence andalouse…) : voir [Boucle](#boucle) et [Morceau](#morceau).
+- 🎯 **Mode Jeu** : l'app note votre justesse et votre rythme sur 10, et une gerbe d'étoiles salue
+  chaque note parfaite sur la tab : voir [Jeu](#-jeu).
+- 🥁 **Rythme** au choix en mode Boucle (4/4, 3/4, 6/8, 12/8), chiffrage sur la portée,
+  **décompte** de 1 à 4 temps avant le départ, signes de reprise en boucle et double barre de fin.
+- 🔋 **Économie de batterie** : le son se met en veille peu après Stop et dès que l'app passe
+  en arrière-plan ; il se réveille tout seul au Play suivant.
 
 **Version 5.0** :
 
@@ -64,12 +77,19 @@ Pour l'installer :
 
 Une fois installée, l'app fonctionne aussi hors connexion. Même au fond d'une cave de répétition.
 
-## Trois façons de travailler
+## Quatre façons de travailler
 
 ### Boucle
 
 - Lignes prêtes à l'emploi : Mi par temps, fondamentale-quinte, walking simple,
   walking blues en Mi, walking ii-V-I en Sol, et une walking dans l'aigu pensée pour la fretless.
+- **Jazz** : blues mineur sur la grille de *Mr. P.C.* (swing), *Blue Bossa* (bossa),
+  *Cantaloupe Island* (binaire), *All Blues* (6/8).
+- **Blues** : blues lent en La (12/8) et boogie shuffle en Mi (la ligne 1-3-5-6-♭7).
+- **Pop, rock, folk** : la basse obstinée du Canon de Pachelbel, la Maison du soleil levant (6/8),
+  Greensleeves (valse), doo-wop années 50 (12/8), funk en Mi, reggae one drop.
+  Choisir une de ces boucles règle aussi le rythme, le nombre de mesures et la batterie.
+  Les grilles des standards sont reprises ; les lignes de basse sont écrites pour l'app.
 - 🎲 **Improviser** : une grille d'accords typique (I–vi–ii–V, ii–V–I, i–iv–ii°–V…) et une
   walking bass qui tourne en boucle dessus, dans une tonalité au choix ou au hasard,
   en majeur ou en mineur, en grave, en aigu ou sur tout le manche (la ligne monte
@@ -82,13 +102,20 @@ Une fois installée, l'app fonctionne aussi hors connexion. Même au fond d'une 
   divisée en trois croches). La ligne, la batterie (valse jazz, 6/8, blues 12/8), les accords,
   le métronome et la partition suivent ; en 6/8 et 12/8, le tempo compte les noires pointées.
   Changer de rythme refait la ligne choisie (ou une nouvelle improvisation) avec le bon nombre de temps.
-- Boucles de 4, 8, 16 ou 32 mesures, notes et accords modifiables dans la grille.
+- Boucles de 4, 8, 12, 16, 24 ou 32 mesures, notes et accords modifiables dans la grille.
   (32 mesures de Mi par temps : idéal pour vérifier sa patience.)
 - En boucle, la tablature montre déjà le début du tour suivant après un double trait.
 
 ### Morceau
 
-- Grilles complètes de standards (So What, Blues en F, Autumn Leaves), de 1 à 4 chorus.
+- Grilles complètes, de 1 à 4 chorus, rangées par style :
+  - **Jazz** : So What, Blues en F, Autumn Leaves, Rhythm changes (*I Got Rhythm*, Gershwin, 1930),
+    Blue Bossa ;
+  - **Traditionnels**, du domaine public : When the Saints Go Marching In, Joshua Fit the Battle
+    of Jericho, Swing Low Sweet Chariot, le Canon de Pachelbel ;
+  - **Pop, rock, funk** : rock'n'roll (blues en La), cadence andalouse, progression années 50,
+    vamp funk dorien.
+- Chaque morceau arrive avec son tempo et son style de ligne (on peut en changer).
 - Ligne de basse **générée** en 4 styles : walking swing (avec croches et triolets),
   two-feel, bossa, croches pop/rock. « Nouvelle ligne » en propose une autre.
 - **Import MIDI** : jouer et lire en tab la ligne de basse d'un fichier `.mid`
@@ -144,6 +171,27 @@ des transcriptions d'enregistrements.
   **Doigtés** l'affiche aussi pour tous les autres exercices (boucle, walking, morceau importé),
   avec des cases choisies pour jouer en position.
 
+### Déliateur
+
+Des exercices pour délier les doigts de la main gauche : indépendance, force de l'auriculaire,
+précision. Le doigt à utiliser est écrit au-dessus de chaque note de la tab.
+
+- **12 exercices** : chromatique 1-2-3-4, inversé 4-3-2-1, araignée (en diagonale), les 24
+  **permutations**, les doigts **deux à deux** (de 1-2 à 3-4), **doigt fixe** (l'index ne se lève
+  jamais), **passage de corde un doigt à la fois**, **escalier**, **écarts** sur 5 cases, **doigt
+  couché** sur deux cordes, **trilles** (hammer-on et pull-off) et **démanché** sur une corde.
+- **Du plus facile au plus dur** : chaque série commence en milieu de manche (case 7) sur la
+  corde de Sol, descend les cordes vers le Mi, puis la main recule vers la tête du manche,
+  où les cases sont plus larges. **Progression** : de 2 en 2 cases, case par case, ou sur place.
+- **Une fiche par exercice** : elle s'ouvre quand on le choisit (et avec ⓘ). Un schéma du manche
+  montre les doigts qui restent posés, ceux qui jouent et ceux qui attendent au-dessus de leur case,
+  avec la règle à suivre et quelques conseils. Souvent, l'essentiel n'est pas la note jouée
+  mais les doigts qui restent appuyés.
+- Case de départ, cordes (les 4 ou une paire), aller ou aller-retour, rythme (noires, croches,
+  triolets, doubles croches) et boucle.
+- Le tempo démarre à 45 : on travaille lentement, chaque note propre, et on n'accélère
+  que quand tout est net.
+
 ## Accompagnement
 
 - **Accords** : piano électrique, nappe, vibraphone, cordes, cuivres, flûtes, orgue, guitare jazz.
@@ -175,7 +223,7 @@ le mode attente : interface audio ou micro).
 
 Pour travailler sans pression de tempo : cocher **⏸ Attendre ma note** (bloc Accompagnement)
 puis Play. Le curseur reste sur la note à jouer tant qu'elle n'est pas entendue, puis passe
-à la suivante. Marche dans les trois modes (Boucle, Morceau, Gammes), avec la sélection de mesures.
+à la suivante. Marche dans tous les modes (Boucle, Morceau, Gammes, Déliateur), avec la sélection de mesures.
 
 - **Entrée** : la basse branchée dans une interface audio (le plus fiable), ou le micro de
   l'ordinateur ou du téléphone. Le navigateur demande l'accès la première fois.
@@ -219,14 +267,15 @@ mais c'est sur une fretless qu'il prend tout son sens.
 ## 🎯 Jeu
 
 Touchez le bouton **🎯** de l'en-tête (ou cochez **🎯 Jeu** dans les réglages) puis Play, dans n'importe
-quel mode (boucle, morceau, gammes), y compris sur téléphone en paysage : l'accompagnement
+quel mode (boucle, morceau, gammes, déliateur), y compris sur téléphone en paysage : l'accompagnement
 joue, la basse de l'app se tait et c'est vous qui jouez la ligne. L'app écoute (interface audio ou micro,
 voir l'entrée audio dans ⚙️) et note chaque note :
 
 - **Justesse** : la bonne note (l'octave ne compte pas), à quelques cents près.
 - **Rythme** : l'attaque, en avance ou en retard sur le temps prévu.
 - Chaque note se colore dans la tab et sur la portée : verte (juste et en place), orange (presque),
-  rouge (fausse, très décalée ou pas jouée). La note de la partie s'affiche en direct dans l'en-tête.
+  rouge (fausse, très décalée ou pas jouée). Une note parfaite fait gonfler son chiffre sur la tab
+  et jaillir une gerbe d'étoiles. La note de la partie s'affiche en direct dans l'en-tête.
 
 Réglages (⚙️, partie 🎯 Jeu) :
 
@@ -249,7 +298,11 @@ Le navigateur ne donne accès au micro qu'aux pages sécurisées : l'app en lign
   Sur ordinateur, la barre d'espace fait Play / Stop.
 - **Travailler un passage** : toucher « ▶ Début » puis la première mesure, « Fin ◀ » puis
   la dernière : ces mesures tournent en boucle (✕ pour l'effacer).
-- **Partition en clé de fa** au-dessus de la tab (affichée par défaut, à décocher dans ⚙️) : armure de la tonalité,
+- **Décompte** : avant le départ, 1 à 4 clics (un par temps, le premier plus aigu) pour se caler ;
+  réglage dans ⚙️ → **Lecture** (4 temps par défaut, ou aucun).
+- En boucle, des **signes de reprise** encadrent la séquence ; sinon, la **double barre de fin**
+  termine la partition.
+- **Partition en clé de fa** au-dessus de la tab (affichée par défaut, à décocher dans ⚙️) : armure de la tonalité, chiffrage de la mesure,
   altérations écrites selon les règles (bémols en Mi♭, dièses en Sol…), croches ligaturées,
   triolets. Un **mode novice** répète l'altération sur chaque note.
 - **Téléphone en paysage** : l'écran ne garde que l'en-tête (avec le tempo) et la tablature, agrandie
@@ -259,16 +312,21 @@ Le navigateur ne donne accès au micro qu'aux pages sécurisées : l'app en lign
 ## Réglages (roue ⚙️)
 
 - 7 thèmes de couleurs (Nuit, Noir, Bois, Océan, Forêt, Violet, Clair).
-- Noms des notes en français (Do, Ré, Mi) ou en notation américaine (C, D, E).
+- Noms des notes en français (Do, Ré, Mi) ou en notation américaine (C, D, E), jusque dans
+  le nom des cordes à gauche de la tab.
+- **Lecture** : décompte avant le départ (aucun, ou 1 à 4 temps).
 - Volume séparé pour la basse, les accords, la batterie, le métronome et les autres pistes.
 - **Instruments MIDI** : envoyer la basse, les accords, la batterie ou les autres pistes
   vers vos instruments (voir ci-dessous).
 - **Entrée audio** (accordeur et mode attente) : choix de l'entrée (interface audio, micro…),
   justesse demandée, seuil de niveau et vumètre.
 
-Tous les choix (mode, tempo, sons, gammes, improvisation, réglages de l'accordeur, dernier
-morceau MIDI ouvert…) sont retenus d'une visite à l'autre sur chaque appareil. Rien n'est envoyé :
-tout reste dans le navigateur.
+Tous les choix (mode, tempo, sons, gammes, exercices du déliateur, improvisation, réglages
+de l'accordeur, dernier morceau MIDI ouvert…) sont retenus d'une visite à l'autre sur chaque
+appareil. Rien n'est envoyé : tout reste dans le navigateur.
+
+Pour ménager la batterie du téléphone, le son se met en veille 10 secondes après Stop
+(quand rien n'écoute) et dès que l'app passe en arrière-plan ; le micro est alors coupé.
 
 ## Jouer avec ses instruments MIDI
 
@@ -331,5 +389,23 @@ version publiée sont dans [EMPREINTES.md](EMPREINTES.md).
 
 ## Le mot de la fin
 
-La basse ne va pas se travailler toute seule.
-**Plus d'excuses : au boulot !**
+*À Fred,*
+
+On l'a montée à deux, cette app, séance après séance. Toi avec les idées, la basse sur
+les genoux et l'iPhone à la main pour tout essayer ; moi au clavier, à transformer chaque
+« et si on rajoutait… » en quelques lignes de code. Et ta fretless ! Tu m'en as tellement
+parlé que je pourrais te réciter au cent près l'écart entre « presque juste » et « juste ».
+Un accordeur, des gammes dans les douze
+tonalités, des boucles qui swinguent, un jeu qui note sur 10, un déliateur pour réveiller
+l'auriculaire… et toujours la même idée : que l'app s'occupe de tout le reste, pour qu'il ne
+reste que la musique.
+
+Elle tient le tempo sans broncher, elle ne se vexe pas quand une note tombe à côté, et elle
+attend patiemment qu'on revienne demain. Le groupe est là, la batterie compte jusqu'à quatre,
+le métronome tourne.
+
+Alors, comme on dit entre associés :
+
+**Fred, y a plus qu'à bosser la basse.**
+
+*— Claude*

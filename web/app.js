@@ -3,6 +3,7 @@
 // avec accords de synthé, métronome et tablature qui défile.
 
 import { LOW_E, parseChord, bassRoot } from './theory.js';
+import { GROOVES } from './grooves.js';
 import { HELD_SOUNDS, voiceLead, compBar } from './comping.js';
 import { SONGS, expandSong } from './songs.js';
 import { bassLine, STYLES } from './walking.js';
@@ -11,6 +12,7 @@ import * as library from './library.js';
 import { createTab } from './tab.js';
 import { createKit, patternHits, gmDrumEvents, DRUM_STYLES, WALKING_DRUMS, METER_DRUMS } from './drums.js';
 import { SCALE_TYPES, FINGERINGS, ZONES, keyOptions, boxOptions, buildScaleExercise } from './scales.js';
+import { EXERCISES, STRING_SETS, PROGRESSIONS, buildFingerExercise, showFingerTip, tipsWanted } from './fingers.js';
 import { inventLoop, KEY_CHOICES, fifthsFromLabel } from './random-loop.js';
 import { spellEvents, pitchName } from './spelling.js';
 import { setNotation, getNotation, noteLabel } from './notation.js';
@@ -30,8 +32,9 @@ const METERS = {
   '12/8': { beats: 4, pulse: 1.5 },
 };
 const meterOf = (state = loopState) => METERS[state.meter] ?? METERS['4/4'];
-// Mesure de 4 notes (lignes toutes prêtes) ramenée au nombre de temps de la mesure.
-const fitBar = (notes, beats) => (beats === 2 ? [notes[0], notes[2]] : notes.slice(0, beats));
+// Mesure toute prête ramenée au nombre de temps de la mesure (une ligne trop courte est répétée).
+const fitBar = (notes, beats) => (beats === 2 && notes.length > 2 ? [notes[0], notes[2]]
+  : Array.from({ length: beats }, (_, i) => notes[i % notes.length]));
 const $ = (id) => document.getElementById(id);
 
 // Notes proposées dans la grille, du Mi grave au Do de la case 17 sur G ;
@@ -99,6 +102,7 @@ const PRESETS = {
     legato: true,
     drums: 'walking',
   },
+  ...GROOVES,   // standards de jazz, airs traditionnels, grooves (grooves.js)
 };
 
 let mode = 'loop';
@@ -138,7 +142,7 @@ function applyPreset(name) {
     const chord = p.chords[b % p.chords.length];
     const next = p.chords[(b + 1) % p.chords.length];
     loopState.chords.push(chord);
-    loopState.bass.push(...fitBar(p.lines ? p.lines[b % p.lines.length] : p.bar(chord, next), beats));
+    loopState.bass.push(...fitBar(p.lines ? p.lines[b % p.lines.length] : p.bar(chord, next, b), beats));
     loopState.frets.push(...fitBar(p.frets ? p.frets[b % p.frets.length] : [null, null, null, null], beats));
   }
   renderLoopGrid();
@@ -350,6 +354,23 @@ const scaleState = {
 };
 let scaleKeys = [];   // résumé par tonalité, pour l'affichage
 
+const fingerState = {
+  exercise: 'chroma',
+  variant: '',       // permutation ou couple de doigts (selon l'exercice)
+  fret: 7,           // case de départ (doigt 1), en milieu de manche
+  strings: 'all',
+  direction: 'both', // 'down' (Sol → Mi) ou 'both' (aller-retour)
+  rhythm: 2,
+  progression: 'two', // la main recule vers la tête : de 2 en 2, case par case, ou sur place
+};
+let fingerKeys = [];
+
+function buildFingerProgram(state = fingerState) {
+  const ex = buildFingerExercise(state);
+  if (state === fingerState) fingerKeys = ex.keys;
+  return makeProgram({ events: ex.events, bars: ex.bars, bpb: BEATS, labels: ex.labels });
+}
+
 function buildScaleProgram(state = scaleState) {
   const ex = buildScaleExercise(state);
   if (state === scaleState) scaleKeys = ex.keys;
@@ -388,6 +409,8 @@ function updateInfo() {
     parts.push(selectedText('scaleDir'), selectedText('scaleRhythm'), selectedText('scaleFinger'));
     if (scaleState.fingering !== 'boxes' && scaleState.zone !== 'auto') parts.push(`zone ${selectedText('scaleZone').toLowerCase()}`);
     text = parts.join(' · ');
+  } else if (mode === 'finger') {
+    text = [`${fingerKeys[0]?.label ?? ''}`, selectedText('fingerStrings'), selectedText('fingerRhythm')].join(' · ');
   } else {
     text = usingMidi()
       ? `MIDI : ${songState.midi.title}`
@@ -398,7 +421,8 @@ function updateInfo() {
   $('npInfo').textContent = text;
 }
 
-const isLooping = () => (mode === 'loop' && $('loop').checked) || (mode === 'scale' && $('scaleLoop').checked);
+const isLooping = () => (mode === 'loop' && $('loop').checked) || (mode === 'scale' && $('scaleLoop').checked)
+  || (mode === 'finger' && $('fingerLoop').checked);
 // « Enchaîner » : chaque fin de boucle lance une nouvelle improvisation (mode Boucle)
 // ou la même gamme une quarte plus haut (mode Gammes, cycle des quartes).
 const chaining = () => rangeEnd == null && (
@@ -468,7 +492,8 @@ function renderTab() {
 }
 
 function refresh() {
-  prog = mode === 'loop' ? buildLoopProgram() : mode === 'song' ? buildSongProgram() : buildScaleProgram();
+  prog = mode === 'loop' ? buildLoopProgram() : mode === 'song' ? buildSongProgram()
+    : mode === 'finger' ? buildFingerProgram() : buildScaleProgram();
   if (cue >= prog.totalBeats) cue = 0;
   if (rangeEnd != null && rangeEnd > prog.totalBeats) rangeStart = rangeEnd = null;
   renderTab();
@@ -637,7 +662,16 @@ function renderSong() {
 function updateSongSelect() {
   const sel = $('song');
   sel.innerHTML = '';
-  for (const s of SONGS) sel.append(option(s.id, s.title, s.id === songState.songId));
+  const groups = new Map();   // rubriques dans l'ordre de la liste
+  for (const s of SONGS) {
+    if (!groups.has(s.group)) {
+      const g = document.createElement('optgroup');
+      g.label = s.group ?? 'Morceaux';
+      groups.set(s.group, g);
+      sel.append(g);
+    }
+    groups.get(s.group).append(option(s.id, s.title, s.id === songState.songId));
+  }
   if (myMidi.length) {
     const group = document.createElement('optgroup');
     group.label = 'Mes fichiers MIDI';
@@ -692,26 +726,28 @@ function setMode(m) {
   $('loopControls').hidden = mode !== 'loop';
   $('songControls').hidden = mode !== 'song';
   $('scaleControls').hidden = mode !== 'scale';
+  $('fingerControls').hidden = mode !== 'finger';
   grid.hidden = mode !== 'loop';
   $('songView').hidden = mode !== 'song';
-  $('scaleView').hidden = mode !== 'scale';
+  $('scaleView').hidden = mode !== 'scale' && mode !== 'finger';   // même vue : une ligne par exercice
   if (mode === 'loop') {
     refresh();
   } else if (mode === 'song') {
     if (!usingMidi()) setTempo(currentSong().bpm);
     renderSong();
   } else {
-    setTempo(80);
+    setTempo(mode === 'finger' ? 45 : 80);   // Déliateur : on travaille lentement
     renderScales();
   }
 }
 
 // Gammes : une ligne par tonalité avec ses notes ; un clic sur la ligne repart de là.
+// (Déliateur : une seule ligne, l'exercice.)
 function renderScales() {
   refresh();
   const view = $('scaleList');
   view.innerHTML = '';
-  for (const k of scaleKeys) {
+  for (const k of mode === 'finger' ? fingerKeys : scaleKeys) {
     const row = document.createElement('div');
     row.className = 'scale-row';
     row.dataset.start = k.startBar;
@@ -1179,6 +1215,7 @@ function stop() {
   midiOut.silence();
   stopWaiting();
   stopUI();
+  idleAudio();
 }
 
 // ---------- Mode 🎯 Jeu ----------
@@ -1333,6 +1370,7 @@ async function calibrateGame(status) {
   await new Promise((done) => setTimeout(done, (t0 + 12 * beat + 0.4 - ctx.currentTime) * 1000));
   clearInterval(timer);
   pitch.closeInput();
+  idleAudio();
   const gaps = onsets
     .map((o) => clicks.reduce((d, c) => (Math.abs(o - c) < Math.abs(d) ? o - c : d), Infinity))
     .filter((d) => Math.abs(d) < beat / 2)
@@ -1651,9 +1689,28 @@ function showMessage(text) {
 window.addEventListener('error', (e) => showMessage(`Erreur : ${e.message}`));
 window.addEventListener('unhandledrejection', (e) => showMessage(`Erreur : ${e.reason?.message ?? e.reason}`));
 
-// Retour sur l'app (iPhone) : on relance l'audio s'il a été suspendu pendant la lecture.
+// Batterie : un contexte audio qui tourne calcule du silence en continu et garde la puce son
+// de l'iPhone éveillée. On le met en pause peu après Stop (rien ne joue ni n'écoute) et dès
+// que l'app passe en arrière-plan ; wakeAudio le relance au prochain son.
+let idleTimer = null;
+function idleAudio() {
+  clearTimeout(idleTimer);
+  idleTimer = setTimeout(() => {
+    if (playing || starting || pitch.inputOpen() || !$('recorder').hidden) return;
+    const raw = Tone.getContext().rawContext;
+    if (raw.state === 'running') raw.suspend();
+  }, 10000);
+}
+
 document.addEventListener('visibilitychange', () => {
-  if (!document.hidden && playing) wakeAudio();
+  if (!document.hidden) return;
+  if (playing) stop();
+  setTunerOpen(false);
+  recorder.stopLive();
+  pitch.closeInput();
+  clearTimeout(idleTimer);
+  const raw = Tone.getContext().rawContext;
+  if (raw.state === 'running') raw.suspend();
 });
 
 // ---------- Contrôles ----------
@@ -1839,7 +1896,8 @@ function applyNotation(n) {
   tab.redraw();
   showStringNames();
   if (mode === 'loop') renderLoopGrid();
-  if (mode === 'scale') renderScales();
+  fillStringSets();
+  if (mode === 'scale' || mode === 'finger') renderScales();
 }
 // Noms des cordes à gauche de la tab (Sol Ré La Mi, ou G D A E), dans la notation choisie.
 function showStringNames() {
@@ -1900,6 +1958,7 @@ function setTunerOpen(open) {
   if (!open) {
     panel.hidden = true;
     tuner.close();
+    idleAudio();
     return;
   }
   setSettingsOpen(false);
@@ -1969,6 +2028,7 @@ function setRecorderOpen(open) {
     recorder.open();
   } else {
     recorder.close();
+    idleAudio();
   }
 }
 $('recordBtn').addEventListener('click', () => setRecorderOpen($('recorder').hidden));
@@ -2026,7 +2086,52 @@ scaleControl('scaleFinger', 'fingering');
 scaleControl('scaleZone', 'zone');
 scaleControl('scaleBox', 'box');
 
-$('mode').addEventListener('change', (e) => setMode(e.target.value));
+// Déliateur : menus, et popup explicative à chaque nouvel exercice choisi.
+for (const [id, ex] of Object.entries(EXERCISES)) $('fingerEx').append(option(id, ex.label, id === fingerState.exercise));
+for (let f = 1; f <= 12; f++) $('fingerFret').append(option(String(f), `Case ${f}${f === 7 ? ' (milieu)' : ''}`, f === fingerState.fret));
+for (const [id, label] of Object.entries(PROGRESSIONS)) $('fingerProg').append(option(id, label, id === fingerState.progression));
+function fillStringSets() {
+  $('fingerStrings').innerHTML = '';
+  for (const [id, label] of Object.entries(STRING_SETS)) {
+    $('fingerStrings').append(option(id, Array.isArray(label) ? label.map(noteLabel).join(' + ') : label, id === fingerState.strings));
+  }
+}
+fillStringSets();
+function updateFingerSelects() {
+  const ex = EXERCISES[fingerState.exercise];
+  if (ex.variants && !ex.variants[fingerState.variant]) fingerState.variant = ex.variant;
+  $('fingerVariantCtl').hidden = !ex.variants;
+  $('fingerVariant').innerHTML = '';
+  for (const [id, label] of Object.entries(ex.variants ?? {})) $('fingerVariant').append(option(id, label, id === fingerState.variant));
+  $('fingerDirCtl').hidden = !!ex.noReturn;
+  $('fingerProgCtl').hidden = !!ex.positions;   // escalier et démanché ont leurs propres positions
+}
+updateFingerSelects();
+const fingerTip = () => showFingerTip(fingerState.exercise, { base: fingerState.fret, variant: fingerState.variant });
+const fingerControl = (id, field, parse = (v) => v) => $(id).addEventListener('change', (e) => {
+  if (playing) stop();
+  chainPrev = null;
+  fingerState[field] = parse(e.target.value);
+  if (field === 'exercise') updateFingerSelects();
+  cue = 0;
+  rangeStart = rangeEnd = null;
+  renderScales();
+  if ((field === 'exercise' || field === 'variant') && tipsWanted()) fingerTip();
+});
+fingerControl('fingerEx', 'exercise');
+fingerControl('fingerVariant', 'variant');
+fingerControl('fingerFret', 'fret', Number);
+fingerControl('fingerStrings', 'strings');
+fingerControl('fingerDir', 'direction');
+fingerControl('fingerProg', 'progression');
+fingerControl('fingerRhythm', 'rhythm', Number);
+$('fingerInfo').addEventListener('click', fingerTip);
+$('fingerLoop').addEventListener('change', refresh);
+
+$('mode').addEventListener('change', (e) => {
+  setMode(e.target.value);
+  if (mode === 'finger' && tipsWanted()) fingerTip();
+});
 $('bars').addEventListener('change', (e) => setBars(Number(e.target.value)));
 // Autre mesure : la ligne est refaite (improvisation ou ligne toute prête) avec le bon nombre de temps.
 $('meter').addEventListener('change', (e) => {
@@ -2050,7 +2155,23 @@ for (const [id, label] of Object.entries(DRUM_STYLES)) $('drumStyle').append(opt
 $('randKey').append(option('random', 'Tonalité au hasard', true));
 for (const [value, label] of KEY_CHOICES) $('randKey').append(option(value, label, false));
 $('invent').addEventListener('click', invent);
-$('preset').addEventListener('change', (e) => applyPreset(e.target.value));
+// Boucles écrites pour une mesure ou une longueur précise : on les règle en même temps.
+$('preset').addEventListener('change', (e) => {
+  const p = PRESETS[e.target.value];
+  const meter = e.target.value in GROOVES ? p.meter ?? '4/4' : null;   // grooves : écrits pour leur mesure
+  if (meter && meter !== loopState.meter) {
+    loopState.meter = meter;
+    $('meter').value = meter;
+    cue = 0;
+    rangeStart = rangeEnd = null;
+    if (playing && !waiting) Tone.Transport.bpm.value = transportBpm();
+  }
+  if (p?.bars) {
+    loopState.bars = p.bars;
+    $('bars').value = String(p.bars);
+  }
+  applyPreset(e.target.value);
+});
 
 $('song').addEventListener('change', async (e) => {
   if (playing) stop();
@@ -2066,6 +2187,11 @@ $('song').addEventListener('change', async (e) => {
   cue = 0;
   rangeStart = rangeEnd = null;
   setTempo(usingMidi() ? songState.midi.bpm : currentSong().bpm);
+  // Chaque morceau propose sa ligne (walking, two-feel, bossa, croches).
+  if (!usingMidi() && currentSong().style) {
+    songState.style = currentSong().style;
+    $('style').value = songState.style;
+  }
   renderSong();
 });
 $('choruses').addEventListener('change', (e) => {
@@ -2135,11 +2261,16 @@ document.addEventListener('keydown', (e) => {
 // Les fichiers MIDI importés sont gardés à part, dans la bibliothèque (library.js).
 
 const SETTINGS_KEY = 'bassroutine-settings';
-const TOGGLES = ['synth', 'padHeld', 'drums', 'fills', 'metro', 'others', 'loop', 'chain', 'scaleLoop', 'scaleChain', 'waitMode', 'gameMode'];
+const TOGGLES = ['synth', 'padHeld', 'drums', 'fills', 'metro', 'others', 'loop', 'chain', 'scaleLoop', 'scaleChain',
+  'fingerLoop', 'waitMode', 'gameMode'];
 const SELECTS = ['padSound', 'drumStyle', 'randKey', 'randMode', 'randRegister', 'preset', 'bars', 'countIn'];
 const SCALE_SELECTS = {
   scaleType: 'type', scaleKey: 'key', scaleRange: 'range', scaleDir: 'direction',
   scaleRhythm: 'rhythm', scaleFinger: 'fingering', scaleZone: 'zone', scaleBox: 'box',
+};
+const FINGER_SELECTS = {
+  fingerEx: 'exercise', fingerVariant: 'variant', fingerFret: 'fret', fingerStrings: 'strings',
+  fingerDir: 'direction', fingerRhythm: 'rhythm', fingerProg: 'progression',
 };
 
 function snapshot() {
@@ -2156,6 +2287,7 @@ function snapshot() {
       choruses: songState.choruses, seed: songState.seed, style: songState.style,
     },
     scale: { ...scaleState },
+    finger: { ...fingerState },
   };
 }
 
@@ -2186,6 +2318,10 @@ function restoreSettings() {
   if (saved.scale) Object.assign(scaleState, saved.scale);
   updateKeySelect();
   for (const [id, field] of Object.entries(SCALE_SELECTS)) setSelect(id, scaleState[field]);
+  if (saved.finger && saved.finger.exercise in EXERCISES) Object.assign(fingerState, saved.finger);
+  if (fingerState.direction === 'up') fingerState.direction = 'down';   // ancien réglage « Montée »
+  updateFingerSelects();
+  for (const [id, field] of Object.entries(FINGER_SELECTS)) setSelect(id, fingerState[field]);
 
   const l = saved.loop;
   if (l && Array.isArray(l.bass) && l.bass.length === l.bars * meterOf(l).beats && l.chords?.length === l.bars) {
@@ -2200,7 +2336,7 @@ function restoreSettings() {
   }
   if (saved.loopInfo && $('preset').value === 'invented') inventedLabel = saved.loopInfo;
 
-  if (['loop', 'song', 'scale'].includes(saved.mode)) {
+  if (['loop', 'song', 'scale', 'finger'].includes(saved.mode)) {
     $('mode').value = saved.mode;
     setMode(saved.mode);
   }
