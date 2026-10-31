@@ -327,6 +327,28 @@ export function createTab(container, { onSeek, labels } = {}) {
       node.classList.remove('g-hit', 'g-near', 'g-miss');
       node.classList.add(`g-${cls}`);
     }
+    if (cls === 'hit') cheer(notes[i][0]);
+  }
+  // Note parfaite : le chiffre grossit un instant et une gerbe d'étoiles jaillit autour.
+  const BURST = [[-26, -30], [0, -40], [26, -30], [-20, 16], [22, 14]];   // directions (px)
+  function cheer(el) {
+    el.classList.remove('g-pop');
+    void el.offsetWidth;   // relance l'animation si la note vient déjà de l'avoir
+    el.classList.add('g-pop');
+    const burst = document.createElement('span');
+    burst.className = 'g-burst';
+    burst.style.left = `${parseFloat(el.style.left) + el.offsetWidth / 2}px`;
+    burst.style.top = el.style.top;
+    BURST.forEach(([dx, dy], k) => {
+      const star = document.createElement('i');
+      star.textContent = '✦';
+      star.style.setProperty('--dx', `${dx}px`);
+      star.style.setProperty('--dy', `${dy}px`);
+      star.style.animationDelay = `${k * 30}ms`;
+      burst.append(star);
+    });
+    track.append(burst);
+    setTimeout(() => burst.remove(), 1300);
   }
   function clearMarks() {
     track?.querySelectorAll('.g-hit, .g-near, .g-miss').forEach((n) => n.classList.remove('g-hit', 'g-near', 'g-miss'));

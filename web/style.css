@@ -358,6 +358,21 @@ button.rewind svg { width: 18px; height: 18px; }
   line-height: 18px;
 }
 .tab-note.playing { background: var(--accent); color: var(--on-accent); }
+/* Mode Jeu : note parfaite (le chiffre gonfle, une étincelle s'envole). */
+.tab-note.g-pop { animation: g-pop 0.45s ease-out; }
+.g-burst { position: absolute; z-index: 6; width: 0; height: 0; pointer-events: none; }
+.g-burst i {
+  position: absolute; left: -7px; top: -10px; font-style: normal; font-size: 17px; line-height: 20px;
+  color: #ffd75e; text-shadow: 0 0 6px rgba(255, 215, 94, 0.9), 0 0 2px #fff;
+  opacity: 0; animation: g-star 1.1s ease-out forwards;
+}
+@keyframes g-pop { 40% { transform: translateY(-50%) scale(1.45); box-shadow: 0 0 0 3px rgba(63, 185, 80, 0.45); } }
+@keyframes g-star {
+  0% { transform: translate(0, 0) scale(0.4) rotate(0); opacity: 1; }
+  60% { opacity: 1; }
+  100% { transform: translate(var(--dx), var(--dy)) scale(1.2) rotate(140deg); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .tab-note.g-pop { animation: none; } .g-burst { display: none; } }
 
 .tab-name {
   position: absolute;
