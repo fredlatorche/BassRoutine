@@ -326,6 +326,7 @@ button.rewind svg { width: 18px; height: 18px; }
 /* Cordes à 30, 54, 78 et 102 px du haut (décalées sous la portée si elle est affichée). */
 .tab-labels { position: relative; width: 20px; height: calc(140px + var(--off, 0px)); color: var(--muted); flex-shrink: 0; }
 .tab-labels.with-staff { width: 36px; }
+.tab-labels.fr { width: 30px; }   /* « Sol », « Ré »… plus larges que G, D */
 .tab-labels span { position: absolute; left: 0; transform: translateY(-50%); }
 .tab-labels span:nth-of-type(1) { top: calc(30px + var(--off, 0px)); }
 .tab-labels span:nth-of-type(2) { top: calc(54px + var(--off, 0px)); }

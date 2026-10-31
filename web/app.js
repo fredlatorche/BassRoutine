@@ -13,7 +13,7 @@ import { createKit, patternHits, gmDrumEvents, DRUM_STYLES, WALKING_DRUMS, METER
 import { SCALE_TYPES, FINGERINGS, ZONES, keyOptions, boxOptions, buildScaleExercise } from './scales.js';
 import { inventLoop, KEY_CHOICES, fifthsFromLabel } from './random-loop.js';
 import { spellEvents, pitchName } from './spelling.js';
-import { setNotation, noteLabel } from './notation.js';
+import { setNotation, getNotation, noteLabel } from './notation.js';
 import * as midiOut from './midi-out.js';
 import * as pitch from './pitch.js';
 import { createTuner } from './tuner.js';
@@ -1814,12 +1814,20 @@ function applyNotation(n) {
   $('notation').value = n;
   try { localStorage.setItem(NOTATION_KEY, n); } catch { /* stockage indisponible */ }
   tab.redraw();
+  showStringNames();
   if (mode === 'loop') renderLoopGrid();
   if (mode === 'scale') renderScales();
+}
+// Noms des cordes à gauche de la tab (Sol Ré La Mi, ou G D A E), dans la notation choisie.
+function showStringNames() {
+  const labels = document.querySelector('.tab-labels');
+  labels.querySelectorAll(':scope > span').forEach((span, i) => { span.textContent = noteLabel(['Sol', 'Ré', 'La', 'Mi'][i]); });
+  labels.classList.toggle('fr', getNotation() === 'fr');
 }
 $('notation').addEventListener('change', (e) => applyNotation(e.target.value));
 // Au chargement on règle seulement la notation : les premiers affichages viennent après.
 try { const n = localStorage.getItem(NOTATION_KEY); if (n) { setNotation(n); $('notation').value = n; } } catch { /* stockage indisponible */ }
+showStringNames();
 
 // Thème de couleurs (le script dans <head> l'applique déjà au chargement).
 const THEME_KEY = 'bassroutine-theme';
