@@ -9,6 +9,9 @@ et s'installe comme une application.
 En résumé : un groupe entier qui joue avec vous, ne se plaint jamais du tempo,
 ne rate aucune répétition et ne vous demande pas de porter l'ampli.
 
+**Nouveau** : 🎯 **mode Jeu**, l'app note votre justesse et votre rythme sur 10 (voir [Jeu](#-jeu)),
+et le choix du **rythme** (4/4, 3/4, 6/8, 12/8) en mode Boucle.
+
 **Version 5.0** :
 
 - 🎲 **Improvisation** (anciennement « ligne inventée ») : le bouton **Improviser** invente une grille
@@ -212,6 +215,36 @@ ni complaisance.
 
 Sur une basse frettée aussi, le mode attente aide à apprendre les notes et les positions,
 mais c'est sur une fretless qu'il prend tout son sens.
+
+## 🎯 Jeu
+
+Touchez le bouton **🎯** de l'en-tête (ou cochez **🎯 Jeu** dans les réglages) puis Play, dans n'importe
+quel mode (boucle, morceau, gammes), y compris sur téléphone en paysage : l'accompagnement
+joue, la basse de l'app se tait et c'est vous qui jouez la ligne. L'app écoute (interface audio ou micro,
+voir l'entrée audio dans ⚙️) et note chaque note :
+
+- **Justesse** : la bonne note (l'octave ne compte pas), à quelques cents près.
+- **Rythme** : l'attaque, en avance ou en retard sur le temps prévu.
+- Chaque note se colore dans la tab et sur la portée : verte (juste et en place), orange (presque),
+  rouge (fausse, très décalée ou pas jouée). La note de la partie s'affiche en direct dans l'en-tête.
+- **À la fin, une note sur 10**, avec une petite animation et un mot pour rire, encourager ou féliciter
+  (plus de 180 phrases, selon la note), des remarques adaptées à la partie (record battu, jeu en retard
+  ou en avance, notes justes mais rythme à revoir, tempo, progrès au fil des tours, séance de nuit…),
+  le détail (notes justes, notes en place, tendance à jouer en avance ou en retard, notes oubliées)
+  et le record de l'exercice. « ↻ Rejouer » relance la même partie.
+
+Réglages (⚙️, partie 🎯 Jeu) :
+
+- **Justesse** : de Large (± 50 cents) à Expert (± 6 cents), ou pas notée (rythme seulement).
+- **Rythme** : de Large (± 100 ms) à Expert (± 15 ms).
+- **Partie (en boucle)** : 1, 2, 4 ou 8 tours, puis le bilan ; ou **sans fin**, avec une note à chaque
+  tour et le bilan de la séance au Stop. Sans boucle, la partie dure l'exercice (ou s'arrête au Stop).
+- **Retard** : entre le son entendu et la note reçue, il y a toujours un petit délai (haut-parleurs,
+  interface audio, réflexe). **Mesurer le retard** : après 4 clics de décompte, jouez une note sur
+  chacun des 8 clics suivants ; l'app le mesure et le retire. Sans cela, tout paraît un peu en retard.
+
+Avec un casque, le micro n'entend pas l'accompagnement : la notation est plus fiable.
+Le navigateur ne donne accès au micro qu'aux pages sécurisées : l'app en ligne (https) ou `localhost`.
 
 ## Tablature et partition
 

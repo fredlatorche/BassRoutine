@@ -18,6 +18,7 @@ import * as midiOut from './midi-out.js';
 import * as pitch from './pitch.js';
 import { createTuner } from './tuner.js';
 import { createRecorder } from './recorder.js';
+import * as game from './game.js';
 
 const BEATS = 4;
 // Mesures du mode Boucle : temps par mesure (une note de la grille par temps) et durée d'un temps
@@ -944,15 +945,20 @@ const makePad = (kind) => (PAD_SOUNDS[kind] ?? PAD_SOUNDS.epiano)(reverb);
 
 // Appelé à chaque temps : joue tous les événements qui tombent dans ce temps.
 function tick(time) {
-  if (rangeEnd != null && step === rangeEnd) step = rangeStart;   // boucle : retour à son début
+  if (rangeEnd != null && step === rangeEnd) {   // boucle : retour à son début
+    step = rangeStart;
+    if (lapDone(time)) return;
+  }
   if (step >= prog.totalBeats) {
     if (!isLooping()) {
+      if (match) match.done = true;
       Tone.Transport.stop(time);
       Tone.Draw.schedule(stopUI, time);
       return;
     }
     step = 0;
     cycle++;
+    if (lapDone(time)) return;
     if (chaining()) {
       const prev = chainNext();
       Tone.Draw.schedule(() => showChain(prev), time);
@@ -966,10 +972,14 @@ function tick(time) {
   const ctx = Tone.getContext().rawContext;
   const toMidi = (track) => midiOut.routedToMidi(track);
 
+  const expected = [];   // mode Jeu : notes à jouer par le bassiste (la basse de l'app se tait)
   for (const e of prog.bassByBeat[s] ?? []) {
-    if (toMidi('bass')) midiOut.playNotes('bass', e.midi, e.dur * beatDur, at(e), e.vel ?? 0.8, ctx);
+    if (match) {
+      if (e.midi != null) expected.push({ time: at(e), midi: e.midi, t: e.t, lap: match.lap, cycle });
+    } else if (toMidi('bass')) midiOut.playNotes('bass', e.midi, e.dur * beatDur, at(e), e.vel ?? 0.8, ctx);
     else bass.triggerAttackRelease(Tone.Frequency(e.midi, 'midi'), e.dur * beatDur, at(e), e.vel ?? 0.8);
   }
+  if (expected.length) match.expected.push(...expected);
   if ($('others').checked) {
     for (const e of prog.otherByBeat[s] ?? []) {
       if (toMidi('other')) midiOut.playNotes('other', e.midi, e.dur * beatDur, at(e), e.vel ?? 0.6, ctx);
@@ -998,6 +1008,7 @@ function tick(time) {
   const c = cycle;
   Tone.Draw.schedule(() => {
     if (!playing) return;   // temps préparé juste avant Stop : on ne l'affiche pas
+    for (const e of expected) e.view = e.t + tabOffset(c);   // place de la note dans la tab affichée
     beatClock = { s, time, cycle: c };
     showBeat(s);
   }, time);
@@ -1074,6 +1085,7 @@ function frame() {
     const copy = tabOffset(beatClock.cycle);
     tab.follow(beatClock.s + frac + copy);
   }
+  if (match) sweepMisses();
   requestAnimationFrame(frame);
 }
 
@@ -1110,12 +1122,13 @@ async function start() {
       await startWaiting();
       return;
     }
-    const ok = await wakeAudio();
+    const ok = await wakeAudio(gameOn());
     if (!ok) {
       showMessage('Le son est bloqué par l\'iPhone : touche Play à nouveau.');
       return;
     }
     if (!bass) initAudio();   // (voir aussi audioReady)
+    if (gameOn() && !(await openGameInput())) return;
     if (Tone.Transport.state !== 'stopped') Tone.Transport.stop();   // transport resté en route : on repart propre
     begin();
   } finally {
@@ -1128,6 +1141,7 @@ function begin() {
   step = cue;
   cycle = 0;
   beatClock = null;
+  if (gameOn()) beginGame();
   Tone.Transport.start('+0.05');
   playing = true;
   setPlayButton(true);
@@ -1144,6 +1158,226 @@ function stop() {
   stopWaiting();
   stopUI();
 }
+
+// ---------- Mode 🎯 Jeu ----------
+// La lecture tourne normalement, la basse de l'app se tait : chaque note attendue est jugée sur la
+// justesse et sur le rythme (attaque entendue par l'entrée audio), puis la partie reçoit une note sur 10.
+
+let match = null;   // partie en cours : { expected, results, lap, lapScores, exercise, cue, done, ending, stopAt }
+const gameOn = () => $('gameMode').checked;
+
+async function openGameInput() {
+  if (!pitch.inputSupported()) {
+    showMessage('Ce navigateur ne donne pas accès au micro ni à l\'interface audio.');
+    return false;
+  }
+  try {
+    await pitch.openInput(Tone.getContext().rawContext, { onNote: gameHeard });
+  } catch (err) {
+    showMessage(`Pas d'accès au micro / à l'interface audio (${err.name}). Autorise-le dans le navigateur.`);
+    return false;
+  }
+  renderInputPanel();
+  return true;
+}
+
+function beginGame() {
+  match = { expected: [], results: [], lap: 0, lapScores: [], exercise: $('loopInfo').textContent || mode, cue };
+  tab.clearMarks();
+  showLiveScore();
+}
+
+function showLiveScore() {
+  $('gameLive').hidden = !match;
+  if (match) $('gameLive').textContent = `🎯 ${match.results.length ? game.formatScore(game.score10(match.results)) : '–'}`;
+}
+
+// Fin d'un tour de boucle (à l'heure audio time) ; vrai si la partie est finie (nombre de tours atteint).
+function lapDone(time) {
+  if (!match) return false;
+  const lap = match.lap++;
+  // Note du tour une fois ses dernières notes jugées.
+  const wait = time - Tone.context.currentTime + game.matchWindow() + game.gameSettings().offset / 1000 + 0.2;
+  const m = match;
+  setTimeout(() => {
+    const res = m.results.filter((r) => r.lap === lap);
+    if (!res.length) return;
+    m.lapScores[lap] = game.score10(res);
+    if (Number(game.gameSettings().tours) !== 1) showMessage(`🎯 Tour ${lap + 1} : ${game.formatScore(m.lapScores[lap])} / 10`);
+  }, Math.max(0, wait * 1000));
+  const tours = Number(game.gameSettings().tours);
+  if (!tours || match.lap < tours) {
+    Tone.Draw.schedule(() => tab.clearMarks(), time);   // nouveau tour : couleurs effacées (le dernier les garde)
+    return false;
+  }
+  match.done = true;
+  match.stopAt = time;
+  Tone.Transport.stop(time);
+  Tone.Draw.schedule(stopUI, time);
+  return true;
+}
+
+// Note jouée : rattachée à la note attendue la plus proche dans le temps, jugée et colorée dans la tab.
+function gameHeard(note) {
+  if (!match || !note.attack) return;
+  const time = note.onset - game.gameSettings().offset / 1000;
+  const win = game.matchWindow();
+  let best = null;
+  for (const e of match.expected) {
+    if (e.judged || Math.abs(e.time - time) > win) continue;
+    if (!best || Math.abs(e.time - time) < Math.abs(best.time - time)) best = e;
+  }
+  if (!best) return;   // note en trop : ni comptée ni pénalisée
+  best.judged = true;
+  const r = game.judge(best, { time, pitch: note.pitch });
+  match.results.push({ ...r, lap: best.lap });
+  if (best.view != null) tab.mark(best.view, r.cls);
+  showLiveScore();
+}
+
+// Notes attendues dont l'heure est passée sans rien entendre : ratées. until : heure de fin de partie.
+function sweepMisses(until = null) {
+  const late = game.matchWindow() + game.gameSettings().offset / 1000 + 0.1;
+  const now = Tone.context.currentTime;
+  for (const e of match.expected) {
+    if (e.judged) continue;
+    if (until != null ? e.time < until : e.time + late < now) {
+      e.judged = true;
+      match.results.push({ ...game.MISSED, lap: e.lap });
+      if (e.view != null) tab.mark(e.view, 'miss');
+    } else if (until != null) e.judged = true;   // pas encore jouée à l'arrêt : ignorée
+  }
+  if (match.expected.length > 200) match.expected = match.expected.filter((e) => !e.judged);
+  showLiveScore();
+}
+
+// Fin de partie (dernier tour, fin de l'exercice ou Stop) : on laisse le temps aux dernières notes
+// d'être entendues, puis le bilan s'affiche.
+function endGame() {
+  const m = match;
+  m.ending = true;
+  m.stopAt ??= Tone.context.currentTime;
+  const endless = !m.done && isLooping() && Number(game.gameSettings().tours) === 0;
+  const title = m.done ? 'Fin de la partie' : endless ? 'Bilan de la séance' : 'Partie arrêtée';
+  setTimeout(() => {
+    sweepMisses(m.stopAt);
+    if (match === m) {
+      match = null;
+      pitch.closeInput();
+    }
+    showLiveScore();
+    if (m.results.length < 3) {
+      showMessage('Partie trop courte pour être notée.');
+      return;
+    }
+    const summary = game.summarize(m.results);
+    const record = game.saveRecord(m.exercise, summary.score);
+    game.showResult(summary, {
+      title,
+      record,
+      tours: m.lapScores.filter((x) => x != null),
+      stopped: !m.done,
+      tempo: Number($('tempo').value),
+      meter: prog.meter,
+      onReplay: () => { cue = m.cue; showRange(); start(); },
+    });
+  }, (game.matchWindow() + game.gameSettings().offset / 1000 + 0.25) * 1000);
+}
+
+// Retard de l'écoute : 4 clics de décompte puis 8 clics où l'on joue une note ; on garde l'écart médian.
+async function calibrateGame(status) {
+  if (playing) stop();
+  if (!(await wakeAudio(true))) { status.textContent = 'Le son est bloqué : réessaie.'; return; }
+  if (!bass) initAudio();
+  const ctx = Tone.getContext().rawContext;
+  const onsets = [];
+  try {
+    await pitch.openInput(ctx, { onNote: (n) => { if (n.attack) onsets.push(n.onset); } });
+  } catch (err) {
+    status.textContent = `Pas d'accès au micro / à l'interface audio (${err.name}).`;
+    return;
+  }
+  const beat = 60 / 90, t0 = ctx.currentTime + 0.3, clicks = [];
+  for (let i = 0; i < 12; i++) {
+    const t = t0 + i * beat;
+    click.triggerAttackRelease(i % 4 === 0 ? 'C6' : 'G5', '32n', t, i % 4 === 0 ? 0.8 : 0.5);
+    if (i >= 4) clicks.push(t);
+  }
+  const timer = setInterval(() => {
+    const i = Math.floor((ctx.currentTime - t0) / beat);
+    status.textContent = i < 4 ? `${4 - Math.max(0, i)}…` : `Joue une note sur chaque clic (${Math.max(0, 12 - i)})`;
+  }, 50);
+  await new Promise((done) => setTimeout(done, (t0 + 12 * beat + 0.4 - ctx.currentTime) * 1000));
+  clearInterval(timer);
+  pitch.closeInput();
+  const gaps = onsets
+    .map((o) => clicks.reduce((d, c) => (Math.abs(o - c) < Math.abs(d) ? o - c : d), Infinity))
+    .filter((d) => Math.abs(d) < beat / 2)
+    .sort((a, b) => a - b);
+  if (gaps.length < 4) {
+    status.textContent = 'Pas assez de notes entendues : recommence en jouant sur chaque clic.';
+    return;
+  }
+  const ms = Math.max(-100, Math.min(300, Math.round((gaps[gaps.length >> 1] * 1000) / 5) * 5));
+  game.setGame({ offset: ms });
+  renderGamePanel();
+  $('gameStatus').textContent = `Retard mesuré : ${ms} ms`;
+}
+
+function renderGamePanel() {
+  const panel = $('gamePanel');
+  panel.replaceChildren();
+  const settings = game.gameSettings();
+  const note = (text) => {
+    const p = document.createElement('p');
+    p.className = 'midi-note';
+    p.textContent = text;
+    panel.append(p);
+  };
+  note('Coche « 🎯 Jeu » puis Play : la basse de l\'app se tait, c\'est toi qui joues la ligne. Chaque note est notée '
+    + 'sur la justesse et le rythme, et la partie reçoit une note sur 10. Entrée audio : celle réglée juste au-dessus. '
+    + 'Avec un casque, le micro n\'entend pas l\'accompagnement : la note est plus fiable.');
+  const row = (label, ...inputs) => {
+    const line = document.createElement('label');
+    line.className = 'midi-row';
+    const text = document.createElement('span');
+    text.textContent = label;
+    line.append(text, ...inputs);
+    panel.append(line);
+  };
+  const select = (choices, value, onChange) => {
+    const sel = document.createElement('select');
+    for (const [v, label] of Object.entries(choices)) sel.append(new Option(label, v));
+    sel.value = String(value);
+    sel.addEventListener('change', () => onChange(sel.value));
+    return sel;
+  };
+  row('Justesse', select(game.GAME_PITCH, settings.pitch, (v) => game.setGame({ pitch: v })), document.createElement('span'));
+  row('Rythme', select(game.GAME_RHYTHM, settings.rhythm, (v) => game.setGame({ rhythm: Number(v) })), document.createElement('span'));
+  row('Partie (en boucle)', select(game.GAME_TOURS, settings.tours, (v) => game.setGame({ tours: Number(v) })), document.createElement('span'));
+  const offset = document.createElement('input');
+  offset.type = 'range';
+  offset.min = -100;
+  offset.max = 300;
+  offset.step = 5;
+  offset.value = settings.offset;
+  const text = document.createElement('span');
+  text.textContent = `${settings.offset} ms`;
+  offset.addEventListener('input', () => { game.setGame({ offset: Number(offset.value) }); text.textContent = `${offset.value} ms`; });
+  row('Retard', offset, text);
+  const measure = document.createElement('button');
+  measure.textContent = 'Mesurer le retard';
+  measure.title = 'Après 4 clics de décompte, joue une note sur chacun des 8 clics suivants';
+  const status = document.createElement('span');
+  status.id = 'gameStatus';
+  status.className = 'midi-note';
+  measure.addEventListener('click', () => calibrateGame(status));
+  const line = document.createElement('div');
+  line.className = 'game-measure';
+  line.append(measure, status);
+  panel.append(line);
+}
+renderGamePanel();
 
 // ---------- Mode « Attendre ma note » ----------
 // Pas de tempo ni d'accompagnement : le curseur reste sur la note à jouer jusqu'à ce que
@@ -1343,7 +1577,25 @@ function renderInputPanel() {
   refreshMeter();
 }
 renderInputPanel();
-$('waitMode').addEventListener('change', () => { if (playing) stop(); });
+$('waitMode').addEventListener('change', () => {
+  if ($('waitMode').checked) $('gameMode').checked = false;   // un seul des deux modes d'écoute
+  showGameButton();
+  if (playing) stop();
+});
+$('gameMode').addEventListener('change', () => {
+  if ($('gameMode').checked) $('waitMode').checked = false;
+  if (playing) stop();
+  showGameButton();
+});
+// Bouton 🎯 de l'en-tête (visible partout, même en paysage) : même effet que la case « 🎯 Jeu ».
+$('gameBtn').addEventListener('click', () => {
+  $('gameMode').checked = !$('gameMode').checked;
+  $('gameMode').dispatchEvent(new Event('change', { bubbles: true }));
+  showMessage($('gameMode').checked ? '🎯 Mode Jeu : touche Play et joue la ligne !' : 'Mode Jeu désactivé.');
+});
+function showGameButton() {
+  $('gameBtn').setAttribute('aria-pressed', $('gameMode').checked);
+}
 
 // Bouton rond : ▶ à l'arrêt, ■ pendant la lecture.
 const PLAY_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
@@ -1355,6 +1607,7 @@ function setPlayButton(on) {
 }
 
 function stopUI() {
+  if (match && !match.ending) endGame();
   playing = false;
   beatClock = null;
   setPlayButton(false);
@@ -1849,7 +2102,7 @@ document.addEventListener('keydown', (e) => {
 // Les fichiers MIDI importés sont gardés à part, dans la bibliothèque (library.js).
 
 const SETTINGS_KEY = 'bassroutine-settings';
-const TOGGLES = ['synth', 'padHeld', 'drums', 'fills', 'metro', 'others', 'loop', 'chain', 'scaleLoop', 'scaleChain', 'waitMode'];
+const TOGGLES = ['synth', 'padHeld', 'drums', 'fills', 'metro', 'others', 'loop', 'chain', 'scaleLoop', 'scaleChain', 'waitMode', 'gameMode'];
 const SELECTS = ['padSound', 'drumStyle', 'randKey', 'randMode', 'randRegister', 'preset', 'bars'];
 const SCALE_SELECTS = {
   scaleType: 'type', scaleKey: 'key', scaleRange: 'range', scaleDir: 'direction',
@@ -1934,6 +2187,7 @@ refreshLibrary().then(async () => {
 let staffOn = true;
 try { staffOn = localStorage.getItem(STAFF_KEY) !== '0'; } catch { /* stockage indisponible */ }
 setStaffVisible(staffOn);
+showGameButton();   // case « 🎯 Jeu » retrouvée de la dernière visite
 
 // Sauvegarde peu après chaque action (menus, cases, curseurs, boutons, grille).
 let saveTimer;

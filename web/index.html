@@ -37,7 +37,9 @@
       <output id="tempoHeadVal">100</output>
     </div>
     <div class="header-right">
+      <span id="gameLive" class="game-live" hidden title="Note de la partie en cours (sur 10)"></span>
       <div id="position" title="Mesure / temps">– / –</div>
+      <button id="gameBtn" class="gear" aria-pressed="false" aria-label="Mode Jeu" title="Mode Jeu : tu joues la ligne, justesse et rythme notés sur 10">🎯</button>
       <button id="tunerBtn" class="gear" aria-label="Accordeur" aria-expanded="false" title="Accordeur"><svg class="fork" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2v8a4 4 0 0 0 8 0V2"/><path d="M12 14v8"/></svg></button>
       <button id="mixerBtn" class="gear" aria-label="Réglages" aria-expanded="false" title="Réglages">⚙️</button>
     </div>
@@ -81,9 +83,13 @@
     </div>
     <div id="midiPanel"></div>
     <div class="mixer-head midi-head">
-      <strong>Entrée audio (⏸ Attendre ma note)</strong>
+      <strong>Entrée audio (⏸ Attendre ma note, 🎯 Jeu)</strong>
     </div>
     <div id="inputPanel"></div>
+    <div class="mixer-head midi-head">
+      <strong>🎯 Jeu</strong>
+    </div>
+    <div id="gamePanel"></div>
   </section>
 
   <section class="controls">
@@ -302,6 +308,9 @@
       </div>
       <div class="field check">
         <label class="toggle" title="Le curseur attend que tu joues la bonne note (basse branchée dans l'interface audio, ou micro), sans accompagnement"><input id="waitMode" type="checkbox"> ⏸ Attendre ma note</label>
+      </div>
+      <div class="field check">
+        <label class="toggle" title="Tu joues la ligne avec l'accompagnement : justesse et rythme notés, note sur 10 à la fin (réglages dans ⚙️)"><input id="gameMode" type="checkbox"> 🎯 Jeu</label>
       </div>
     </div>
   </section>

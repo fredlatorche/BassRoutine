@@ -11,6 +11,7 @@ const CLARITY = 0.85;  // en dessous : bruit, pas une note
 const STABLE = 3;      // analyses identiques de suite pour valider une note
 const PERIOD = 25;     // ms entre deux analyses
 const KEY = 'bassroutine-input';
+const ONSET_BLOCK = 128;   // échantillons par bloc pour repérer les attaques
 
 // Hauteur d'un bloc d'échantillons. Renvoie { hz, clarity, rms } (hz = 0 si rien de net).
 export function detectPitch(buf, sampleRate) {
@@ -156,8 +157,9 @@ export async function listInputs() {
 
 let stream = null, source = null, analyser = null, timer = null, tracker = null, lastRms = 0;
 
-// Ouvre l'entrée et appelle onNote({ pitch, midi, attack }) tant qu'une note stable sonne,
-// onHear(analyse) à chaque analyse.
+// Ouvre l'entrée et appelle onNote({ pitch, midi, attack, onset }) tant qu'une note stable sonne,
+// onHear(analyse) à chaque analyse. onset (à l'attaque) : heure audio (s) où le son a démarré,
+// repérée par bonds d'énergie de quelques millisecondes (la hauteur, elle, met ~100 ms à se stabiliser).
 // ctx : contexte audio (celui de Tone). Lève une erreur si l'accès est refusé.
 export async function openInput(ctx, { onNote, onHear } = {}) {
   closeInput();
@@ -176,12 +178,31 @@ export async function openInput(ctx, { onNote, onHear } = {}) {
   source.connect(analyser);  // rien vers les haut-parleurs
   tracker = createTracker(settings.threshold);
   const buf = new Float32Array(analyser.fftSize);
+  const sr = ctx.sampleRate;
+  let doneUntil = 0, env = 0, onset = null;   // fin du son déjà parcouru, énergie récente, dernière attaque
   timer = setInterval(() => {
     analyser.getFloatTimeDomainData(buf);
-    const r = detectPitch(buf, ctx.sampleRate);
+    const now = ctx.currentTime;
+    // Attaques : énergie par blocs de 128 échantillons (≈ 3 ms) sur le son arrivé depuis l'analyse précédente.
+    for (let i = 0; i + ONSET_BLOCK <= buf.length; i += ONSET_BLOCK) {
+      const end = now - (buf.length - i - ONSET_BLOCK) / sr;
+      if (end <= doneUntil) continue;
+      let e = 0;
+      for (let k = i; k < i + ONSET_BLOCK; k++) e += buf[k] * buf[k];
+      e = Math.sqrt(e / ONSET_BLOCK);
+      if (e > settings.threshold && e > env * 3 && (!onset || end - onset > 0.08)) onset = end - ONSET_BLOCK / sr;
+      env = env * 0.8 + e * 0.2;
+    }
+    doneUntil = now;
+    const r = detectPitch(buf, sr);
     lastRms = r.rms;
     onHear?.(r);
     const note = tracker.push(r);
+    if (note?.attack) {
+      // Attaque repérée juste avant (sinon note liée, sans bond d'énergie : estimation).
+      note.onset = onset != null && now - onset < 0.3 ? onset : now - 0.08;
+      onset = null;
+    }
     if (note) onNote?.(note);
   }, PERIOD);
 }

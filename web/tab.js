@@ -293,5 +293,18 @@ export function createTab(container, { onSeek, labels } = {}) {
     redraw();
   }
 
-  return { render, follow, setCue, setRange, setStaff, setKey, setEveryAccidental, setFingers, redraw };
+  // Mode Jeu : couleur d'une note jugée (cls : 'hit', 'near' ou 'miss'), repérée par sa position (en temps).
+  function mark(beat, cls) {
+    const i = events.findIndex((e) => Math.abs(e.t - beat) < 1e-3);
+    if (i < 0) return;
+    for (const node of notes[i]) {
+      node.classList.remove('g-hit', 'g-near', 'g-miss');
+      node.classList.add(`g-${cls}`);
+    }
+  }
+  function clearMarks() {
+    track?.querySelectorAll('.g-hit, .g-near, .g-miss').forEach((n) => n.classList.remove('g-hit', 'g-near', 'g-miss'));
+  }
+
+  return { render, follow, setCue, setRange, setStaff, setKey, setEveryAccidental, setFingers, redraw, mark, clearMarks };
 }
