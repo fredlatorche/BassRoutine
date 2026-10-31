@@ -74,6 +74,19 @@
     <label class="toggle mixer-option"><input id="showFingers" type="checkbox"> Doigtés sur la tablature pour tous les exercices (1 index … 4 auriculaire, 0 corde à vide)</label>
     <label class="toggle mixer-option"><input id="everyAcc" type="checkbox"> Mode novice : altérations (♯ ♭ ♮) sur chaque note, en plus de l'armure</label>
     <div class="mixer-head">
+      <strong>Lecture</strong>
+    </div>
+    <div class="control mixer-option">
+      <label for="countIn">Décompte avant le départ</label>
+      <select id="countIn" title="Clics avant le départ, à chaque Play (au tempo et dans la mesure choisis)">
+        <option value="0">Aucun</option>
+        <option value="1" selected>1 mesure</option>
+        <option value="2">2 mesures</option>
+        <option value="3">3 mesures</option>
+        <option value="4">4 mesures</option>
+      </select>
+    </div>
+    <div class="mixer-head">
       <strong>Volumes</strong>
       <button id="mixerReset">Réinitialiser</button>
     </div>
