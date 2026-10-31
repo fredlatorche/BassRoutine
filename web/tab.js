@@ -64,7 +64,7 @@ export function createTab(container, { onSeek, labels } = {}) {
   // Abscisse du centre d'une note : espacement régulier dans la mesure, très légèrement resserré
   // si besoin pour laisser de l'air avant la barre de mesure suivante (notes rapides).
   let xAt = (t) => t * bw + NOTE_X;
-  let showStaff = false, everyAccidental = false, showFingers = false, lastArgs = null, starts = [], fifths = 0;
+  let showStaff = false, everyAccidental = false, showFingers = false, lastArgs = null, starts = [], fifths = 0, meter = '4/4';
 
   // Un clic (ou un tap, pas un glissé) choisit le point de départ.
   container.addEventListener('click', (e) => {
@@ -81,8 +81,14 @@ export function createTab(container, { onSeek, labels } = {}) {
   // deux fois puis le début d'une troisième, séparées par des doubles traits, pour voir la suite.
   // parts : séquences différentes [{ events, beats }] à mettre bout à bout à la place des copies
   // (improvisations ou gammes enchaînées), la dernière coupée comme la 3e copie.
-  function render(evts, totalBeats, beatsPerBar, { loopLen = 0, parts = null } = {}) {
-    lastArgs = [evts, totalBeats, beatsPerBar, { loopLen, parts }];
+  // pulse : durée d'un temps en noires (1,5 en 6/8 et 12/8), pour l'écriture sur la portée ;
+  // timeSig : chiffrage de la mesure affiché après la clé (« 4/4 », « 6/8 »…).
+  function render(evts, totalBeats, beatsPerBar, { loopLen = 0, parts = null, pulse = 1, timeSig = '4/4' } = {}) {
+    lastArgs = [evts, totalBeats, beatsPerBar, { loopLen, parts, pulse, timeSig }];
+    if (timeSig !== meter) {
+      meter = timeSig;
+      drawClef();
+    }
     bw = beatWidth(parts ? parts.flatMap((p) => p.events) : evts);
     const last = beatsPerBar - minGap(evts);   // position de la dernière note possible dans une mesure
     const squeeze = Math.min(1, (beatsPerBar * bw - BAR_GAP - NOTE_X) / (last * bw || 1));
@@ -122,7 +128,7 @@ export function createTab(container, { onSeek, labels } = {}) {
     track.style.width = `${totalBeats * bw + 8}px`;
     track.style.height = `${140 + off}px`;
 
-    const staff = showStaff ? renderStaff(events, totalBeats, beatsPerBar, bw, doubles, everyAccidental, xAt) : null;
+    const staff = showStaff ? renderStaff(events, totalBeats, beatsPerBar, bw, doubles, everyAccidental, xAt, pulse) : null;
     if (staff) track.append(staff.svg);
 
     for (let s = 0; s < STRINGS.length; s++) {
@@ -237,8 +243,8 @@ export function createTab(container, { onSeek, labels } = {}) {
   function drawClef() {
     if (!labels) return;
     labels.querySelector('.staff-clef')?.remove();
-    labels.style.width = showStaff ? `${clefWidth(fifths)}px` : '';
-    if (showStaff) labels.prepend(clefSvg(fifths));
+    labels.style.width = showStaff ? `${clefWidth(fifths, meter)}px` : '';
+    if (showStaff) labels.prepend(clefSvg(fifths, meter));
   }
 
   // Armure affichée (nombre de dièses > 0 ou de bémols < 0).

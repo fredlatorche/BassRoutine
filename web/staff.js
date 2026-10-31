@@ -52,11 +52,14 @@ function staffLines(svg, width) {
 const SIG_SHARP_D = { 3: 24, 0: 21, 4: 25, 1: 22, 5: 19, 2: 23, 6: 20 };   // Fa Do Sol Ré La Mi Si
 const SIG_FLAT_D = { 6: 20, 2: 23, 5: 19, 1: 22, 4: 18, 0: 21, 3: 17 };    // Si Mi La Ré Sol Do Fa
 
-export const clefWidth = (fifths = 0) => 36 + Math.abs(fifths) * 8 + (fifths ? 6 : 0);
+const sigWidth = (fifths) => 36 + Math.abs(fifths) * 8 + (fifths ? 6 : 0);
+const meterWidth = (meter) => (meter ? (meter.split('/').some((n) => n.length > 1) ? 22 : 16) : 0);
+export const clefWidth = (fifths = 0, meter = null) => sigWidth(fifths) + meterWidth(meter);
 
-// Clé de fa et armure, pour la colonne de gauche (restent visibles pendant le défilement).
-export function clefSvg(fifths = 0) {
-  const width = clefWidth(fifths);
+// Clé de fa, armure et chiffrage de la mesure (« 6/8 » : 6 en haut, 8 en bas), pour la colonne
+// de gauche (restent visibles pendant le défilement).
+export function clefSvg(fifths = 0, meter = null) {
+  const width = clefWidth(fifths, meter);
   const svg = el('svg', { width, height: STAFF_H, class: 'staff-clef' });
   el('rect', { width, height: STAFF_H, class: 'staff-bg' }, svg);
   staffLines(svg, width);
@@ -83,6 +86,13 @@ export function clefSvg(fifths = 0) {
     const t = el('text', { x: 36 + i * 8, y: yOf(d) + (fifths > 0 ? 5 : 3), class: 'staff-acc' }, svg);
     t.textContent = fifths > 0 ? '♯' : '♭';
   });
+  if (meter) {
+    const x = sigWidth(fifths) + meterWidth(meter) / 2 - 3;
+    meter.split('/').forEach((n, i) => {
+      const t = el('text', { x, y: BOTTOM - (i ? 0 : 4 * STEP) - 5, class: 'staff-time' }, svg);
+      t.textContent = n;
+    });
+  }
   return svg;
 }
 
@@ -98,7 +108,8 @@ function flagPath(sx, sy, up) {
 // doubles : positions (en temps) des doubles barres (fin / début de boucle).
 // everyNote : mode novice, l'altération est écrite sur chaque note altérée (même si l'armure l'indique déjà).
 // xAt(t) : abscisse du centre de la note, fournie par la tab (même placement des deux côtés).
-export function renderStaff(events, totalBeats, bpb, beatW, doubles = [], everyNote = false, xAt = (t) => t * beatW + 20) {
+// pulse : durée d'un temps en noires (1, ou 1,5 en 6/8 et 12/8 : croches ligaturées par 3).
+export function renderStaff(events, totalBeats, bpb, beatW, doubles = [], everyNote = false, xAt = (t) => t * beatW + 20, pulse = 1) {
   const width = totalBeats * beatW + 8;
   const svg = el('svg', { width, height: STAFF_H, class: 'staff' });
   el('rect', { width, height: STAFF_H, class: 'staff-bg' }, svg);
@@ -140,12 +151,16 @@ export function renderStaff(events, totalBeats, bpb, beatW, doubles = [], everyN
     // Valeur de la note d'après l'écart avec la suivante (la durée jouée est raccourcie).
     const next = events[i + 1];
     const span = next ? next.t - e.t : e.dur;
-    const value = span >= 3.5 ? 1 : span >= 1.75 ? 2 : span >= 0.9 ? 4 : span >= 0.3 ? 8 : 16;
+    const dotted = [0.75, 1.5, 3].some((v) => Math.abs(span - v) < 0.05);   // croche, noire ou blanche pointée
+    const base = dotted ? span / 1.5 : span;
+    const value = base >= 3.5 ? 1 : base >= 1.75 ? 2 : base >= 0.9 ? 4 : base >= 0.3 ? 8 : 16;
     el('ellipse', {
       cx: x, cy: y, rx: 5.2, ry: 3.8, transform: `rotate(-20 ${x} ${y})`,
       class: value <= 2 ? 'staff-head hollow' : 'staff-head',
     }, g);
-    return { x, d, y, g, value, span, bar, beat: Math.floor(e.t + 1e-6), triplet: Math.abs(span - 1 / 3) < 0.04 };
+    // Point dans l'interligne (au-dessus de la ligne si la tête est sur une ligne).
+    if (dotted) el('circle', { cx: x + 9, cy: (d - D_BOTTOM) % 2 === 0 ? y - 3 : y, r: 1.7, class: 'staff-ink' }, g);
+    return { x, d, y, g, value, span, bar, beat: Math.floor(e.t / pulse + 1e-6), triplet: Math.abs(span - 1 / 3) < 0.04 };
   });
 
   // 2. Groupes ligaturés : croches et doubles croches consécutives d'un même temps.

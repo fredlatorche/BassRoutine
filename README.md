@@ -75,6 +75,10 @@ Une fois installée, l'app fonctionne aussi hors connexion. Même au fond d'une 
   Avec **Boucle** cochée, la case **Enchaîner** fait suivre chaque improvisation d'une nouvelle,
   de la même durée et sur la même batterie, sans arrêter la lecture. La tablature montre déjà
   la suivante après la double barre et défile sans à-coup, comme en boucle.
+- **Rythme** : 4/4 (binaire), 3/4 (valse), 6/8 ou 12/8 (ternaire, le temps est une noire pointée
+  divisée en trois croches). La ligne, la batterie (valse jazz, 6/8, blues 12/8), les accords,
+  le métronome et la partition suivent ; en 6/8 et 12/8, le tempo compte les noires pointées.
+  Changer de rythme refait la ligne choisie (ou une nouvelle improvisation) avec le bon nombre de temps.
 - Boucles de 4, 8, 16 ou 32 mesures, notes et accords modifiables dans la grille.
   (32 mesures de Mi par temps : idéal pour vérifier sa patience.)
 - En boucle, la tablature montre déjà le début du tour suivant après un double trait.
@@ -85,7 +89,8 @@ Une fois installée, l'app fonctionne aussi hors connexion. Même au fond d'une 
 - Ligne de basse **générée** en 4 styles : walking swing (avec croches et triolets),
   two-feel, bossa, croches pop/rock. « Nouvelle ligne » en propose une autre.
 - **Import MIDI** : jouer et lire en tab la ligne de basse d'un fichier `.mid`
-  (choix de la piste, autres pistes et batterie du fichier).
+  (choix de la piste, autres pistes et batterie du fichier). La mesure du fichier est lue :
+  un 6/8 ou un 12/8 se joue en ternaire, avec le tempo compté en noires pointées.
 - **Mes fichiers MIDI** : chaque fichier importé est gardé sur l'appareil et reste dans le menu
   Morceau, avec la piste basse choisie. Plus besoin de le réimporter. « 🗑 Retirer de la liste »
   l'enlève.
@@ -108,6 +113,8 @@ Fonctionne dans Chrome, Edge et Firefox sur ordinateur (pas sur iPhone, faute de
   (carte son, clavier, réflexe), qui ferait tomber les notes un peu tard. **Mesurer** : après le décompte,
   jouez une note sur chacun des 8 clics, l'app mesure ce retard et le retire des notes enregistrées.
   Le curseur permet aussi de l'ajuster à la main. Le réglage est retenu.
+- **Rythme** : 4/4, 3/4, 6/8 ou 12/8. Le métronome, le décompte et les barres de mesure le suivent
+  (en 6/8 et 12/8, un clic par noire pointée), et le fichier MIDI est enregistré dans cette mesure.
 - **Octave** : un petit clavier joue souvent trop haut pour la basse ; « −1 octave » ou « −2 octaves »
   décale les notes (Mi₁ = corde de Mi à vide).
 - Chaque touche fait entendre la note au son de basse de l'app. Les notes saisies s'affichent

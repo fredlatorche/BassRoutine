@@ -6,7 +6,13 @@
 // La ligne est une suite de notes et de silences { midi (null = silence), dur (en temps) }.
 
 const KEY = 'bassroutine-recorder';
-const BEATS = 4;
+// Mesures proposées : [chiffrage, libellé]. Les durées sont comptées en noires ; en 6/8 et 12/8,
+// le temps (clic du métronome, tempo) est une noire pointée.
+const METERS = [['4/4', '4/4 (binaire)'], ['3/4', '3/4 (valse)'], ['6/8', '6/8 (ternaire)'], ['12/8', '12/8 (ternaire)']];
+const meterInfo = (meter) => {
+  const [num, den] = meter.split('/').map(Number);
+  return { num, den, bpb: (num * 4) / den, pulse: den === 8 ? 1.5 : 1 };
+};
 const DURATIONS = [   // [temps, symbole, nom]
   [2, 'Blanche', 'Blanche'],   // (pas de symbole : absent de la plupart des polices)
   [1.5, '♩.', 'Noire pointée'],
@@ -19,7 +25,7 @@ const GRIDS = { 0.5: 'Croche', 0.25: 'Double croche', [1 / 3]: 'Triolet de croch
 const OCTAVES = [[1, '+1 octave'], [0, 'Telle quelle'], [-1, '−1 octave'], [-2, '−2 octaves']];
 
 // offset : retard (ms) entre le clic entendu et la touche reçue (son, clavier, réflexe), retiré des notes jouées.
-const settings = { mode: 'step', dur: 1, grid: 0.5, octave: 0, offset: 0 };
+const settings = { mode: 'step', dur: 1, grid: 0.5, octave: 0, offset: 0, meter: '4/4' };
 const CALIBRATION_BEATS = 8;   // temps joués pour mesurer le retard
 try { Object.assign(settings, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch { /* stockage indisponible */ }
 const save = () => {
@@ -53,12 +59,14 @@ export function quantize(played, grid) {
   return items;
 }
 
-// Fichier MIDI (@tonejs/midi, globale Midi) d'une ligne : une piste « Basse », en 4/4.
-export function lineToMidi(items, title, bpm) {
+// Fichier MIDI (@tonejs/midi, globale Midi) d'une ligne : une piste « Basse », dans la mesure choisie.
+// bpm : tempo en temps de la mesure (noires pointées en 6/8), écrit en noires dans le fichier.
+export function lineToMidi(items, title, bpm, meter = '4/4') {
+  const { num, den, pulse } = meterInfo(meter);
   const midi = new Midi();
   midi.name = title;
-  midi.header.setTempo(bpm);
-  midi.header.timeSignatures.push({ ticks: 0, timeSignature: [BEATS, 4] });
+  midi.header.setTempo(bpm * pulse);
+  midi.header.timeSignatures.push({ ticks: 0, timeSignature: [num, den] });
   midi.header.update();
   const track = midi.addTrack();
   track.name = 'Basse';
@@ -109,7 +117,12 @@ export function createRecorder(container, app) {
   octave.title = 'Décale les notes du clavier (un petit clavier joue souvent trop haut pour la basse)';
   for (const [v, label] of OCTAVES) octave.append(new Option(label, v));
   octave.addEventListener('change', () => { settings.octave = Number(octave.value); save(); });
-  fields.append(title, octave);
+  const meter = el('select');
+  meter.setAttribute('aria-label', 'Rythme');
+  meter.title = 'Mesure de la ligne (métronome, décompte, barres de mesure)';
+  for (const [v, label] of METERS) meter.append(new Option(label, v));
+  meter.addEventListener('change', () => { stopLive(); settings.meter = meter.value; save(); render(); });
+  fields.append(title, meter, octave);
 
   // Pas à pas : durée de la prochaine note, silence, effacer.
   const step = el('div', 'rec-step');
@@ -163,7 +176,7 @@ export function createRecorder(container, app) {
     stopLive(true);
     if (!items.some((x) => x.midi != null)) return;
     const name = title.value.trim() || defaultTitle();
-    app.onSave(lineToMidi(items, name, app.tempo()), name);
+    app.onSave(lineToMidi(items, name, app.tempo(), settings.meter), name);
     items = [];
     title.value = '';
     render();
@@ -203,9 +216,11 @@ export function createRecorder(container, app) {
   async function startLive(calibration = false) {
     if (!(await app.prepare())) return;
     const ctx = app.ctx();
-    const beat = 60 / app.tempo();
+    // Mesure jouée (la mesure du retard se fait sur des noires) ; beat : durée d'une noire en secondes.
+    const { bpb, pulse } = calibration ? meterInfo('4/4') : meterInfo(settings.meter);
+    const beat = 60 / (app.tempo() * pulse);
     const start = ctx.currentTime + 0.15;
-    const downbeat = start + BEATS * beat;   // après une mesure de décompte
+    const downbeat = start + bpb * beat;   // après une mesure de décompte
     // Heure du clavier (performance.now, en ms) → position en temps depuis le premier temps.
     const latency = (ctx.outputLatency || ctx.baseLatency || 0);
     const perfAtDownbeat = performance.now() + (downbeat - ctx.currentTime + latency) * 1000;
@@ -213,13 +228,13 @@ export function createRecorder(container, app) {
       held: new Map(),
       played: [],
       pos: (ms) => (ms - perfAtDownbeat - settings.offset) / 1000 / beat,
-      next: 0,   // prochain clic à programmer (0 = premier temps du décompte)
+      next: 0,   // prochain clic à programmer (0 = premier temps du décompte), compté en temps de la mesure
       calibration,
       beat,
     };
     live.timer = setInterval(() => {
-      while (start + live.next * beat < ctx.currentTime + 0.12) {
-        app.click(start + live.next * beat, live.next % BEATS === 0);
+      while (start + live.next * pulse * beat < ctx.currentTime + 0.12) {
+        app.click(start + live.next * pulse * beat, (live.next * pulse) % bpb < 1e-6);
         live.next++;
       }
       const now = (ctx.currentTime - downbeat) / beat;
@@ -228,7 +243,7 @@ export function createRecorder(container, app) {
         count.textContent = now < 0 ? `${Math.ceil(-now)}…` : `Joue sur chaque clic (${CALIBRATION_BEATS - Math.floor(now)})`;
         return;
       }
-      count.textContent = now < 0 ? `${Math.ceil(-now)}…` : `● Mesure ${Math.floor(now / BEATS) + 1}`;
+      count.textContent = now < 0 ? `${Math.ceil(-now / pulse - 1e-6)}…` : `● Mesure ${Math.floor(now / bpb) + 1}`;
     }, 25);
     if (!calibration) items = [];
     render();
@@ -277,6 +292,8 @@ export function createRecorder(container, app) {
     for (const [v, b] of durBtns) b.classList.toggle('on', Math.abs(v - settings.dur) < 1e-6);
     octave.value = String(settings.octave);
     grid.value = String(settings.grid);
+    meter.value = settings.meter;
+    const { bpb } = meterInfo(settings.meter);
     rec.textContent = live ? '■ Arrêter' : '● Enregistrer';
     rec.classList.toggle('on', !!live);
 
@@ -289,7 +306,7 @@ export function createRecorder(container, app) {
     line.replaceChildren();
     let t = 0;
     for (const { midi, dur } of items) {
-      if (t > 0 && Math.abs(t / BEATS - Math.round(t / BEATS)) < 1e-6) line.append(el('span', 'rec-bar'));
+      if (t > 0 && Math.abs(t / bpb - Math.round(t / bpb)) < 1e-6) line.append(el('span', 'rec-bar'));
       const chip = el('span', midi == null ? 'rec-note rest' : 'rec-note', midi == null ? '–' : app.name(midi));
       chip.append(el('small', null, durLabel(dur)));
       line.append(chip);
@@ -301,7 +318,7 @@ export function createRecorder(container, app) {
         : `Touche Enregistrer : une mesure de décompte au tempo de l'app (${app.tempo()} BPM), puis joue.`));
     }
     const notes = items.filter((x) => x.midi != null).length;
-    const bars = Math.ceil(t / BEATS - 1e-6);
+    const bars = Math.ceil(t / bpb - 1e-6);
     summary.textContent = notes ? `${notes} note${notes > 1 ? 's' : ''} · ${bars} mesure${bars > 1 ? 's' : ''}` : '';
     store.disabled = !notes;
   }

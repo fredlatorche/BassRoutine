@@ -15,14 +15,49 @@ export const DRUM_STYLES = {
   funk: 'Funk',
   halftime: 'Groove half-time',
   reggae: 'Reggae (one drop)',
+  waltz: 'Valse jazz (3/4)',
+  sixeight: 'Ternaire 6/8',
+  twelveeight: 'Blues 12/8',
 };
+
+// Rythme de batterie de chaque mesure (les autres rythmes sont en 4/4).
+export const METER_DRUMS = { '3/4': 'waltz', '6/8': 'sixeight', '12/8': 'twelveeight' };
 
 // Rythmes qui vont avec une walking bass (choix au hasard du mode aléatoire).
 export const WALKING_DRUMS = ['walking', 'brushes', 'two', 'shuffle'];
-const SWUNG = new Set(['walking', 'brushes', 'two', 'shuffle', 'reggae']);
+const SWUNG = new Set(['walking', 'brushes', 'two', 'shuffle', 'reggae', 'waltz']);
 
-// Rythmes : `bars` mesures de 4 temps, chaque coup { t (en temps depuis le début du motif), d (fût), v }.
+// Rythmes : `bars` mesures de 4 temps (sinon meter et bpb : nombre de noires par mesure),
+// chaque coup { t (en noires depuis le début du motif), d (fût), v }.
 const PATTERNS = {
+  // Valse jazz : ride « ding, ding-da ding » sur 3 temps, charleston au pied sur 2 et 3.
+  waltz: {
+    meter: '3/4', bpb: 3, bars: 1,
+    hits: [
+      { t: 0, d: 'ride', v: 0.65 }, { t: 1, d: 'ride', v: 0.75 }, { t: 1 + SWING, d: 'ride', v: 0.45 }, { t: 2, d: 'ride', v: 0.7 },
+      { t: 1, d: 'pedal', v: 0.5 }, { t: 2, d: 'pedal', v: 0.5 },
+      { t: 0, d: 'kick', v: 0.4 },
+    ],
+  },
+  // 6/8 : deux temps de trois croches, grosse caisse sur le 1, caisse claire sur le 2e temps.
+  sixeight: {
+    meter: '6/8', bpb: 3, bars: 1,
+    hits: [
+      ...Array.from({ length: 6 }, (_, i) => ({ t: i / 2, d: 'hat', v: i % 3 === 0 ? 0.6 : 0.35 })),
+      { t: 0, d: 'kick', v: 0.85 }, { t: 2.5, d: 'kick', v: 0.4 },
+      { t: 1.5, d: 'snare', v: 0.8 },
+    ],
+  },
+  // Blues lent en 12/8 : ride en triolets de croches, caisse claire sur les temps 2 et 4.
+  twelveeight: {
+    meter: '12/8', bpb: 6, bars: 1,
+    hits: [
+      ...Array.from({ length: 12 }, (_, i) => ({ t: i / 2, d: 'ride', v: i % 3 === 0 ? 0.65 : 0.4 })),
+      { t: 0, d: 'kick', v: 0.85 }, { t: 2.5, d: 'kick', v: 0.45 }, { t: 3, d: 'kick', v: 0.75 },
+      { t: 1.5, d: 'snare', v: 0.8 }, { t: 4.5, d: 'snare', v: 0.8 },
+      { t: 1.5, d: 'pedal', v: 0.4 }, { t: 4.5, d: 'pedal', v: 0.4 },
+    ],
+  },
   // Ride swing « ding, ding-da ding », charleston au pied sur 2 et 4, grosse caisse effleurée.
   walking: {
     bars: 1,
@@ -132,6 +167,11 @@ const FILLS = {
     [{ t: 0, d: 'snare', v: 0.45 }, { t: 1 / 3, d: 'snare', v: 0.55 }, { t: 2 / 3, d: 'tom', note: 'A2', v: 0.7 }],
     [{ t: 0, d: 'tom', note: 'E3', v: 0.6 }, { t: 1 / 3, d: 'tom', note: 'C3', v: 0.65 }, { t: 2 / 3, d: 'tom', note: 'A2', v: 0.75 }],
   ],
+  // Mesures ternaires : croches par deux sur le dernier temps (noire) de la mesure.
+  compound: [
+    [{ t: 0, d: 'snare', v: 0.55 }, { t: 0.5, d: 'tom', note: 'A2', v: 0.7 }],
+    [{ t: 0, d: 'tom', note: 'C3', v: 0.65 }, { t: 0.5, d: 'tom', note: 'G2', v: 0.75 }],
+  ],
   straight: [
     [{ t: 0, d: 'snare', v: 0.5 }, { t: 0.25, d: 'snare', v: 0.55 }, { t: 0.5, d: 'snare', v: 0.65 }, { t: 0.75, d: 'snare', v: 0.75 }],
     [{ t: 0, d: 'snare', v: 0.6 }, { t: 0.25, d: 'snare', v: 0.5 }, { t: 0.5, d: 'tom', note: 'C3', v: 0.7 }, { t: 0.75, d: 'tom', note: 'G2', v: 0.8 }],
@@ -140,16 +180,23 @@ const FILLS = {
 
 // Coups du motif qui tombent dans le temps `s` (temps absolu), avec t absolu.
 // fills : break sur le dernier temps de chaque 4e mesure, puis crash sur le temps 1 suivant.
-export function patternHits(style, s, bpb, fills = false) {
-  const p = PATTERNS[style] ?? PATTERNS.eighths;
-  const len = p.bars * 4;
+// meter : mesure jouée ('3/4', '6/8'…) ; un rythme écrit pour une autre mesure laisse la place
+// à celui de cette mesure.
+export function patternHits(style, s, bpb, fills = false, meter = null) {
+  let p = PATTERNS[style] ?? PATTERNS.eighths;
+  if (meter && (p.meter ?? '4/4') !== meter && METER_DRUMS[meter]) {
+    style = METER_DRUMS[meter];
+    p = PATTERNS[style];
+  }
+  const pbpb = p.bpb ?? 4;
+  const len = p.bars * pbpb;
   const bar = Math.floor(s / bpb);
   const beat = s % bpb;
   if (fills && bar % 4 === 3 && beat === bpb - 1) {
-    const variants = FILLS[SWUNG.has(style) ? 'swung' : 'straight'];
+    const variants = FILLS[p.meter === '6/8' || p.meter === '12/8' ? 'compound' : SWUNG.has(style) ? 'swung' : 'straight'];
     return variants[Math.floor(bar / 4) % variants.length].map((h) => ({ ...h, t: s + h.t }));
   }
-  const pos = (bar % p.bars) * 4 + beat;   // position dans le motif
+  const pos = (bar % p.bars) * pbpb + beat;   // position dans le motif
   const hits = p.hits
     .filter((h) => h.t >= pos && h.t < pos + 1 && h.t < len)
     .map((h) => ({ ...h, t: s + (h.t - pos) }));

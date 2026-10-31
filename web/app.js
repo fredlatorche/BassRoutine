@@ -9,7 +9,7 @@ import { bassLine, STYLES } from './walking.js';
 import { readMidiFile, guessBassTrack } from './midi-import.js';
 import * as library from './library.js';
 import { createTab } from './tab.js';
-import { createKit, patternHits, gmDrumEvents, DRUM_STYLES, WALKING_DRUMS } from './drums.js';
+import { createKit, patternHits, gmDrumEvents, DRUM_STYLES, WALKING_DRUMS, METER_DRUMS } from './drums.js';
 import { SCALE_TYPES, FINGERINGS, ZONES, keyOptions, boxOptions, buildScaleExercise } from './scales.js';
 import { inventLoop, KEY_CHOICES, fifthsFromLabel } from './random-loop.js';
 import { spellEvents, pitchName } from './spelling.js';
@@ -20,6 +20,17 @@ import { createTuner } from './tuner.js';
 import { createRecorder } from './recorder.js';
 
 const BEATS = 4;
+// Mesures du mode Boucle : temps par mesure (une note de la grille par temps) et durée d'un temps
+// en noires (1,5 en 6/8 et 12/8 : noire pointée, divisée en trois croches).
+const METERS = {
+  '4/4': { beats: 4, pulse: 1 },
+  '3/4': { beats: 3, pulse: 1 },
+  '6/8': { beats: 2, pulse: 1.5 },
+  '12/8': { beats: 4, pulse: 1.5 },
+};
+const meterOf = (state = loopState) => METERS[state.meter] ?? METERS['4/4'];
+// Mesure de 4 notes (lignes toutes prêtes) ramenée au nombre de temps de la mesure.
+const fitBar = (notes, beats) => (beats === 2 ? [notes[0], notes[2]] : notes.slice(0, beats));
 const $ = (id) => document.getElementById(id);
 
 // Notes proposées dans la grille, du Mi grave au Do de la case 17 sur G ;
@@ -93,6 +104,7 @@ let mode = 'loop';
 
 const loopState = {
   bars: 8,
+  meter: '4/4',
   chords: [],
   bass: [],   // une note MIDI (ou null = silence) par temps
   frets: [],  // position imposée dans la tab ([corde, case]) ou null, par temps
@@ -119,13 +131,14 @@ function applyPreset(name) {
   loopState.frets = [];
   loopState.legato = !!p.legato;
   loopState.fifths = p.fifths ?? 0;
-  loopState.drums = p.drums ?? 'eighths';
+  loopState.drums = METER_DRUMS[loopState.meter] ?? p.drums ?? 'eighths';
+  const { beats } = meterOf();
   for (let b = 0; b < loopState.bars; b++) {
     const chord = p.chords[b % p.chords.length];
     const next = p.chords[(b + 1) % p.chords.length];
     loopState.chords.push(chord);
-    loopState.bass.push(...(p.lines ? p.lines[b % p.lines.length] : p.bar(chord, next)));
-    loopState.frets.push(...(p.frets ? p.frets[b % p.frets.length] : [null, null, null, null]));
+    loopState.bass.push(...fitBar(p.lines ? p.lines[b % p.lines.length] : p.bar(chord, next), beats));
+    loopState.frets.push(...fitBar(p.frets ? p.frets[b % p.frets.length] : [null, null, null, null], beats));
   }
   renderLoopGrid();
 }
@@ -133,7 +146,7 @@ function applyPreset(name) {
 // Mode aléatoire : grille et walking inventées dans la tonalité choisie (ou au hasard).
 function improvise(drums) {
   const register = $('randRegister').value;
-  const r = inventLoop({ key: $('randKey').value, mode: $('randMode').value, register, bars: loopState.bars });
+  const r = inventLoop({ key: $('randKey').value, mode: $('randMode').value, register, bars: loopState.bars, beats: meterOf().beats });
   return {
     label: r.label,
     bars: loopState.bars,
@@ -150,7 +163,8 @@ let chainPrev = null;   // partie précédente : { events, beats }
 // laissées comme elles sont) ; l'affichage est mis à jour par showChain().
 function invent({ next = false } = {}) {
   // Batterie en « Auto » : un rythme au hasard parmi ceux qui vont avec une walking.
-  const drums = next ? loopState.drums : WALKING_DRUMS[Math.floor(Math.random() * WALKING_DRUMS.length)];
+  const drums = next ? loopState.drums
+    : METER_DRUMS[loopState.meter] ?? WALKING_DRUMS[Math.floor(Math.random() * WALKING_DRUMS.length)];
   const imp = next && upcoming?.bars === loopState.bars ? upcoming : improvise(drums);
   upcoming = null;
   Object.assign(loopState, imp.state);
@@ -175,8 +189,9 @@ function setBars(n) {
   for (let b = 0; b < n; b++) {
     const src = b % oldBars;
     chords.push(loopState.chords[src]);
-    bass.push(...loopState.bass.slice(src * BEATS, src * BEATS + BEATS));
-    frets.push(...loopState.frets.slice(src * BEATS, src * BEATS + BEATS));
+    const { beats } = meterOf();
+    bass.push(...loopState.bass.slice(src * beats, src * beats + beats));
+    frets.push(...loopState.frets.slice(src * beats, src * beats + beats));
   }
   Object.assign(loopState, { bars: n, chords, bass, frets });
   renderLoopGrid();
@@ -205,7 +220,8 @@ function trimLegato(events) {
 // chordBars : un tableau de symboles par mesure (ou null) ; labels : texte affiché par mesure.
 // drumStyle : rythme de batterie généré ; drums : coups lus dans un MIDI (remplacent le rythme).
 // fifths : armure (pour la portée) ; les notes peuvent porter leur propre armure (sig, gammes).
-function makeProgram({ events, others = [], drums = null, drumStyle = 'eighths', chordBars = null, bars, bpb, labels, fifths = 0 }) {
+// meter, pulse : mesure du mode Boucle et durée d'un temps en noires (tempo, métronome, batterie, portée).
+function makeProgram({ events, others = [], drums = null, drumStyle = 'eighths', chordBars = null, bars, bpb, labels, fifths = 0, meter = null, pulse = 1 }) {
   const totalBeats = bars * bpb;
   const bassEvents = trimLegato(events);
   // Armure de chaque mesure (change d'une tonalité à l'autre dans les gammes).
@@ -230,6 +246,8 @@ function makeProgram({ events, others = [], drums = null, drumStyle = 'eighths',
   return {
     totalBeats,
     bpb,
+    meter,
+    pulse,
     labels,
     bassEvents,
     bassByBeat: byBeat(bassEvents, totalBeats),
@@ -243,22 +261,26 @@ function makeProgram({ events, others = [], drums = null, drumStyle = 'eighths',
 }
 
 function buildLoopProgram(state = loopState) {
+  const { beats, pulse } = meterOf(state);
+  const bpb = beats * pulse;   // noires par mesure
   const events = [];
   state.bass.forEach((midi, i) => {
     if (midi == null) return;
     const pos = state.frets[i];
     events.push({
-      t: i, dur: state.legato ? 0.97 : 0.85, midi, vel: i % BEATS === 0 ? 0.9 : 0.75,
+      t: i * pulse, dur: pulse * (state.legato ? 0.97 : 0.85), midi, vel: i % beats === 0 ? 0.9 : 0.75,
       ...(pos && { string: pos[0], fret: pos[1] }),
     });
   });
   return makeProgram({
-    events: spellEvents(events, (t) => state.chords[Math.floor(t / BEATS)], state.fifths),
+    events: spellEvents(events, (t) => state.chords[Math.floor(t / bpb)], state.fifths),
     fifths: state.fifths,
     drumStyle: state.drums,
     chordBars: state.chords.map((c) => [c]),
     bars: state.bars,
-    bpb: BEATS,
+    bpb,
+    meter: state.meter ?? '4/4',
+    pulse,
     labels: state.chords.map((_, b) => `Mesure ${b + 1}`),
   });
 }
@@ -279,6 +301,8 @@ function buildSongProgram() {
     return makeProgram({
       events: spellEvents(bassTrack.notes, null, m.fifths ?? 0),
       fifths: m.fifths ?? 0,
+      meter: m.meter ?? null,
+      pulse: m.pulse ?? 1,
       others,
       drums,
       bars,
@@ -352,6 +376,7 @@ function updateInfo() {
     text = $('preset').value === 'invented' && inventedLabel
       ? inventedLabel
       : `${selectedText('preset')} · ${loopState.bars} mesures`;
+    if (loopState.meter !== '4/4') text += ` · ${selectedText('meter')}`;
   } else if (mode === 'scale') {
     const what = scaleKeys.length > 1
       ? `Gamme ${SCALE_TYPES[scaleState.type].label.toLowerCase()} · toutes les tonalités`
@@ -423,17 +448,20 @@ function upcomingPart() {
   return { events: p.bassEvents, beats: p.totalBeats };
 }
 
+// Chiffrage de la mesure (fichier MIDI : celui du fichier ; morceaux et gammes : 4/4).
+const timeSig = () => prog.meter ?? (prog.bpb === 4 ? '4/4' : `${prog.bpb}/4`);
+
 function renderTab() {
   const T = prog.totalBeats;
   if (!chaining()) {
     chainPrev = upcoming = null;
     // En boucle, la tab montre la suite (le début de la séquence suivante) après un double trait
     // (pas pendant le travail d'une sélection, qui revient simplement à son début).
-    tab.render(prog.bassEvents, T, prog.bpb, { loopLen: isLooping() && rangeEnd == null ? T : 0 });
+    tab.render(prog.bassEvents, T, prog.bpb, { loopLen: isLooping() && rangeEnd == null ? T : 0, pulse: prog.pulse, timeSig: timeSig() });
     return;
   }
   const parts = [chainPrev, { events: prog.bassEvents, beats: T }, upcomingPart()].filter(Boolean);
-  tab.render(prog.bassEvents, T, prog.bpb, { parts });
+  tab.render(prog.bassEvents, T, prog.bpb, { parts, pulse: prog.pulse, timeSig: timeSig() });
 }
 
 function refresh() {
@@ -535,8 +563,10 @@ function renderLoopGrid() {
 
     const steps = document.createElement('div');
     steps.className = 'steps';
-    for (let t = 0; t < BEATS; t++) {
-      const i = b * BEATS + t;
+    const { beats } = meterOf();
+    steps.style.gridTemplateColumns = `repeat(${beats}, 1fr)`;
+    for (let t = 0; t < beats; t++) {
+      const i = b * beats + t;
       const sel = document.createElement('select');
       sel.dataset.step = i;
       sel.append(option('', '—', loopState.bass[i] == null));
@@ -728,11 +758,12 @@ function showBeat(s) {
     return;
   }
   const bar = Math.floor(s / prog.bpb);
-  $('position').textContent = `${bar + 1} / ${(s % prog.bpb) + 1}`;
-  $('position').title = `${prog.labels[bar]} · Temps ${(s % prog.bpb) + 1}`;
+  const pulse = Math.floor((s % prog.bpb) / prog.pulse + 1e-6);   // temps dans la mesure (noire pointée en 6/8)
+  $('position').textContent = `${bar + 1} / ${pulse + 1}`;
+  $('position').title = `${prog.labels[bar]} · Temps ${pulse + 1}`;
   tab.setKey(prog.barSig[bar] ?? 0);   // l'armure suit la tonalité en cours (gammes)
   const els = mode === 'loop'
-    ? [grid.querySelector(`[data-step="${s}"]`)]
+    ? [grid.querySelector(`[data-step="${Math.floor(s / prog.pulse + 1e-6)}"]`)]
     : mode === 'song'
       ? [chart.querySelector(`[data-bar="${usingMidi() ? bar : bar % chart.children.length}"]`)]
       : [...document.querySelectorAll('.scale-row')].filter((r) => bar >= r.dataset.start && bar < r.dataset.end);
@@ -952,13 +983,17 @@ function tick(time) {
     const fileDrums = choice === 'auto' && prog.drumByBeat;
     const hits = fileDrums
       ? prog.drumByBeat[s] ?? []
-      : patternHits(choice === 'auto' ? prog.drumStyle : choice, s, prog.bpb, $('fills').checked);
+      : patternHits(choice === 'auto' ? prog.drumStyle : choice, s, prog.bpb, $('fills').checked, prog.meter);
     const play = toMidi('drums') ? (h, t) => midiOut.playDrum(h, t, ctx) : (h, t) => kit.play(h, t);
     for (const h of hits) play(h, at(h));
     if (s === 0 && !fileDrums) play({ d: 'crash', v: 0.6 }, time);
   }
   if ($('metro').checked) {
-    click.triggerAttackRelease(beat === 0 ? 'C6' : 'G5', '32n', time, beat === 0 ? 0.8 : 0.45);
+    // Un clic par temps de la mesure (noire, ou noire pointée en 6/8 et 12/8) qui tombe dans cette noire.
+    for (let p = Math.ceil(beat / prog.pulse - 1e-6) * prog.pulse; p < beat + 1 - 1e-6; p += prog.pulse) {
+      const first = p < 1e-6;
+      click.triggerAttackRelease(first ? 'C6' : 'G5', '32n', time + (p - beat) * beatDur, first ? 0.8 : 0.45);
+    }
   }
   const c = cycle;
   Tone.Draw.schedule(() => {
@@ -1011,7 +1046,7 @@ function playChords(s, time, beatDur, ctx) {
   if (bar !== comp.bar) {
     const choice = $('drumStyle').value;
     const style = choice === 'auto' ? prog.drumStyle : choice;
-    comp.hits = compBar(style, bar, bpb, { guitar: $('padSound').value === 'guitar', pushed: comp.pushed });
+    comp.hits = compBar(style, bar, bpb, { guitar: $('padSound').value === 'guitar', pushed: comp.pushed, meter: prog.meter });
     comp.bar = bar;
     comp.pushed = false;
   }
@@ -1089,7 +1124,7 @@ async function start() {
 }
 
 function begin() {
-  Tone.Transport.bpm.value = Number($('tempo').value);
+  Tone.Transport.bpm.value = transportBpm();
   step = cue;
   cycle = 0;
   beatClock = null;
@@ -1666,7 +1701,11 @@ function setTempo(bpm) {
   $('tempoVal').textContent = `${bpm} BPM`;
   $('tempoHead').value = bpm;
   $('tempoHeadVal').textContent = bpm;
-  if (bass) Tone.Transport.bpm.rampTo(bpm, 0.1);
+  if (bass) Tone.Transport.bpm.rampTo(transportBpm(), 0.1);
+}
+// Le tempo compte les temps de la mesure (noires pointées en 6/8 et 12/8) ; le transport, les noires.
+function transportBpm() {
+  return Number($('tempo').value) * (prog?.pulse ?? 1);
 }
 $('tempo').addEventListener('input', (e) => setTempo(Number(e.target.value)));
 $('tempoHead').addEventListener('input', (e) => setTempo(Number(e.target.value)));
@@ -1705,6 +1744,14 @@ scaleControl('scaleBox', 'box');
 
 $('mode').addEventListener('change', (e) => setMode(e.target.value));
 $('bars').addEventListener('change', (e) => setBars(Number(e.target.value)));
+// Autre mesure : la ligne est refaite (improvisation ou ligne toute prête) avec le bon nombre de temps.
+$('meter').addEventListener('change', (e) => {
+  loopState.meter = e.target.value;
+  upcoming = chainPrev = null;
+  if ($('preset').value === 'invented') invent();
+  else applyPreset($('preset').value);
+  if (playing && !waiting) Tone.Transport.bpm.value = transportBpm();
+});
 $('loop').addEventListener('change', refresh);
 // Enchaîner, ou réglages de l'improvisation changés : la suivante est préparée à nouveau.
 for (const id of ['chain', 'randKey', 'randMode', 'randRegister']) {
@@ -1855,11 +1902,12 @@ function restoreSettings() {
   for (const [id, field] of Object.entries(SCALE_SELECTS)) setSelect(id, scaleState[field]);
 
   const l = saved.loop;
-  if (l && Array.isArray(l.bass) && l.bass.length === l.bars * BEATS && l.chords?.length === l.bars) {
+  if (l && Array.isArray(l.bass) && l.bass.length === l.bars * meterOf(l).beats && l.chords?.length === l.bars) {
     // Sauvegarde d'avant l'armure : on la retrouve d'après la ligne inventée, ou d'après la ligne choisie.
     if (l.fifths == null) l.fifths = fifthsFromLabel(saved.loopInfo) ?? PRESETS[saved.selects?.preset]?.fifths ?? 0;
-    Object.assign(loopState, l);
+    Object.assign(loopState, { meter: '4/4' }, l);   // sauvegardes d'avant le choix de la mesure : 4/4
     setSelect('bars', l.bars);
+    setSelect('meter', loopState.meter);
     renderLoopGrid();
   } else {
     applyPreset($('preset').value in PRESETS ? $('preset').value : 'mi');

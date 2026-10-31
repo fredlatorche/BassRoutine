@@ -46,6 +46,7 @@ export function voiceLead(chord, prev) {
 const FAMILY = {
   walking: 'swing', brushes: 'swing', shuffle: 'swing', two: 'two', bossa: 'bossa',
   eighths: 'straight', disco: 'disco', funk: 'funk', reggae: 'reggae', halftime: 'halftime',
+  waltz: 'swing',
 };
 const isSwing = (style) => ['swing', 'two'].includes(FAMILY[style]);
 
@@ -53,12 +54,30 @@ const pick = (list) => list[Math.floor(Math.random() * list.length)];
 
 // Coups d'une mesure : [{ t (temps dans la mesure), dur (en temps), vel, push }].
 // push : coup anticipé sur l'accord de la mesure suivante (qui ne rejoue pas alors sur son 1).
-// pushed : la mesure précédente a anticipé celle-ci.
-export function compBar(style, bar, bpb, { guitar = false, pushed = false } = {}) {
+// pushed : la mesure précédente a anticipé celle-ci. meter : '4/4', '3/4', '6/8' ou '12/8'.
+export function compBar(style, bar, bpb, { guitar = false, pushed = false, meter = null } = {}) {
   const family = FAMILY[style] ?? 'straight';
   const E = isSwing(style) ? 2 / 3 : 0.5;   // croche swing (comme la batterie) ou droite
   let hits;
-  if (bpb !== 4) {
+  if (meter === '12/8') {
+    // Blues lent : triolets de croches au piano, appuyés sur chaque temps ; parfois des accords tenus.
+    hits = Math.random() < 0.7
+      ? Array.from({ length: 12 }, (_, i) => [i / 2, 0.4, i % 3 === 0 ? 0.55 : 0.4])
+      : [[0, 1.4, 0.55], [1.5, 0.4, 0.45], [3, 1.4, 0.55], [4.5, 0.4, 0.45], [5, 0.4, 0.4], [5.5, 0.4, 0.4]];
+  } else if (meter === '6/8') {
+    hits = pick([
+      [[0, 1.4, 0.55], [1.5, 1.4, 0.5]],
+      [[0, 0.4, 0.55], [1, 0.4, 0.45], [1.5, 0.4, 0.5], [2.5, 0.4, 0.45]],
+      [[0.5, 0.4, 0.5], [1, 0.4, 0.45], [2, 0.4, 0.5], [2.5, 0.4, 0.45]],
+    ]);
+  } else if (meter === '3/4' && family === 'swing' && !guitar) {
+    // Valse jazz : accords sur 2 et 3, parfois anticipés ou tenus.
+    hits = pick([
+      [[1, 0.6, 0.55], [2, 0.6, 0.5]],
+      [[0, 1.4, 0.55], [2, 0.6, 0.5]],
+      [[1 + E, 0.5, 0.5], [2, 0.8, 0.5]],
+    ]);
+  } else if (bpb !== 4) {
     // Mesures à 3 temps (ou autres) : basse sur le 1, accords sur les temps suivants.
     hits = Array.from({ length: bpb - 1 }, (_, i) => [i + 1, 0.5, 0.5]);
   } else if (family === 'swing' && guitar) {

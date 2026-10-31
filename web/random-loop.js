@@ -89,8 +89,9 @@ function spanNeck(line) {
 
 // key : nom anglais ('Db', 'C#'…) ou 'random' ; mode : 'major', 'minor' ou 'random' ;
 // register : 'low', 'high' ou 'neck' (tout le manche).
+// beats : temps par mesure (une note de la ligne par temps).
 // Renvoie { chords (un par mesure), line (une note MIDI par temps), label, fifths (armure) }.
-export function inventLoop({ key, mode, register, bars }, rand = Math.random) {
+export function inventLoop({ key, mode, register, bars, beats = 4 }, rand = Math.random) {
   const minor = mode === 'random' ? rand() < 0.4 : mode === 'minor';
   const fifthsTable = minor ? MINOR_FIFTHS : MAJOR_FIFTHS;
   let name = key in KEY_LABEL ? key : (minor ? MINOR_KEYS : MAJOR_KEYS)[Math.floor(rand() * 12)];   // 'random' ou valeur inconnue
@@ -101,7 +102,7 @@ export function inventLoop({ key, mode, register, bars }, rand = Math.random) {
   const picked = Array.from({ length: Math.max(1, bars / 4) }, () => templates[Math.floor(rand() * templates.length)]);
   const chords = picked.flat().map((r) => chordSymbol(name, minor, table[r]));
 
-  let line = walkingQuarters(chords.map((c) => ({ chords: [c] })), Math.floor(rand() * 1e9)).map((e) => e.midi);
+  let line = walkingQuarters(chords.map((c) => ({ chords: [c] })), Math.floor(rand() * 1e9), beats).map((e) => e.midi);
   if (register === 'high') line = line.map((m) => m + 12);   // une octave plus haut : cordes de D et G
   if (register === 'neck') line = spanNeck(line);
 

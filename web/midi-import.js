@@ -9,6 +9,8 @@ export async function readMidiFile(file) {
   const midi = new Midi(await file.arrayBuffer());
   const ppq = midi.header.ppq;
   const [num, den] = midi.header.timeSignatures[0]?.timeSignature ?? [4, 4];
+  // 6/8, 9/8, 12/8 : mesures ternaires, le temps est une noire pointée (tempo compté en temps).
+  const pulse = den === 8 && num % 3 === 0 ? 1.5 : 1;
 
   const tracks = midi.tracks
     .filter((t) => t.notes.length)
@@ -26,8 +28,10 @@ export async function readMidiFile(file) {
 
   return {
     title: midi.name || file.name.replace(/\.midi?$/i, ''),
-    bpm: Math.round(midi.header.tempos[0]?.bpm ?? 120),
+    bpm: Math.round((midi.header.tempos[0]?.bpm ?? 120) / pulse),
     beatsPerBar: (num * 4) / den,
+    meter: `${num}/${den}`,
+    pulse,
     fifths: (() => {
       const k = midi.header.keySignatures[0];
       return k ? ((k.scale === 'minor' ? MINOR : MAJOR)[k.key] ?? 0) : 0;
