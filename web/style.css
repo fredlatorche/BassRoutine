@@ -641,6 +641,21 @@ body.with-staff .bass-duo { margin-bottom: 310px; }
 @keyframes game-wobble { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-12deg); } 75% { transform: rotate(12deg); } }
 @keyframes game-pulse { 50% { transform: scale(1.12); } }
 @keyframes game-fall { to { transform: translateY(calc(100dvh + 80px)) rotate(540deg); opacity: 0.2; } }
+/* Téléphone en paysage : la note à gauche, le détail à droite, le tout sans défiler. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .game-result { padding: 8px 16px; }
+  .game-card {
+    width: min(720px, 100%); max-height: calc(100dvh - 16px); padding: 12px 16px;
+    display: grid; grid-template-columns: minmax(180px, 0.8fr) 1.2fr; gap: 16px; align-items: center;
+  }
+  .game-emoji { font-size: 38px; }
+  .game-score { font-size: 46px; }
+  .game-text { font-size: 15px; margin-bottom: 0; }
+  .game-side { text-align: left; }
+  .game-tip { margin: 0 0 6px; font-size: 13px; }
+  .game-details { margin-bottom: 10px; padding: 8px 10px; font-size: 13px; line-height: 1.5; }
+  .game-actions { justify-content: flex-end; }
+}
 @media (prefers-reduced-motion: reduce) {
   .game-result, .game-card, .game-emoji, .game-score, .game-confetti { animation: none !important; }
   .game-confetti { display: none; }

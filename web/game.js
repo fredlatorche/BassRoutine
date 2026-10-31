@@ -445,8 +445,12 @@ export function showResult(summary, { title = 'Fin de la partie', record = null,
   const value = el('span', 'game-value', '0');
   const scoreLine = el('div', 'game-score');
   scoreLine.append(value, el('small', null, ' / 10'));
-  card.append(el('div', 'game-emoji', emoji), el('p', 'game-title', title), scoreLine, el('p', 'game-text', text));
-  for (const tip of tips) card.append(el('p', 'game-tip', tip));
+  // Deux blocs : la note (à gauche en paysage) et le détail (à droite).
+  const main = el('div', 'game-main');
+  const side = el('div', 'game-side');
+  main.append(el('div', 'game-emoji', emoji), el('p', 'game-title', title), scoreLine, el('p', 'game-text', text));
+  for (const tip of tips) side.append(el('p', 'game-tip', tip));
+  card.append(main, side);
 
   const details = el('ul', 'game-details');
   const item = (t) => details.append(el('li', null, t));
@@ -458,7 +462,7 @@ export function showResult(summary, { title = 'Fin de la partie', record = null,
   if (summary.missed) item(`🔇 ${summary.missed} note${summary.missed > 1 ? 's' : ''} non jouée${summary.missed > 1 ? 's' : ''} sur ${summary.notes}`);
   if (tours?.length > 1) item(`🔁 Tours : ${tours.map(formatScore).join(' · ')}`);
   if (record) item(record.isNew ? `🏅 Nouveau record ! (ancien : ${formatScore(record.previous)})` : `🏅 Record : ${formatScore(record.best)} / 10`);
-  card.append(details);
+  side.append(details);
 
   const actions = el('div', 'game-actions');
   const again = el('button', 'primary', '↻ Rejouer');
@@ -470,7 +474,7 @@ export function showResult(summary, { title = 'Fin de la partie', record = null,
   root.addEventListener('click', (e) => { if (e.target === root) dismiss(); });
   document.addEventListener('keydown', onKey);
   actions.append(close, again);
-  card.append(actions);
+  side.append(actions);
   root.append(card);
 
   // Confettis de notes pour les belles parties.
@@ -485,7 +489,7 @@ export function showResult(summary, { title = 'Fin de la partie', record = null,
     }
   }
   document.body.append(root);
-  again.focus();
+  again.focus({ preventScroll: true });   // sans faire défiler : la note reste en vue
 
   // La note défile de 0 jusqu'au score.
   const target = summary.score;
