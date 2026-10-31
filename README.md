@@ -227,11 +227,6 @@ voir l'entrée audio dans ⚙️) et note chaque note :
 - **Rythme** : l'attaque, en avance ou en retard sur le temps prévu.
 - Chaque note se colore dans la tab et sur la portée : verte (juste et en place), orange (presque),
   rouge (fausse, très décalée ou pas jouée). La note de la partie s'affiche en direct dans l'en-tête.
-- **À la fin, une note sur 10**, avec une petite animation et un mot pour rire, encourager ou féliciter
-  (plus de 180 phrases, selon la note), des remarques adaptées à la partie (record battu, jeu en retard
-  ou en avance, notes justes mais rythme à revoir, tempo, progrès au fil des tours, séance de nuit…),
-  le détail (notes justes, notes en place, tendance à jouer en avance ou en retard, notes oubliées)
-  et le record de l'exercice. « ↻ Rejouer » relance la même partie.
 
 Réglages (⚙️, partie 🎯 Jeu) :
 
