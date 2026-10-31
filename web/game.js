@@ -89,9 +89,10 @@ export function saveRecord(exercise, score) {
   return { best: Math.max(best ?? 0, score), isNew: best != null && score > best, previous: best };
 }
 
-// Petit mot selon la note, tiré au hasard (23 par tranche).
+// Petit mot selon la note, tiré au hasard (23 par tranche), et l'humeur du bassiste :
+// la star (9 et plus), il danse (7 et plus), il réfléchit (3 et plus), dépité (moins de 3).
 const MESSAGES = [
-  [10, '🏆', [
+  [10, '🧑‍🎤', [
     'Parfait ! Même le métronome est jaloux.',
     'Sans faute. Le batteur vient de te demander ton numéro.',
     '10/10 : on encadre la tab et on la met au salon.',
@@ -116,7 +117,7 @@ const MESSAGES = [
     'Impeccable. Même le chat a arrêté de bouger pour écouter.',
     'La perfection existe, et elle joue de la basse.',
   ]],
-  [9, '🤩', [
+  [9, '🧑‍🎤', [
     'Impressionnant ! Le public tape du pied, le voisin aussi.',
     'Presque parfait : il ne manquait que les applaudissements.',
     'Quel groove ! Le batteur peut enfin se reposer sur toi.',
@@ -141,7 +142,7 @@ const MESSAGES = [
     'Excellent : tes voisins ont ouvert la fenêtre pour mieux entendre.',
     'Bravo ! Il ne te manque qu\'un costume à paillettes.',
   ]],
-  [8, '😎', [
+  [8, '🕺', [
     'Très bien ! Le groove est là, on part en tournée.',
     'Solide ! Tu es le ciment du groupe (et c\'est un compliment).',
     'Belle partie ! Le guitariste ne s\'est même pas retourné.',
@@ -166,7 +167,7 @@ const MESSAGES = [
     'Bien joué ! La section rythmique, c\'est toi.',
     'Bravo ! Le groupe peut dormir tranquille, la basse veille.',
   ]],
-  [7, '🙂', [
+  [7, '🕺', [
     'Bien joué ! Encore quelques tours et c\'est la scène.',
     'C\'est propre ! Les quelques écarts, on dira que c\'était du feeling.',
     'Bon niveau ! Le groupe te garde pour la répétition de jeudi.',
@@ -191,7 +192,7 @@ const MESSAGES = [
     'Ça avance bien ! Le chemin vers le 10 est tout tracé.',
     'Bien joué ! Encore quelques répétitions et c\'est dans les doigts.',
   ]],
-  [6, '👍', [
+  [6, '🤔', [
     'Pas mal du tout ! Le chef d\'orchestre hoche la tête.',
     'Ça tient la route ! Un petit coup de métronome et ça brille.',
     'Honnête ! Le batteur t\'a fait un clin d\'œil… ou il avait une poussière.',
@@ -216,7 +217,7 @@ const MESSAGES = [
     'Pas mal ! Le public ne s\'est pas enfui, c\'est bon signe.',
     'Bonne base de travail ! On remet ça ?',
   ]],
-  [5, '😅', [
+  [5, '🤔', [
     'La moyenne ! Le bassiste moyen est content, le perfectionniste un peu moins.',
     'À moitié juste, donc à moitié génial.',
     'Ça avance ! On garde la basse, on change juste quelques notes.',
@@ -241,7 +242,7 @@ const MESSAGES = [
     'On est sur la bonne pente ! Il reste à la monter.',
     'Partie honnête ! Avec un tempo plus doux, ce sera tout de suite mieux.',
   ]],
-  [3, '💪', [
+  [3, '🤔', [
     'Courage ! Même les grands ont commencé par des Mi à vide.',
     'Ça vient ! Rome ne s\'est pas faite en un jour, la walking bass non plus.',
     'Pas de panique : ralentis le tempo, la basse n\'est pas pressée.',
@@ -266,7 +267,7 @@ const MESSAGES = [
     'Courage ! Tes doigts font des progrès en secret.',
     'Pas de panique : on appelle ça « travailler », et c\'est exactement ce que tu fais.',
   ]],
-  [0, '🙈', [
+  [0, '🙃', [
     'Aïe ! On dira que c\'était du free jazz.',
     'Le métronome a démissionné, mais toi tu ne lâches rien !',
     'Ta basse est-elle branchée ? (Si oui : ralentis, tout va bien se passer.)',
